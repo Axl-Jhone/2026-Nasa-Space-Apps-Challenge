@@ -1,0 +1,9 @@
+{
+  "landing":      ["terrain", "dust", "illumination"],
+  "navigation":   ["illumination", "terrain"],
+  "mobility":     ["terrain", "geology", "dust", "ice", "permafrost"],
+  "robotics":     ["temperature", "dust", "illumination"],
+  "construction": ["geology", "temperature", "permafrost", "subsurface"],
+  "resources":    ["ice", "permafrost", "geology"],
+  "human_ops":    ["temperature", "subsurface", "illumination"]
+}

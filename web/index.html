@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Earth Analog Atlas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,600&family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="app">
+  <header class="mast">
+    <div class="brand"><b>Earth Analog Atlas</b><span>WHERE EARTH STANDS IN, AND WHERE IT STOPS</span></div>
+    <nav class="tabs" aria-label="Main">
+      <button data-tab="worlds" aria-pressed="true">Three worlds</button>
+      <button data-tab="planets" aria-pressed="false">Planets</button>
+      <button data-tab="side-by-side" aria-pressed="false">Side by side</button>
+    </nav>
+  </header>
+
+  <main>
+    <!-- 1. THREE WORLDS -->
+    <section class="view" id="view-worlds">
+      <div class="main-col">
+        <div class="otherbar">
+          <span class="mono">Compare Earth with</span>
+          <div class="seg" id="other-toggle" role="group" aria-label="Second world">
+            <button data-b="moon" aria-pressed="true">Moon</button>
+            <button data-b="mars" aria-pressed="false">Mars</button>
+          </div>
+        </div>
+        <div class="globes">
+          <figure><figcaption><span class="dot earth"></span>Earth</figcaption><div class="globe earth" id="globe-earth" role="img" aria-label="Globe of Earth with analog site pins"><canvas></canvas></div><p class="cap" id="cap-earth"></p></figure>
+          <figure id="fig-moon"><figcaption><span class="dot moon"></span>Moon</figcaption><div class="globe moon" id="globe-moon" role="img" aria-label="Globe of the Moon with counterpart pins"><canvas></canvas></div><p class="cap" id="cap-moon"></p></figure>
+          <figure id="fig-mars" hidden><figcaption><span class="dot mars"></span>Mars</figcaption><div class="globe mars" id="globe-mars" role="img" aria-label="Globe of Mars with counterpart pins"><canvas></canvas></div><p class="cap" id="cap-mars"></p></figure>
+        </div>
+        <div class="legend">
+          <span><i class="dot earth"></i>Our sites</span>
+          <span><i class="dot" style="border:2px solid var(--ink-3);width:7px;height:7px"></i>Well-known analogs, for context</span>
+          <span>Drag a globe to turn it</span>
+        </div>
+      </div>
+      <aside class="side" aria-label="Analog sites">
+        <div class="slist" id="slist">
+          <div class="top"><h2>Sites</h2><div class="pills" id="filters" role="group" aria-label="Filter"></div></div>
+          <ul class="sites" id="sitelist"></ul>
+        </div>
+        <div class="sdetail" id="sdetail" hidden></div>
+      </aside>
+    </section>
+
+    <!-- 2. PLANETS -->
+    <section class="view" id="view-planets" hidden>
+      <div class="planets">
+        <div class="pgrid">
+          <ul class="pstats" id="pstats" aria-label="Key figures"></ul>
+          <div class="pstage">
+            <div class="pglobe" id="pglobe-earth" role="img" aria-label="Earth"><canvas></canvas></div>
+            <div class="pglobe" id="pglobe-moon" role="img" aria-label="Moon" hidden><canvas></canvas></div>
+            <div class="pglobe" id="pglobe-mars" role="img" aria-label="Mars" hidden><canvas></canvas></div>
+            <div class="pop" id="pop" role="dialog" aria-label="Site details" hidden></div>
+          </div>
+          <div class="pcard" id="pcard"></div>
+        </div>
+        <div class="pnav">
+          <nav aria-label="Choose a world" id="pnav"></nav>
+          <p class="mono fineprint">Figures are from our notes and are to be checked against the NASA Planetary Fact Sheet before submission.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. SIDE BY SIDE -->
+    <section class="view" id="view-side-by-side" hidden>
+      <div class="sbs">
+        <div class="row">
+          <h1>Side by side</h1>
+          <div class="pills" id="pairs" style="margin:0" role="group" aria-label="Pair"></div>
+          <div class="seg" role="group" aria-label="Display"><button id="mode-3d" aria-pressed="true">3D terrain</button><button id="mode-slide" aria-pressed="false">Slide</button></div>
+        </div>
+        <div class="ctl">
+          <label>View <input type="range" id="ctl-view" min="0" max="359" value="35"><output id="out-view"></output></label>
+          <label>Sun from <input type="range" id="ctl-az" min="0" max="359" value="300"><output id="out-az"></output></label>
+          <label>Sun height <input type="range" id="ctl-el" min="3" max="60" value="14"><output id="out-el"></output></label>
+          <label>Vertical exaggeration <input type="range" id="ctl-ve" min="1" max="4" step="0.5" value="2"><output id="out-ve"></output></label>
+          <button class="pill" id="sweep">Sweep the sun</button>
+        </div>
+        <div class="panels" id="panels"></div>
+        <div class="slider" id="slider" hidden>
+          <div style="flex:1;min-height:0;display:flex;justify-content:center">
+            <div class="stage" id="stage" style="height:100%;aspect-ratio:1;max-width:100%;--p:50%">
+              <canvas id="hs-other"></canvas><canvas id="hs-earth" class="top"></canvas><div class="bar"></div>
+              <span class="lab" id="lab-earth" style="left:10px"></span><span class="lab" id="lab-other" style="right:10px"></span>
+            </div>
+          </div>
+          <input type="range" id="ctl-slide" min="0" max="100" value="50" aria-label="Compare the two windows">
+        </div>
+        <p class="printed" id="printed"></p>
+      </div>
+      <aside class="meas" id="meas" aria-label="Terrain measurements"></aside>
+    </section>
+  </main>
+  <footer class="credit" id="credit"></footer>
+</div>
+
+<script type="module" src="js/app.js"></script>
+</body>
+</html>

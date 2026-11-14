@@ -228,3 +228,6 @@ pipeline/cache/
 *.img
 *.tif
 *.tiff
+
+# Large raw datasets (DEM tiles etc.)
+data/raw/

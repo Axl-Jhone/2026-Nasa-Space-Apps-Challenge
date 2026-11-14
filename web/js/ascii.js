@@ -37,7 +37,9 @@ function paint(g) {
 
   const dpr = Math.min(2, devicePixelRatio || 1), w = Math.max(120, Math.round(g.root.clientWidth * dpr));
   const cell = Math.max(5, Math.round(w / CELLS)), n = Math.ceil(w / cell), W = n * cell;
-  if (a.cv.width !== W) { a.cv.width = a.cv.height = W; a.ctx = a.cv.getContext('2d'); a.img = a.ctx.createImageData(W, W); }
+  // a.W remembers the size we set up for. Comparing with the canvas's own width is wrong: a new canvas is 300 wide by default,
+  // so a globe that needed exactly 300 was never set up and the pass threw.
+  if (a.W !== W) { a.W = W; a.cv.width = a.cv.height = W; a.ctx = a.cv.getContext('2d'); a.img = a.ctx.createImageData(W, W); }
   const out = a.img.data, src = g.out.data, S = g.S, q = S / n, inks = sheet(cell), top = RAMP.length - 1;
   out.fill(0);
   for (let j = 0; j < n; j++) for (let i = 0; i < n; i++) {

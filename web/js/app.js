@@ -361,8 +361,8 @@ function histHtml(e, o) {
   return `<figure class="hist">${head}<svg role="img" aria-label="Slope histograms for Earth and Moon" viewBox="0 0 ${W} ${H}" style="width:100%;height:auto">
     <line x1="${x0}" y1="${y0}" x2="${x1}" y2="${y0}" stroke="#3a4560"/><line x1="${x0}" y1="${y1}" x2="${x0}" y2="${y0}" stroke="#3a4560"/>
     <polyline fill="none" stroke="#e0a03a" stroke-width="2" points="${pts(ha.frac)}"/><polyline fill="none" stroke="#a9b4c8" stroke-width="2" stroke-dasharray="5 3" points="${pts(hb.frac)}"/>
-    <text x="160" y="132" fill="#a3acbd" font-size="10" text-anchor="middle">slope (degrees, 0 to ${maxDeg})</text>
-    <text x="${x1 - 40}" y="22" fill="#e0a03a" font-size="10">Earth</text><text x="${x1 - 40}" y="36" fill="#a9b4c8" font-size="10">Moon</text></svg></figure>`;
+    <text x="160" y="132" fill="#a3acbd" font-size="12" text-anchor="middle">slope (degrees, 0 to ${maxDeg})</text>
+    <text x="${x1 - 40}" y="22" fill="#e0a03a" font-size="12">Earth</text><text x="${x1 - 40}" y="36" fill="#a9b4c8" font-size="12">Moon</text></svg></figure>`;
 }
 
 boot();

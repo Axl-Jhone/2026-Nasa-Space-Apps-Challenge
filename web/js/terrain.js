@@ -85,7 +85,7 @@ export function drawTerrain(cv, f, T) {
   // scale bar: a quarter of the window, along the unrotated east-west axis
   const bar = sc * 0.25, bx = 14 * dpr, by = H - 16 * dpr; ctx.strokeStyle = tok('--ink'); ctx.fillStyle = tok('--ink'); ctx.lineWidth = 1.5 * dpr;
   ctx.beginPath(); ctx.moveTo(bx, by - 4 * dpr); ctx.lineTo(bx, by); ctx.lineTo(bx + bar, by); ctx.lineTo(bx + bar, by - 4 * dpr); ctx.stroke();
-  ctx.font = `${11 * dpr}px "IBM Plex Mono", monospace`; ctx.fillText(`${+(f.windowKm * 0.25).toFixed(1)} km`, bx + bar + 6 * dpr, by + 1 * dpr);
+  ctx.font = `${12 * dpr}px "IBM Plex Mono", monospace`; ctx.fillText(`${+(f.windowKm * 0.25).toFixed(1)} km`, bx + bar + 6 * dpr, by + 1 * dpr);
 }
 
 export function drawHillshade(cv, f, T) {

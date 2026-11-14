@@ -105,4 +105,6 @@ Each site has: `label` (`benchmark`, `established` or `hypothesis`), `labelNote`
 
 One monospace face (IBM Plex Mono), square corners, 1px rules, a black ground with a character starfield, and bracketed controls. It follows two references looked at on 15 November: The Monospace Web (one face, no rounded corners, uppercase headings on a grid) and NASA's Eyes on the Solar System (black ground, the scene owns the screen, thin uppercase chrome at the edges).
 
+The theme keeps to one type scale (12, 14, 16, 20 and 25 px), three weights (400, 500, 600) and a reading measure of about 68 characters. Sizes in `style.css` that are off the scale are overridden by a generated block at the top of the theme file, so `style.css` itself is unchanged. One orange family means "breaks"; Mars is a darker rust so the two are not confused.
+
 The globes have two views, switched in the masthead and remembered per browser. **ASCII** draws each globe as characters in square cells: the brightness of the NASA imagery picks the character and the imagery gives its colour. **Image** shows the imagery itself. The ASCII view is computed in memory from the globe's pixel buffer (about 1 ms per frame); nothing in it is AI-generated. The 3D terrain pictures are evidence and are not restyled.

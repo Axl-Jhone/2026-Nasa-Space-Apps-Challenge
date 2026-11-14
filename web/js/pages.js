@@ -32,6 +32,14 @@ export function matrixHtml(D, s, cls = '') {
   }).join('')}</ul>`;
 }
 
+// The same eight dimensions as rows. Uniform items read better as a table than as eight cards.
+export function dimTableHtml(D, s) {
+  return `<div class="xwrap dtw"><table class="dt"><tbody>${D.dims.map(([k, name]) => {
+    const [c, note] = s.d[k], v = (s.cmp || {})[k];
+    return `<tr><th scope="row">${esc(name)}</th><td class="s"><span class="st-${c}"><i>${esc(D.status[c])}</i></span></td><td>${esc(note)}${v ? `<small>${World(s.body)}: ${esc(v[0] || 'no data')} · Earth: ${esc(v[1] || 'no data')}</small>` : ''}</td></tr>`;
+  }).join('')}</tbody></table></div>`;
+}
+
 /* ---------- terrain measures (numbers from the exports) ---------- */
 export const METRICS = [
   ['relief_p5_p95_m', 'Relief', '5th to 95th percentile height, metres', v => Math.round(v).toLocaleString()],
@@ -107,8 +115,7 @@ export function renderPair(D, s, ctx) {
     </section>
     <section>
       <h2>Dimension by dimension</h2>
-      <div class="mhead">${legendHtml(D)}</div>
-      ${matrixHtml(D, s)}
+      ${dimTableHtml(D, s)}
     </section>
     <section class="breaks" id="breaks">
       <h2>Where it breaks</h2>

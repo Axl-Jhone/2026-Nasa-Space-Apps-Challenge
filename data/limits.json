@@ -1,0 +1,3 @@
+[
+  { "id": "gravity", "fake": true, "label": "Surface gravity", "earth": "FAKE", "moon": "FAKE", "mars": "FAKE", "source": "src-fake-1" }
+]

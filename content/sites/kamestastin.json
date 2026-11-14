@@ -1,0 +1,23 @@
+{
+  "id": "kamestastin",
+  "fake": true,
+  "status": "chosen",
+  "earth": { "name": "Kamestastin Lake crater", "region": "Labrador, Canada", "lat": 0, "lon": 0 },
+  "counterpart": { "body": "moon", "name": "To be chosen by Prince", "lat": 0, "lon": 0 },
+  "label": "established",
+  "confidence": "medium",
+  "summary": "FAKE. One or two sentences.",
+  "matches": [ { "text": "FAKE. Formed in the same kind of rock.", "source": "src-fake-1" } ],
+  "breaks": [ { "text": "FAKE. None of the polar cold.", "source": null } ],
+  "ratings": {
+    "terrain":      { "level": "measured", "note": "See the terrain file", "source": null },
+    "geology":      { "level": "cited", "note": "FAKE", "source": "src-fake-1" },
+    "temperature":  { "level": "breaks", "note": "FAKE", "source": null },
+    "illumination": { "level": "breaks", "note": "FAKE", "source": null },
+    "ice":          { "level": "not_assessed", "note": null, "source": null },
+    "permafrost":   { "level": "not_assessed", "note": null, "source": null },
+    "dust":         { "level": "not_assessed", "note": null, "source": null },
+    "subsurface":   { "level": "not_assessed", "note": null, "source": null }
+  },
+  "terrain_file": "terrain/kamestastin.json"
+}

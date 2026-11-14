@@ -1,30 +1,70 @@
-# Earth Analog Atlas (2026 NASA Space Apps Challenge)
+# Earth Analog Atlas
 
-## Goal
-We compare Earth terrain windows with Moon/Mars terrain windows using real elevation
-data (DEMs), to find Earth places that are good analogs for Moon base locations.
-Team of 4; we are beginners in geospatial work, so explain code in plain words.
+NASA Space Apps 2026, challenge "Identify Earth Locations that Analog the Permanent Moon Base Locations and Mars". Deadline 15 November 2026, 11:59 pm PHT (submit by 9 pm).
 
-## Who works where
-- The data pipeline owner works ONLY in `/pipeline` (plus the output folders below).
-- Shared files, especially the JSON data contract, must NOT be changed unless the
-  whole team has agreed. If a change seems needed, stop and ask.
+The site argues: this place on Earth is like that place on the Moon or Mars in these measured ways, and unlike it in these. Terrain is the only dimension measured the same way on both worlds, so it is the only one scored.
 
-## Environment
-- Python 3.12 on Windows, VS Code, Jupyter kernel `nasa-spaceapps`.
-- Installed: rasterio, numpy, matplotlib, pystac-client, planetary-computer, pyproj.
-- Do not install anything else without asking.
+## Who owns what
 
-## Notebook rules (`pipeline/earth_dem.ipynb`)
-- Keep code short and commented, in the existing style: a config cell, then one step per cell.
-- Every code cell gets a markdown note saying what it does; explain every non-obvious line.
-- Work one step at a time; show output and wait for confirmation.
-- If a number or plot looks wrong, say so plainly and investigate; never smooth it over.
-- No refactoring into modules yet. Do not commit or push until the pipeline owner explicitly approves.
+| Folder | Owner | Contents |
+| --- | --- | --- |
+| `contract/` | whole team | Agreed data shapes. Do not edit without the team agreeing |
+| `content/` | Prince (`limits.json`: Mico) | Site text, sources, rule table, validator `build.py` |
+| `pipeline/` | Leander | Download, crop, regrid, hillshade, write `data/terrain/` |
+| `score/` | Mico | Relief, slope, roughness, similarity, tests |
+| `data/` | written by `content/build.py` and `pipeline/` | Read by the app. Do not hand-edit |
+| `app/` | Axl | React + Vite + TypeScript, Plotly, Leaflet |
 
-## Data
-- `data/raw/` is read-only and git-ignored. Never commit or modify files there.
-- Outputs go to `data/processed/`. Web exports go to `web/data/`.
-- Never invent measurements. Scale factors, offsets, projections and coordinates must come
-  from the files or a cited source. If unsure, say so. Numbers shown to users must come from real data.
-- All windows are 40 km x 40 km squares so Earth and Moon are comparable.
+Edit only the folder of the person you are working with. If the work needs a change in another folder, say what and why, and let its owner make it. If it needs a new field, propose a change to `contract/`.
+
+## How to work with us
+
+We are learning as we build. For every step:
+
+1. Do one small step, not a whole module.
+2. Before writing code, explain the plan, why this way, and what could go wrong. Wait for an OK.
+3. After writing it, walk through what you wrote and say what we should check by hand.
+4. Commit only when asked.
+
+Keep code comments short.
+
+## Skills in this repo (`.claude/skills/`)
+
+| Skill | Use it when | Who mostly |
+| --- | --- | --- |
+| `test-driven-development` | Writing any function with a checkable answer. Write the expected value from physics or a hand calculation first, watch the test fail, then write the code | Mico (C3), Leander, Prince's `build.py` |
+| `systematic-debugging` | Anything breaks. Find the root cause and explain it before changing code | Everyone |
+| `verification-before-completion` | Before saying a step is done. Run the check and show its output | Everyone |
+| `requesting-code-review` | Before pushing a finished piece of a module | Everyone |
+| `architecture-decision-records` | The team picks between real alternatives. The records in `docs/adr/` double as the AI-use log for the submission | Everyone |
+
+The "How to work with us" rules come first: explain, wait for an OK, one small step. These skills add discipline on top. They do not replace the explanation.
+
+## Honesty rules
+
+- Never invent a source, citation, number or coordinate. If it is unknown, use `not_assessed` or ask.
+- Any record with made-up content has `"fake": true`. Remove it only when the content is real.
+- Do not change a test's expected value to make it pass. Explain the failure instead.
+- Every `cited` rating needs a source id that exists in `content/sources.json`.
+
+## Fixed word lists
+
+- Dimensions: `terrain`, `geology`, `temperature`, `illumination`, `ice`, `permafrost`, `dust`, `subsurface`
+- Operations: `landing`, `navigation`, `mobility`, `robotics`, `construction`, `resources`, `human_ops`
+- Levels: `measured`, `cited`, `hypothesis`, `breaks`, `not_assessed`
+- Labels: `benchmark`, `established`, `agency_used`, `hypothesis`
+- Bodies: `moon`, `mars`
+
+## Commands
+
+- Python: one virtual environment at the repo root. `python -m venv .venv`, then `pip install -r requirements.txt`
+- Score tests: `python -m pytest score`
+- Content check: `python content/build.py` (add `--final` before submitting)
+- App: `cd app`, `npm install`, `npm run dev`
+
+## Gotchas
+
+- `.gitignore` started as GitHub's Python template. Its `lib/`, `build/`, `dist/` and `downloads/` rules are now anchored to the repo root, so `app/src/lib/` is safe. Check with `git check-ignore -v <path>` if a file will not show up in `git status`.
+- Raw downloads go in `pipeline/cache/`, which is ignored. Never commit `.img` elevation files.
+- The app is served from the repo name on GitHub Pages. Prefix fetched paths with `import.meta.env.BASE_URL` and use a hash router.
+- One `slope_hist` has one fewer value than `slope_bins_deg` has edges.

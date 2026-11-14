@@ -1,9 +1,7 @@
 numpy
-scipy
 rasterio
 pyproj
 pystac-client
 planetary-computer
 matplotlib
 jupyter
-pytest

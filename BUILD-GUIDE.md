@@ -4,7 +4,7 @@ Written 14 November 2026, 3:15 pm PHT. Deadline: 15 November, 11:59 pm PHT.
 
 **Updated 3:40 pm: the team will build with AI ("vibecoding") and wants every step explained.** The order of work, the clock and the checkpoints below still stand. What changes is who types. The AI writes the code and explains its reasoning at each step. Each lane owner directs it and checks what comes out. The questions and hints in each lane are now your checklist for that checking.
 
-**Updated 4:25 pm: tech stack chosen and the work split into modules.** See "Tech stack" and "Modules" below. Step 0 now ends when the repo has the folders, `CLAUDE.md` and the contract files. You are running about 30 minutes behind the clock, so keep Step 0 to the contract and skip debating anything else.
+**Updated 1 am, 15 November: the repo was cleaned up and checked.** See "Where things stand". It replaces the 4:25 pm tech stack and modules.
 
 The goal is to learn things you can reuse, and to submit one honest, working argument. When those two pull apart, cut scope. Do not cut understanding. Code you cannot explain to a judge is a risk, however fast it was written.
 
@@ -113,279 +113,32 @@ Suggested. Swap if it suits you better, but every lane needs one named owner.
 | C. Similarity score | Mico | Leander |
 | D. The app | Axl | Prince |
 
-## Tech stack
+## Where things stand (15 November, 1 am)
 
-Decided 14 November, 4:20 pm.
+The team built a different app from the 4:25 pm plan, and it works, so the plan now follows the repo. The React app, the `contract/` folder and the `content/`, `score/` and `app/` modules were removed.
 
-| Part | Choice | Why |
+| Part | What exists | Owner |
 | --- | --- | --- |
-| App | React + Vite, with TypeScript | AI tools write React well, and pages split into components that one person owns. TypeScript turns the data contract into types, so Claude Code catches a misspelled field before the page breaks |
-| Charts | Plotly (`react-plotly.js`) | Histograms and hover tooltips with little code. Plotly also exists in Python, so Mico can try a chart in a notebook before Axl builds it |
-| Map | Leaflet with NASA GIBS tiles | Small, well documented, and GIBS is behind NASA Worldview on the official Resources list |
-| Pipeline and score | Python 3.11 or newer, one virtual environment at the repo root | NumPy and rasterio are the standard tools for elevation grids |
-| Hosting | GitHub Pages, deployed by a GitHub Action | Free, no card, and Axl already owns the repo |
-| AI | Claude Code, all four of you | One tool means one set of rules (`CLAUDE.md`) that every session reads |
+| App | `web/`: a static site, no build step. Tabs: Three worlds, Planets, Side by side. Formats in `web/README.md` | Axl |
+| Site text | `web/data/sites.json`: nine sites, the analogy matrix (codes M, C, P, B, N), planets, pairs, controls | Prince |
+| Earth window | `pipeline/earth_dem.ipynb`: Kamestastin, Copernicus GLO-30, UTM 20N at 30 m, lake masked | Leander |
+| Moon window | `pipeline/moon_dem.ipynb`: de Gerlache, LOLA `LDEM_80S_80M`, every number from the label | Leander |
+| Measures | `pipeline/export_terrain.py`: both windows on one 80 m grid; relief, median and steep-end slope, roughness, gentle-ground share, slope histogram. `--selftest` checks the maths | Leander, Mico |
 
-### Nobody needs a GPU
+**Checked on 15 November, 1 am:** both notebooks were rerun from a clean start. Every height, lake-mask cell, histogram bin and measure matched the committed terrain files. Only the `generated` date differs, and it changes on every rerun. The self-test passes.
 
-A GPU is fast at doing the same small calculation on millions of numbers at once. That matters for training neural networks. This project does no machine learning.
+**Decisions the team made that differ from the plan:**
 
-The heaviest job here is the slope of every pixel in a 40 km window. At 100 m per pixel that is 400 × 400 = 160,000 pixels, which NumPy finishes in milliseconds on any laptop. Even at 30 m (about 1.8 million pixels) it takes under a second.
+- **No combined score.** Each measure is shown on its own with a plain Moon ÷ Earth ratio. Step C2's single number is dropped. The controls in C4 (crater against crater, crater against a flat lake bed and a dune field) still matter, and are still "pending" on the page.
+- **Eight matrix dimensions, not the eight in "The parameters".** The page uses geology, terrain, temperature and light, water/ice/resources, dust, biology, subsurface and operations. Illumination is folded into temperature, permafrost into ice, and the seven base operations into one "operations" row measured as gentle-ground share.
 
-What does matter:
+**Still open before Checkpoint B (2 am):**
 
-- **Memory.** 8 GB is enough if you read only the window you need, not whole files. The pipeline must do that anyway.
-- **Disk.** One to two GB for downloads.
-- **Internet.** The lunar file is the biggest download. Do it once, on the best connection, and pass the file around by drive rather than everyone downloading it.
-
-### Code in `.py` files, notebooks only for looking
-
-Claude Code can run a Python file and its tests and read the output. It cannot see a plot inside a notebook until you run the cell yourself. So:
-
-- All logic lives in `.py` files that Claude Code can run and test.
-- A notebook imports those files and draws pictures, so you can check them with your own eyes.
-
-If someone's laptop struggles, Google Colab (free, CPU only) is the fallback. Upload the `.py` files and the notebook, and run there.
-
-## Modules
-
-### Repo layout
-
-```
-contract/          all four, Step 0      the agreed shapes; changes only when the team agrees
-content/           Prince (limits: Mico) site text, sources, rule table, limits
-pipeline/          Leander               download, crop, regrid, hillshade, write terrain files
-score/             Mico                  relief, slope, roughness, similarity, tests
-data/              written by content/ and pipeline/, read by app/
-app/               Axl                   the React site
-CLAUDE.md          all four              rules every Claude Code session reads first
-```
-
-**The rule that keeps four AI sessions from colliding:** each person's Claude Code edits only that person's folder. If your module needs something from another folder, ask its owner. If it needs a new field, propose a change to `contract/` and agree it with the team.
-
-### Who hands what to whom
-
-| From | To | What | Shape fixed in |
-| --- | --- | --- | --- |
-| Prince | Axl | `data/sites.json`, `data/sources.json`, `data/rules.json` | `contract/sample-site.json` |
-| Mico | Axl | `data/limits.json`, and the method text for the method page | `contract/README.md` |
-| Mico | Leander | Python functions in `score/` | The function list below |
-| Leander | Axl | `data/terrain/<pair>.json` and `data/img/*.png` | `contract/sample-terrain.json` |
-
-The app reads only `data/`. Nothing else crosses a folder boundary.
-
-### Fake data is marked
-
-Any record with made-up content carries `"fake": true`. The app shows a large FAKE banner on any page that uses one. Prince's validator refuses to run in final mode while any record is still fake. This is how the mock-up's invented numbers can never reach the judges by accident.
-
-### Module A: content (Prince)
-
-Folder: `content/`. Mico writes `content/limits.json` in the same folder.
-
-Pieces:
-
-1. One file per site in `content/sites/`, ten in all, in the shape of `contract/sample-site.json`.
-2. `content/sources.json`: every source, with an id, title, link, and who opened it and when.
-3. `content/rules.json`: the operations-to-dimensions table from "The parameters", as data.
-4. `content/build.py`: checks every file and writes the combined `data/sites.json`, `data/sources.json` and `data/rules.json`. Have Claude Code build this with you. It is your coding piece, and it is short.
-
-What `build.py` checks:
-
-- All eight dimension keys are present on every site. A missing key is an error, not "not assessed".
-- Every level is one of the five allowed words.
-- A `cited` rating, and every match, points to a source id that exists in `sources.json`.
-- `breaks` and `hypothesis` ratings have a note saying why.
-- With `--final`, no record has `"fake": true`.
-
-What only you can check: that each source exists and says what the record claims. Claude Code will happily write a citation that does not exist.
-
-By Checkpoint A: the Kamestastin record and the lunar crater choice (A1 to A3), with `build.py` passing. By Checkpoint B: the seven chosen pairs.
-
-First prompt for Claude Code:
-
-> Read CLAUDE.md and contract/. I'm Prince and I own content/. This step only: write content/build.py that validates content/sites/*.json against the rules in contract/README.md and writes the combined files to data/. Before writing code, explain your plan, why you would do it that way, and what could go wrong, then wait for my OK. After writing it, show me how to run it and make it fail on purpose.
-
-### Module B: pipeline (Leander)
-
-Folder: `pipeline/`. Raw downloads go in `pipeline/cache/`, which git ignores.
-
-Pieces, matching steps B1 to B6:
-
-1. `earth.py`: search Planetary Computer for `cop-dem-glo-30`, read only the window, reproject to a local projection in metres.
-2. `moon.py`: read the LOLA polar file from the label, apply scaling and offset, cut the window.
-3. `grid.py`: resample both sides to the same pixel size.
-4. `hillshade.py`: one PNG per side with the same light settings.
-5. `export.py`: call Mico's functions and write `data/terrain/<pair>.json`.
-6. `notebooks/look.ipynb`: imports the above and shows each crop, so you can check it.
-
-Until Mico's functions exist, `export.py` can call simple stand-ins with the same names. Swap them when `score/` is ready. Nobody waits.
-
-What only you can check: units and scale. Pixel size in metres, heights in metres, the crater the right size and round.
-
-By Checkpoint A: one Earth crop and one Moon crop as images. By Checkpoint B: the real terrain file for one pair.
-
-First prompt for Claude Code:
-
-> Read CLAUDE.md and contract/. I'm Leander and I own pipeline/. This step only (B1): load a 40 km window of the Copernicus 30 m DEM (cop-dem-glo-30) from Microsoft Planetary Computer around a point I give you, and save a PNG of it. Before any code, explain which libraries you'd use and why, how reading only a window works, and what could go wrong. Wait for my OK.
-
-### Module C: score (Mico)
-
-Folder: `score/`.
-
-The functions Leander will call. Agree these names and shapes in Step 0. What happens inside them is Mico's to decide in C1 and C2.
-
-| Function | Takes | Returns |
-| --- | --- | --- |
-| `relief_m(dem, px_m)` | Elevation grid in metres (NaN where there is no data), pixel size in metres | One number, metres |
-| `slope_deg(dem, px_m)` | Same | A grid of slope angles in degrees |
-| `slope_hist(slope, bins)` | Slope grid, the bin edges from the contract | Fractions per bin, summing to 1 |
-| `roughness_m(dem, px_m)` | Same as `relief_m` | One number, metres |
-| `similarity(a, b)` | Two dicts with `relief_m`, `roughness_m`, `slope_hist` | `overall`, `relief`, `slope`, `roughness`, each 0 to 1 |
-
-Pieces:
-
-1. `metrics.py` and `similarity.py` with the functions above.
-2. `tests/test_synthetic.py`: the shapes with known answers from C3. Write your predictions into the test before running it.
-3. `METHOD.md`: each definition in one sentence and one formula, for Axl's method page.
-4. `content/limits.json`: gravity, pressure, radiation, with sources (C5).
-
-What only you can check: that the tests encode the physics you believe, not whatever the code happened to output. If Claude Code changes a test's expected value to make it pass, stop and ask why.
-
-By Checkpoint A: the definitions handed to Leander, functions written, synthetic tests passing. By Checkpoint B: the match and non-match test on real crops (C4).
-
-First prompt for Claude Code:
-
-> Read CLAUDE.md and contract/. I'm Mico and I own score/. This step only: write slope_deg(dem, px_m) in score/metrics.py and a pytest that checks it on a tilted plane whose slope I can work out by hand. Before code, explain the formula from the two partial derivatives to an angle, how the grid edges and NaN values are handled, and what could go wrong. Wait for my OK.
-
-### Module D: app (Axl)
-
-Folder: `app/`, made with the Vite React TypeScript template.
-
-Pieces:
-
-1. `src/types.ts`: the contract as TypeScript types.
-2. `src/data.ts`: loads the files in `data/`.
-3. `src/logic/operations.ts`: works out each site's operations from its ratings and `rules.json` (the method is in the contract section below). Do not name the folder `lib`; see the trap below.
-4. Pages: map of all ten, pair page, site page for the nine unscored, method page.
-5. Components: slope chart, score bars, the two hillshades side by side, the "where it breaks" block, the limits strip, the ratings table, the FAKE banner.
-6. The GitHub Action that deploys to Pages.
-
-What only you can check: that every chart follows the honesty rules in D4, and that the page works on a phone.
-
-By Checkpoint A: the bare page reading the sample files, live on GitHub Pages. By Checkpoint B: the pair page with real data.
-
-First prompt for Claude Code:
-
-> Read CLAUDE.md and contract/. I'm Axl and I own app/. This step only: create a Vite React TypeScript app in app/ that loads contract/sample-site.json from the data folder and shows the site name, its matches and its breaks as plain text. Before code, explain the folder structure, how Vite serves files from data/, and how the app will find its files once it is on GitHub Pages under the repo name. Wait for my OK.
-
-<details><summary>Hint: serving data/ from the app</summary>
-
-Vite has a `publicDir` setting. It can point outside `app/`. Fetch files with `import.meta.env.BASE_URL` in front of the path, or they will 404 on GitHub Pages.
-</details>
-
-<details><summary>Hint: page routes on GitHub Pages</summary>
-
-GitHub Pages has no server to send `/pair/kamestastin` back to your app, so refreshing that page gives a 404. A hash router (`/#/pair/kamestastin`) avoids it.
-</details>
-
-<details><summary>Hint: Leaflet with GIBS</summary>
-
-Leaflet's default projection is Web Mercator, so use GIBS's `epsg3857` endpoint, not `epsg4326`. Read the GIBS access docs for the tile address of the Blue Marble layer, and keep a static image as a fallback.
-</details>
-
-### The trap already in your repo
-
-The `.gitignore` in your repo is GitHub's Python template. It ignores any folder named `lib/`, `build/`, `dist/` or `downloads/`, anywhere in the repo. A file in `app/src/lib/` would silently never be committed, and the site would work on Axl's laptop and break for everyone else. In Step 0, add `node_modules/`, `pipeline/cache/` and `*.img` to it, and either avoid those folder names or change `lib/` to `/lib/` so it only applies at the top level.
-
-### The data contract (draft, agree it in Step 0)
-
-Fixed word lists. Use them exactly, everywhere.
-
-- **Dimensions:** `terrain`, `geology`, `temperature`, `illumination`, `ice`, `permafrost`, `dust`, `subsurface`
-- **Operations:** `landing`, `navigation`, `mobility`, `robotics`, `construction`, `resources`, `human_ops`
-- **Levels:** `measured`, `cited`, `hypothesis`, `breaks`, `not_assessed`
-- **Labels:** `benchmark`, `established`, `agency_used`, `hypothesis`
-- **Bodies:** `moon`, `mars`
-
-`contract/sample-site.json`, one site. Every value below is made up.
-
-```json
-{
-  "id": "kamestastin",
-  "fake": true,
-  "status": "chosen",
-  "earth": { "name": "Kamestastin Lake crater", "region": "Labrador, Canada", "lat": 0, "lon": 0 },
-  "counterpart": { "body": "moon", "name": "To be chosen by Prince", "lat": 0, "lon": 0 },
-  "label": "established",
-  "confidence": "medium",
-  "summary": "FAKE. One or two sentences.",
-  "matches": [ { "text": "FAKE. Formed in the same kind of rock.", "source": "src-fake-1" } ],
-  "breaks": [ { "text": "FAKE. None of the polar cold.", "source": null } ],
-  "ratings": {
-    "terrain":      { "level": "measured", "note": "See the terrain file", "source": null },
-    "geology":      { "level": "cited", "note": "FAKE", "source": "src-fake-1" },
-    "temperature":  { "level": "breaks", "note": "FAKE", "source": null },
-    "illumination": { "level": "breaks", "note": "FAKE", "source": null },
-    "ice":          { "level": "not_assessed", "note": null, "source": null },
-    "permafrost":   { "level": "not_assessed", "note": null, "source": null },
-    "dust":         { "level": "not_assessed", "note": null, "source": null },
-    "subsurface":   { "level": "not_assessed", "note": null, "source": null }
-  },
-  "terrain_file": "terrain/kamestastin.json"
-}
-```
-
-`terrain_file` is `null` for the nine sites that are not scored. The app then says "terrain not scored" instead of drawing an empty chart.
-
-`contract/sample-terrain.json`, one scored pair. Every number below is made up.
-
-```json
-{
-  "pair_id": "kamestastin",
-  "fake": true,
-  "window_km": 40,
-  "grid_m": 100,
-  "slope_bins_deg": [0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 25, 30, 40, 90],
-  "hillshade": { "azimuth_deg": 315, "altitude_deg": 45, "vertical_exaggeration": 1 },
-  "earth": {
-    "dataset": "Copernicus GLO-30 via Microsoft Planetary Computer",
-    "relief_m": 0, "roughness_m": 0,
-    "slope_hist": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-    "image": "img/kamestastin-earth.png"
-  },
-  "counterpart": {
-    "dataset": "LRO LOLA polar gridded elevation, file to be chosen",
-    "relief_m": 0, "roughness_m": 0,
-    "slope_hist": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-    "image": "img/kamestastin-moon.png"
-  },
-  "score": { "overall": 0, "relief": 0, "slope": 0, "roughness": 0, "method": "mean of the three parts" },
-  "control": { "earth_name": "A site that should not match", "score": { "overall": 0, "relief": 0, "slope": 0, "roughness": 0 } }
-}
-```
-
-There is one fewer `slope_hist` value than there are bin edges. That is correct, and it is the first thing to check when a chart looks shifted by one bar.
-
-`content/rules.json`:
-
-```json
-{
-  "landing":      ["terrain", "dust", "illumination"],
-  "navigation":   ["illumination", "terrain"],
-  "mobility":     ["terrain", "geology", "dust", "ice", "permafrost"],
-  "robotics":     ["temperature", "dust", "illumination"],
-  "construction": ["geology", "temperature", "permafrost", "subsurface"],
-  "resources":    ["ice", "permafrost", "geology"],
-  "human_ops":    ["temperature", "subsurface", "illumination"]
-}
-```
-
-How the app turns ratings into operations, for each operation at each site:
-
-- **Can be rehearsed on:** its dimensions rated `measured` or `cited`. Those rated `hypothesis` are listed too, marked as hypothesis.
-- **Cannot be rehearsed for:** its dimensions rated `breaks`.
-- **Unknown:** its dimensions rated `not_assessed`.
-- An operation with nothing in the first list is shown as "not supported by evidence yet", not hidden.
+1. A public URL. Axl turns on GitHub Pages: Settings → Pages → Source: GitHub Actions. The workflow in `.github/workflows/pages.yml` then publishes `web/` on every push to `main`.
+2. The 10° gentle-slope limit is a placeholder. It needs a cited landing or traverse limit (Prince or Mico).
+3. The de Gerlache and Kamestastin centres are provisional (A2).
+4. The Shackleton pair has no export yet, so its terrain is tagged SAMPLE. Rerun `moon_dem.ipynb` with Shackleton's name, centre and source notes in the settings cell.
+5. The controls (C4).
 
 ## The clock
 
@@ -412,10 +165,10 @@ How the app turns ratings into operations, for each operation at each site:
 ## Step 0. Agree, together (one hour)
 
 1. **Read the submission requirements now**, not tomorrow night. Write down exactly what the form asks for (description, demo format, repository link, anything about AI tools). Put the list in the repo.
-2. **Repository set up (done 4:35 pm, not yet pushed).** Folders from "Repo layout", `CLAUDE.md` at the root, the `.gitignore` fix, `requirements.txt`, and fake seed data in `data/` so the app can start now. Decide who merges.
-3. **Agree the data contract.** This is the most important thing you do today. The draft is in `contract/` (README plus two samples) and the rule table in `content/rules.json`. Read them together and change what is wrong.
+2. **Repository set up.** Done. The layout is under "Where things stand".
+3. **Agree the data format.** Done in practice: the format the site reads is in `web/README.md`, and `export_terrain.py` writes it.
 
-The contract must answer these questions. Check the draft against each one.
+The format had to answer these questions. They are kept here because they still make a good checklist.
 
 - Which Earth site, where, and what box around it?
 - Which counterpart, on which body, where?
@@ -478,7 +231,7 @@ Done when: all ten records have verified text. If time runs short, verify the se
 
 ## Lane B. Data pipeline (Leander)
 
-Work in Python, with logic in `.py` files and a notebook only for looking (see "Tech stack"). The file for each step is listed under "Module B".
+Work in Python. B1 and B2 are done in `pipeline/earth_dem.ipynb`, B3 in `pipeline/moon_dem.ipynb`, and B4 and B5 in `pipeline/export_terrain.py`.
 
 ### B1. Get one Earth crop on screen
 
@@ -625,7 +378,7 @@ Write the "what Earth cannot reproduce" strip with real numbers and sources: sur
 
 ## Lane D. The app (Axl)
 
-React, Vite and TypeScript, with Plotly for charts and Leaflet for the map (see "Tech stack"). The pieces are listed under "Module D". The data argument matters more than any of these tools.
+The app is `web/`, a static site with no build step (see "Where things stand"). The data argument matters more than any tool.
 
 ### D1. A page that reads the fake file
 
@@ -664,9 +417,9 @@ Show Leander's two images side by side at the same size, with a scale bar and th
 
 ### D6. The map of all ten
 
-A Leaflet world map with a pin per candidate. Clicking a pin opens its page. The GIBS hint is under "Module D".
+A map with a pin per candidate. Clicking a pin opens its page. The current site uses textured globes instead, which does the same job.
 
-<details><summary>Hint: if Leaflet fights you</summary>
+<details><summary>Hint: a flat map without a library</summary>
 
 You do not need a map library. On a plain world image in equirectangular projection, a pin's horizontal position is (longitude + 180) / 360 of the width, and its vertical position is (90 − latitude) / 180 of the height.
 </details>

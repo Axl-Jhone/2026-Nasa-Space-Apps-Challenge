@@ -20,6 +20,7 @@ slope limit is chosen.
 """
 import json
 import sys
+import tempfile
 from datetime import date
 from pathlib import Path
 
@@ -129,13 +130,13 @@ def _selftest():
     dem = 300 + crater + rng.normal(0, 3, (n, n))
     lake = (np.hypot(x - 400, y - 800) * 30 < 4000)
     dem[lake] = 334.5
-    o = export_window(dem, 30, 40, "/tmp/selftest_terrain.json", "t", "earth", "synthetic", (0, 0), mask=lake)
+    o = export_window(dem, 30, 40, Path(tempfile.gettempdir()) / "selftest_terrain.json", "t", "earth", "synthetic", (0, 0), mask=lake)
     assert len(o["heights_m"]) == DISPLAY_N ** 2 and len(o["water"]) == DISPLAY_N ** 2
     expected = np.pi * 4 ** 2 / 40 ** 2          # a 4 km radius lake in a 40 km window
     assert abs(o["metrics"]["masked_share"] - expected) < 0.002, (o["metrics"]["masked_share"], expected)
     assert abs(sum(o["slope_hist"]["frac"]) - 1) < 1e-9
     # a flat plane must give zero slope and zero relief
-    flat = export_window(np.full((500, 500), 100.0), 80, 40, "/tmp/selftest_flat.json", "f", "moon", "flat", (0, 0))
+    flat = export_window(np.full((500, 500), 100.0), 80, 40, Path(tempfile.gettempdir()) / "selftest_flat.json", "f", "moon", "flat", (0, 0))
     assert flat["metrics"]["median_slope_deg"] < 1e-9 and flat["metrics"]["relief_p5_p95_m"] < 1e-9 and flat["metrics"]["gentle_share"] == 1.0
     # block_mean: exact for an integer factor, and each output cell equals the mean of its own source pixels
     r2 = np.tile(np.arange(1000.0), (1000, 1))

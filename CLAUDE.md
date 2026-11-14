@@ -2,20 +2,22 @@
 
 NASA Space Apps 2026, challenge "Identify Earth Locations that Analog the Permanent Moon Base Locations and Mars". Deadline 15 November 2026, 11:59 pm PHT (submit by 9 pm).
 
-The site argues: this place on Earth is like that place on the Moon or Mars in these measured ways, and unlike it in these. Terrain is the only dimension measured the same way on both worlds, so it is the only one scored.
+The site argues: this place on Earth is like that place on the Moon or Mars in these measured ways, and unlike it in these. Terrain is the only dimension measured the same way on both worlds, so it is the only one measured. There is no combined score: each measure is shown on its own with a plain ratio.
 
-## Who owns what
+## What lives where
 
-| Folder | Owner | Contents |
+| Path | Owner | What |
 | --- | --- | --- |
-| `contract/` | whole team | Agreed data shapes. Do not edit without the team agreeing |
-| `content/` | Prince (`limits.json`: Mico) | Site text, sources, rule table, validator `build.py` |
-| `pipeline/` | Leander | Download, crop, regrid, hillshade, write `data/terrain/` |
-| `score/` | Mico | Relief, slope, roughness, similarity, tests |
-| `data/` | written by `content/build.py` and `pipeline/` | Read by the app. Do not hand-edit |
-| `app/` | Axl | React + Vite + TypeScript, Plotly, Leaflet |
+| `pipeline/earth_dem.ipynb` | Leander | Copernicus GLO-30 window from Planetary Computer, reprojected to UTM |
+| `pipeline/moon_dem.ipynb` | Leander | LOLA `LDEM_80S_80M` window, every number read from the label |
+| `pipeline/export_terrain.py` | Leander, Mico (metric definitions) | Shared 80 m grid, metrics, writes `web/data/terrain/<id>.json`. `--selftest` checks the maths |
+| `data/raw/` | | Downloads. Only `.LBL` labels are committed |
+| `data/processed/` | | Notebook outputs (GeoTIFF). Not committed, regenerate from the notebooks |
+| `web/` | Axl | Static site, no build step. Formats are in `web/README.md` |
+| `web/data/sites.json` | Prince | Site text, analogy matrix, planets, pairs, controls |
+| `web/data/terrain/` | written by `export_terrain.py` | Do not hand-edit |
 
-Edit only the folder of the person you are working with. If the work needs a change in another folder, say what and why, and let its owner make it. If it needs a new field, propose a change to `contract/`.
+Edit only what the person you are working with owns. If the work needs a change elsewhere, say what and why, and let its owner make it.
 
 ## How to work with us
 
@@ -24,7 +26,7 @@ We are learning as we build. For every step:
 1. Do one small step, not a whole module.
 2. Before writing code, explain the plan, why this way, and what could go wrong. Wait for an OK.
 3. After writing it, walk through what you wrote and say what we should check by hand.
-4. Commit only when asked.
+4. Commit only when asked. Pull before you start and before you push.
 
 Keep code comments short.
 
@@ -32,39 +34,36 @@ Keep code comments short.
 
 | Skill | Use it when | Who mostly |
 | --- | --- | --- |
-| `test-driven-development` | Writing any function with a checkable answer. Write the expected value from physics or a hand calculation first, watch the test fail, then write the code | Mico (C3), Leander, Prince's `build.py` |
+| `test-driven-development` | Writing any function with a checkable answer. Write the expected value from physics or a hand calculation first, watch the test fail, then write the code | Mico, Leander |
 | `systematic-debugging` | Anything breaks. Find the root cause and explain it before changing code | Everyone |
 | `verification-before-completion` | Before saying a step is done. Run the check and show its output | Everyone |
-| `requesting-code-review` | Before pushing a finished piece of a module | Everyone |
+| `requesting-code-review` | Before pushing a finished piece | Everyone |
 | `architecture-decision-records` | The team picks between real alternatives. The records in `docs/adr/` double as the AI-use log for the submission | Everyone |
 
-The "How to work with us" rules come first: explain, wait for an OK, one small step. These skills add discipline on top. They do not replace the explanation.
+The "How to work with us" rules come first. These skills add discipline on top; they do not replace the explanation.
 
 ## Honesty rules
 
-- Never invent a source, citation, number or coordinate. If it is unknown, use `not_assessed` or ask.
-- Any record with made-up content has `"fake": true`. Remove it only when the content is real.
+- Never invent a source, citation, number or coordinate. If it is unknown, mark it `N` (not assessed) or ask.
+- Placeholders say so on the page: missing terrain is tagged SAMPLE, the 10° gentle-slope limit is labelled a placeholder until a cited limit replaces it.
+- Every number on the page comes from a file. The browser never invents or recomputes a measurement.
 - Do not change a test's expected value to make it pass. Explain the failure instead.
-- Every `cited` rating needs a source id that exists in `content/sources.json`.
 
-## Fixed word lists
+## Word lists used in `web/data/sites.json`
 
-- Dimensions: `terrain`, `geology`, `temperature`, `illumination`, `ice`, `permafrost`, `dust`, `subsurface`
-- Operations: `landing`, `navigation`, `mobility`, `robotics`, `construction`, `resources`, `human_ops`
-- Levels: `measured`, `cited`, `hypothesis`, `breaks`, `not_assessed`
-- Labels: `benchmark`, `established`, `agency_used`, `hypothesis`
+- Matrix status codes: `M` measured, `C` cited, `P` partial match, `B` breaks here, `N` not assessed
+- Dimensions: `geo`, `terrain`, `temp`, `ice`, `dust`, `bio`, `sub`, `ops`
 - Bodies: `moon`, `mars`
 
 ## Commands
 
-- Python: one virtual environment at the repo root. `python -m venv .venv`, then `pip install -r requirements.txt`
-- Score tests: `python -m pytest score`
-- Content check: `python content/build.py` (add `--final` before submitting)
-- App: `cd app`, `npm install`, `npm run dev`
+- Python: `python -m venv .venv`, then `pip install -r requirements.txt`. Notebooks run from `pipeline/`
+- Metric self-test: `cd pipeline`, then `python export_terrain.py --selftest`
+- Site: `cd web`, then `python -m http.server 8000`, open http://localhost:8000 (double-clicking `index.html` does not work)
 
 ## Gotchas
 
-- `.gitignore` started as GitHub's Python template. Its `lib/`, `build/`, `dist/` and `downloads/` rules are now anchored to the repo root, so `app/src/lib/` is safe. Check with `git check-ignore -v <path>` if a file will not show up in `git status`.
-- Raw downloads go in `pipeline/cache/`, which is ignored. Never commit `.img` elevation files.
-- The app is served from the repo name on GitHub Pages. Prefix fetched paths with `import.meta.env.BASE_URL` and use a hash router.
-- One `slope_hist` has one fewer value than `slope_bins_deg` has edges.
+- `.gitignore` started as GitHub's Python template; its `lib/`, `build/`, `dist/` rules are anchored to the repo root. Check with `git check-ignore -v <path>` if a file will not show up in `git status`.
+- Never commit `.IMG` or `.tif` elevation files. They are ignored in both upper and lower case.
+- Both windows must be 40 km and measured on the same 80 m grid. The page warns if they differ.
+- The de Gerlache and Shackleton centres are provisional (the Gazetteer lists several). The page shows the centre each export was cut at.

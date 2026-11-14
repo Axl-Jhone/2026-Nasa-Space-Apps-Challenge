@@ -16,9 +16,8 @@ Rules for the exploratory notebooks in this folder (`earth_dem.ipynb`, `moon_dem
 - Every scale factor, offset, projection and coordinate comes from the file or a cited source. If unsure, say so.
 
 ## Where these notebooks read and write
-- They read downloads from `data/raw/` (git-ignored) and write small outputs to `data/processed/`.
+- Read downloads from `data/raw/`. Git keeps only the `.LBL` labels there.
+- Write GeoTIFFs to `data/processed/` (not committed; regenerate by rerunning).
+- The last cell of each notebook calls `export_window` from `export_terrain.py`, which writes `web/data/terrain/<id>.json`. That file format, described in `web/README.md`, is the only one the site reads.
 
-## To settle as a team (differences with the root `CLAUDE.md` and `pipeline/README.md`)
-1. **Raw downloads:** the root file says `pipeline/cache/`; these notebooks use `data/raw/`. Pick one place.
-2. **Outputs:** the team plan writes `data/terrain/<pair>.json` through `pipeline/export.py`. These notebooks write GeoTIFFs to `data/processed/` instead, and `*.tif` is now git-ignored (the one already committed stays tracked).
-3. **Test site:** `web/` and `pipeline/export_terrain.py` came from a separate prototype. Their terrain JSON is **not** the `contract/` format and must not be mistaken for it.
+Settled 15 November: raw downloads in `data/raw/`, outputs through `export_terrain.py`. The earlier `contract/`, `content/`, `score/` and `app/` plan was removed, because `web/` is the app.

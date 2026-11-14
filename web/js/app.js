@@ -253,8 +253,11 @@ function panelHtml(f, title, coords, cls, id) {
 }
 function renderPanels(p, e, o) {
   const site = byId(p.site), oc = p.otherCentre;
-  $('#panels').innerHTML = panelHtml(e, p.earthTitle, fmtLL(site.lat, site.lon), 'earth', 'terr-earth') +
-    panelHtml(o, p.otherTitle, fmtLL(oc.lat, oc.lon) + (oc.provisional ? ' (provisional)' : ''), 'moon', 'terr-other');
+  // show the centre the data was actually cut at, when there is an export
+  const ec = (!e.sample && e.meta.centre) || { lat: site.lat, lon: site.lon };
+  const occ = (!o.sample && o.meta.centre) || oc;
+  $('#panels').innerHTML = panelHtml(e, p.earthTitle, fmtLL(ec.lat, ec.lon), 'earth', 'terr-earth') +
+    panelHtml(o, p.otherTitle, fmtLL(occ.lat, occ.lon) + (oc.provisional ? ' (provisional)' : ''), 'moon', 'terr-other');
   // drag to turn, on either canvas, shared camera
   for (const id of ['terr-earth', 'terr-other']) {
     const cv = $('#' + id); let on = false, lx = 0;
@@ -284,7 +287,10 @@ function printLine(e, o) {
   const g = [e, o].map(f => f.meta && f.meta.analysis_cell_m).filter(Boolean); if (g.length === 2) parts.push(g[0] === g[1] ? `analysis grid ${g[0]} m` : `GRIDS DIFFER: ${g[0]} m and ${g[1]} m`);
   const mesh = Math.round(e.windowKm * 1000 / (e.n - 1)); parts.push(`display mesh ${mesh} m`);
   parts.push(`vertical exaggeration ${S.T.ve.toFixed(1)}×`, `sun ${S.T.el}° above the horizon, from ${S.T.az}°`);
-  const share = e.water.reduce((a, b) => a + b, 0) / e.water.length; if (!e.sample && share > 0) parts.push(`Earth lake masked: ${(share * 100).toFixed(1)}% of window`);
+  // measured share from the 80 m grid, so it matches the table
+  const m = e.meta && e.meta.metrics;
+  const share = m && m.masked_share != null ? m.masked_share : e.water.reduce((a, b) => a + b, 0) / e.water.length;
+  if (!e.sample && share > 0) parts.push(`Earth lake masked: ${(share * 100).toFixed(1)}% of window`);
   if (e.sample || o.sample) parts.push('SAMPLE terrain shown where no export exists');
   $('#printed').textContent = parts.join(' · ');
 }

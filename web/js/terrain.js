@@ -1,15 +1,17 @@
-// Terrain fields: loading real exports, labelled sample fallback, shading and drawing.
+// Terrain fields: loading real exports, shading and drawing. Nothing here generates terrain.
 // The drawing code is the prototype's painter's-algorithm renderer, generalised to any grid size.
-import { DEG, tok, hex, mix, makeNoise, fbm, mulberry } from './util.js';
+import { DEG, tok, hex, mix } from './util.js';
 
 /* ---------- loading ---------- */
-// A real export is data/terrain/<id>.json (see web/README.md). Anything wrong with it is reported, never hidden.
+// A real export is data/terrain/<id>.json (see web/README.md). If it is absent or invalid the caller gets a
+// "missing" marker with the reason, and draws a message. No placeholder terrain is ever made up in its place.
+const missing = (kind, id, why) => ({ kind, missing: true, why, meta: { id } });
 export async function loadField(id, kind) {
   let res;
-  try { res = await fetch(`data/terrain/${id}.json`, { cache: 'no-cache' }); } catch (e) { return sampleField(kind, id, 'file could not be fetched'); }
-  if (!res.ok) return sampleField(kind, id, 'no export yet');
+  try { res = await fetch(`data/terrain/${id}.json`, { cache: 'no-cache' }); } catch (e) { return missing(kind, id, 'the file could not be fetched'); }
+  if (!res.ok) return missing(kind, id, 'no export yet');
   try { return fromExport(await res.json(), kind); }
-  catch (e) { console.warn(`terrain/${id}.json is invalid:`, e); return sampleField(kind, id, 'export invalid: ' + e.message); }
+  catch (e) { console.warn(`terrain/${id}.json is invalid:`, e); return missing(kind, id, 'the export is invalid: ' + e.message); }
 }
 
 function fromExport(j, kind) {
@@ -24,27 +26,7 @@ function fromExport(j, kind) {
   const dry = []; for (let i = 0; i < len; i++) if (!water[i]) dry.push(raw[i]);
   dry.sort((a, b) => a - b); const ref = dry.length ? dry[dry.length >> 1] : 0;
   const h = new Float32Array(len); for (let i = 0; i < len; i++) h[i] = raw[i] - ref;
-  return { kind, n, h, water, windowKm: j.window_km, sample: false, meta: j, ref };
-}
-
-/* ---------- labelled sample terrain (placeholder, never a measurement) ---------- */
-const SAMPLE_N = 96, SAMPLE_KM = 40;
-function crater(r, R, d, hr) { const t = r / R; if (t < 1) { const w = Math.max(0, (t - 0.5) / 0.5); return -d + (d + hr) * w * w * (3 - 2 * w); } return hr * Math.exp(-(t - 1) * 3.2); }
-export function sampleField(kind, id, why) {
-  const n = SAMPLE_N, TW = SAMPLE_KM, h = new Float32Array(n * n), water = new Uint8Array(n * n), nz = makeNoise(kind === 'earth' ? 21 : 42), rnd = mulberry(kind === 'earth' ? 5 : 9), small = [];
-  if (kind === 'moon') { small.push([8, -6, 5], [-5, 11, 3.2], [13, 9, 2.2]); for (let i = 0; i < 26; i++) small.push([(rnd() - 0.5) * TW, (rnd() - 0.5) * TW, 0.4 + rnd() * 0.9]); }
-  for (let j = 0; j < n; j++) for (let i = 0; i < n; i++) {
-    const x = (i / (n - 1) - 0.5) * TW, y = (j / (n - 1) - 0.5) * TW; let z;
-    if (kind === 'earth') {
-      z = crater(Math.hypot(x + 1.5, y - 1), 14, 260, 170) + 240 * (fbm(nz, x / 9 + 3, y / 9 + 3, 5) - 0.5) + 130 * Math.exp(-((x - 2) ** 2 + (y + 1.5) ** 2) / 6);
-      if (z < -150) { z = -150; water[j * n + i] = 1; }
-    } else {
-      z = crater(Math.hypot(x + 22, y + 10), 30, 1500, 700) + 170 * (fbm(nz, x / 7 + 5, y / 7 + 5, 5) - 0.5);
-      for (const c of small) { const r = Math.hypot(x - c[0], y - c[1]); if (r < c[2] * 2.2) z += crater(r, c[2], c[2] * 95, c[2] * 24); }
-    }
-    h[j * n + i] = z;
-  }
-  return { kind, n, h, water, windowKm: TW, sample: true, why, meta: { id }, ref: 0 };
+  return { kind, n, h, water, windowKm: j.window_km, missing: false, meta: j, ref };
 }
 
 /* ---------- shading and drawing ---------- */

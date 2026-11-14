@@ -19,7 +19,7 @@ To deploy, upload the `web/` folder to GitHub Pages, Netlify or Vercel as it is.
 | Globe imagery (`assets/tiles`) | Real NASA imagery (GIBS Blue Marble, LRO WAC, Viking MDIM), credited in the footer |
 | Site list, labels, claims (`data/sites.json`) | Claims for the ten plan sites come from the research plan's source check and carry source ids. A claim with no source id is shown as "our reading". Río Tinto and Yungay are team additions, confirmed by abstract only |
 | Planet figures | NASA Planetary Fact Sheets, read 15 November 2026 |
-| 3D terrain and slide view | Real for both pairs (de Gerlache and Shackleton). A pair marked `hideIfSample` in `sites.json` is hidden if its export is missing, so sample terrain never reaches the page |
+| 3D terrain and slide view | Real for both pairs (de Gerlache and Shackleton). There is no sample or generated terrain in the code. A pair marked `hideIfMissing` is not listed until its export exists, and a missing export shows a message |
 | Measurements table and slope chart | Blank until both windows have an export with metrics. The browser never invents or recomputes them |
 | Control results | Run on 15 November: two lunar craters, Kamestastin, the Namib Sand Sea and Sua Pan. The table on the Method tab reads the exports |
 
@@ -31,9 +31,9 @@ css/style.css       layout and base styling
 css/theme-ascii.css the ASCII square space theme, loaded after style.css (remove its <link> for the previous look)
 js/app.js           tabs, routing, lists, globes, side-by-side logic
 js/pages.js         pair page, All pairs table, Method and sources (all text from sites.json)
-js/terrain.js       loads exports, sample fallback, shading, 3D drawing, hillshade
+js/terrain.js       loads exports, shading, 3D drawing, hillshade
 js/globe.js         textured globes and tile stitching
-js/ascii.js         the theme's starfield, the ASCII view of the globes, and the ASCII / Image switch
+js/ascii.js         the ASCII view of the globes, and the ASCII / Image switch
 js/util.js          small helpers
 data/sites.json     sites, matrix, planets, pairs, text boxes (edit this, not the code)
 data/terrain/       one JSON per window, written by pipeline/export_terrain.py
@@ -64,7 +64,7 @@ export_window(moon_crop, cell_m=80, window_km=40,
 Requirements: a square 2D array in metres, north at the top, covering `window_km`. Heights can be absolute
 (sea level, or the lunar reference sphere); the app draws them relative to the median of the dry ground.
 
-If a file is missing the app shows sample terrain with a tag. If a file is malformed the tag says why.
+If a file is missing or malformed the app shows a message saying why. It never draws terrain it was not given.
 
 ### File format (what the app reads)
 
@@ -103,8 +103,22 @@ Each site has: `label` (`benchmark`, `established` or `hypothesis`), `labelNote`
 
 ## Theme: ASCII square space
 
-One monospace face (IBM Plex Mono), square corners, 1px rules, a black ground with a character starfield, and bracketed controls. It follows two references looked at on 15 November: The Monospace Web (one face, no rounded corners, uppercase headings on a grid) and NASA's Eyes on the Solar System (black ground, the scene owns the screen, thin uppercase chrome at the edges).
+One monospace face (IBM Plex Mono), square corners and a plain black ground. A minimal pass on 15 November removed the starfield, the corner marks, the bracketed controls and nearly every box: content is separated by space and a few hairlines, the current tab or filter is underlined, and only two colours carry meaning (ochre for measured and selected, orange for where an analogy breaks). It follows two references looked at on 15 November: The Monospace Web (one face, no rounded corners, uppercase headings on a grid) and NASA's Eyes on the Solar System (black ground, the scene owns the screen, thin uppercase chrome at the edges).
 
 The theme keeps to one type scale (12, 14, 16, 20 and 25 px), three weights (400, 500, 600) and a reading measure of about 68 characters. Sizes in `style.css` that are off the scale are overridden by a generated block at the top of the theme file, so `style.css` itself is unchanged. One orange family means "breaks"; Mars is a darker rust so the two are not confused.
 
 The globes have two views, switched in the masthead and remembered per browser. **ASCII** draws each globe as characters in square cells: the brightness of the NASA imagery picks the character and the imagery gives its colour. **Image** shows the imagery itself. The ASCII view is computed in memory from the globe's pixel buffer (about 1 ms per frame); nothing in it is AI-generated. The 3D terrain pictures are evidence and are not restyled.
+
+## Layout of Three worlds
+
+The globes sit on the left and the site panel is docked on the right, beside them: it never covers the globes, which shrink to make room and stay usable. The slim handle on the panel's inner edge hides it to a strip or shows it again, and the choice is remembered. Clicking a pin shows the panel on that site; Escape steps back to the list. On a narrow screen the panel goes under the globes and the handle becomes a bar across its top. The Moon / Mars switch sits under the globes, and the small **Globes: ASCII / Image** switch sits at the lower left on the two tabs that have globes.
+
+## Terrain similarity and temperature
+
+Each pair in `pairs` can carry `sim`: a terrain similarity percentage and its three parts (slope-histogram overlap, relief ratio, roughness ratio; plain average), written by `pipeline/score_terrain.py`. `data/temperature.json`, written by `pipeline/earth_temperature.py`, holds a year of MODIS land surface temperature at each Earth site; a pair page sets it against the site's `tempOther`, a published figure for the counterpart.
+
+## Confidence
+
+Each site has `conf`: a score out of 100, a band, and five parts with the reason for each. It is written by `pipeline/score_confidence.py`, which counts it from the file: `analogySrc` (sources that make the comparison), the sources behind `matches` and `figures`, each source's `kind` and `depth`, figure rows marked `same`, whether the terrain exports exist, and the `breaks` that carry a source. A hypothesis is capped at 40. The rubric is the team's own and is printed on the Method tab. `planRating` keeps the research plan's wording next to it.
+
+Each dimension row can carry source ids in `dsrc`; a row with none is shown as "our reading".

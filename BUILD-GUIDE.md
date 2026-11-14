@@ -157,6 +157,7 @@ Built with the AI assistant while the team slept. Nothing here is checked by a p
 - **Coordinates** now carry a source or a note saying they are approximate.
 - `pipeline/run_notebook.py` reruns a notebook's own cells for another site. `SUBMISSION.md` holds drafts for the form and the demo script.
 - **Theme (3 am).** An ASCII square space look: one monospace face, square corners, a character starfield, and globes drawn as ASCII characters from the NASA imagery, with an ASCII / Image switch in the masthead. It lives in `web/css/theme-ascii.css` and `web/js/ascii.js`; removing the stylesheet link in `index.html` returns the previous look. A line above the globes now says what the site argues and links to Galena Creek.
+- **Layout and trust (5 am).** Three worlds shows the globes with the site list docked beside them on the right; a handle hides or shows the list, and it never covers the globes. The Moon / Mars switch is under the globes, and the globe switch is small at the lower left. The look was stripped to a minimal one. Confidence is now a number out of 100 with five counted parts (`pipeline/score_confidence.py`). The sample-terrain code and the unsourced context pins were removed, and the Method tab has a table of where every number comes from.
 
 **Who checks what before the 5 pm freeze**
 

@@ -1,0 +1,140 @@
+{
+ "dataset": "MODIS/Terra Land Surface Temperature, 8-day, 1 km (MOD11A2 v061)",
+ "year": 2023,
+ "generated": "2026-11-15",
+ "note": "One 1 km pixel at the site's coordinates. Clear-sky 8-day composites; a composite with no value is skipped.",
+ "sites": {
+  "galena": {
+   "lat": 44.64,
+   "lon": -109.79,
+   "composites": 44,
+   "n_day": 40,
+   "n_night": 42,
+   "mean_day_k": 275.7,
+   "mean_night_k": 265.4,
+   "min_night_k": 239.2,
+   "max_day_k": 302.8
+  },
+  "kamestastin": {
+   "lat": 55.883,
+   "lon": -63.3,
+   "composites": 44,
+   "n_day": 44,
+   "n_night": 44,
+   "mean_day_k": 272.5,
+   "mean_night_k": 267.9,
+   "min_night_k": 239.2,
+   "max_day_k": 292.4
+  },
+  "sittampundi": {
+   "lat": 11.233,
+   "lon": 77.9,
+   "composites": 45,
+   "n_day": 37,
+   "n_night": 29,
+   "mean_day_k": 305.6,
+   "mean_night_k": 297.4,
+   "min_night_k": 292.2,
+   "max_day_k": 309.8
+  },
+  "ummjirsan": {
+   "lat": 25.5888,
+   "lon": 39.757,
+   "composites": 44,
+   "n_day": 44,
+   "n_night": 44,
+   "mean_day_k": 315.0,
+   "mean_night_k": 293.2,
+   "min_night_k": 280.8,
+   "max_day_k": 328.1
+  },
+  "kobuk": {
+   "lat": 67.05,
+   "lon": -158.95,
+   "composites": 44,
+   "n_day": 0,
+   "n_night": 0,
+   "mean_day_k": null,
+   "mean_night_k": null,
+   "min_night_k": null,
+   "max_day_k": null
+  },
+  "bodele": {
+   "lat": 16.95,
+   "lon": 17.783,
+   "composites": 44,
+   "n_day": 44,
+   "n_night": 44,
+   "mean_day_k": 314.7,
+   "mean_night_k": 295.3,
+   "min_night_k": 285.5,
+   "max_day_k": 325.9
+  },
+  "salda": {
+   "lat": 37.55,
+   "lon": 29.68,
+   "composites": 44,
+   "n_day": 44,
+   "n_night": 43,
+   "mean_day_k": 288.9,
+   "mean_night_k": 287.1,
+   "min_night_k": 278.4,
+   "max_day_k": 299.9
+  },
+  "matanomadh": {
+   "lat": 23.54,
+   "lon": 68.94,
+   "composites": 44,
+   "n_day": 39,
+   "n_night": 41,
+   "mean_day_k": 307.7,
+   "mean_night_k": 294.1,
+   "min_night_k": 277.0,
+   "max_day_k": 317.3
+  },
+  "azerbaijan": {
+   "lat": 40.43,
+   "lon": 49.7,
+   "composites": 44,
+   "n_day": 41,
+   "n_night": 41,
+   "mean_day_k": 301.2,
+   "mean_night_k": 285.7,
+   "min_night_k": 270.9,
+   "max_day_k": 317.6
+  },
+  "makgadikgadi": {
+   "lat": -20.8,
+   "lon": 25.5,
+   "composites": 45,
+   "n_day": 45,
+   "n_night": 43,
+   "mean_day_k": 307.3,
+   "mean_night_k": 293.6,
+   "min_night_k": 284.4,
+   "max_day_k": 321.3
+  },
+  "riotinto": {
+   "lat": 37.683,
+   "lon": -6.583,
+   "composites": 44,
+   "n_day": 44,
+   "n_night": 44,
+   "mean_day_k": 300.3,
+   "mean_night_k": 287.9,
+   "min_night_k": 276.7,
+   "max_day_k": 315.3
+  },
+  "yungay": {
+   "lat": -24.0,
+   "lon": -69.5,
+   "composites": 44,
+   "n_day": 44,
+   "n_night": 44,
+   "mean_day_k": 314.5,
+   "mean_night_k": 284.1,
+   "min_night_k": 278.9,
+   "max_day_k": 324.2
+  }
+ }
+}

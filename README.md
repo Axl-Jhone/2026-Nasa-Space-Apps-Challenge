@@ -8,7 +8,7 @@ Identify Earth Locations that Analog the Permanent Moon Base Locations and Mars
 | `web/` | The website (static, no build step). Run: `cd web`, `python -m http.server 8000` |
 | `web/data/sites.json` | All page text: sites, labels, claims with source ids, the analogy matrix, method text, source list |
 | `web/data/terrain/` | Terrain exports the site reads |
-| `pipeline/` | Notebooks that cut the Earth and Moon windows, `export_terrain.py` that measures them, and `run_notebook.py` that reruns a notebook for another site |
+| `pipeline/` | Notebooks that cut the Earth and Moon windows, `export_terrain.py` that measures them, `run_notebook.py` that reruns a notebook for another site, and `score_confidence.py` that counts each pair's confidence score |
 | `SUBMISSION.md` | Drafts for the Space Apps form, the 30-second demo script, and the source list |
 | `data/raw/` | Raw downloads (only the `.LBL` labels are committed) |
 

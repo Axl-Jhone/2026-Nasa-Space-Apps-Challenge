@@ -2,7 +2,7 @@
 
 NASA Space Apps 2026, challenge "Identify Earth Locations that Analog the Permanent Moon Base Locations and Mars". Deadline 15 November 2026, 11:59 pm PHT (submit by 9 pm).
 
-The site argues: this place on Earth is like that place on the Moon or Mars in these measured ways, and unlike it in these. Terrain is the only dimension measured the same way on both worlds, so it is the only one measured. There is no combined score: each measure is shown on its own with a plain ratio.
+The site argues: this place on Earth is like that place on the Moon or Mars in these measured ways, and unlike it in these. Terrain is measured on both worlds and gets a similarity percentage, always shown with its three parts. Earth temperature is measured from MODIS and set against published figures. Confidence is a separate percentage about evidence. No number is an overall score for a pair.
 
 ## What lives where
 
@@ -12,6 +12,11 @@ The site argues: this place on Earth is like that place on the Moon or Mars in t
 | `pipeline/moon_dem.ipynb` | Leander | LOLA `LDEM_80S_80M` window, every number read from the label |
 | `pipeline/export_terrain.py` | Leander, Mico (metric definitions) | Shared 80 m grid, metrics, writes `web/data/terrain/<id>.json`. `--selftest` checks the maths |
 | `pipeline/run_notebook.py` | Leander | Reruns a notebook's own cells for another site (Shackleton, the control windows) |
+| `pipeline/score_confidence.py` | Mico, Prince | Counts each pair's confidence score from `sites.json` and writes it back. `--check` says if the stored scores are stale |
+| `pipeline/score_terrain.py` | Mico | Terrain similarity (slopes, relief, roughness, plain average) for each pair and control window |
+| `pipeline/earth_temperature.py` | Leander | One year of MODIS land surface temperature at each Earth site, written to `web/data/temperature.json` |
+| `pipeline/earth_climate.py` | Leander | NASA POWER air temperature, wind and rainfall at each Earth site, written to `web/data/climate.json` |
+| `pipeline/sitesjson.py` | | Reads and writes `sites.json` in its hand-editable layout |
 | `data/raw/` | | Downloads. Only `.LBL` labels are committed |
 | `data/processed/` | | Notebook outputs (GeoTIFF). Not committed, regenerate from the notebooks |
 | `web/` | Axl | Static site, no build step. Formats are in `web/README.md` |
@@ -47,7 +52,8 @@ The "How to work with us" rules come first. These skills add discipline on top; 
 ## Honesty rules
 
 - Never invent a source, citation, number or coordinate. If it is unknown, mark it `N` (not assessed) or ask.
-- Placeholders say so on the page. A pair whose terrain export is missing is hidden, not shown with sample terrain. The gentle-slope limit is 8°, cited to NASA's Human Landing System tilt threshold and labelled a coarse screen at 80 m.
+- Nothing on the site is generated, simulated or seeded. The sample-terrain code is gone: a missing export shows a message, never a picture. The gentle-slope limit is 8°, cited to NASA's Human Landing System tilt threshold and labelled a coarse screen at 80 m.
+- Confidence is a number out of 100 with its five parts shown. It is counted by `pipeline/score_confidence.py` from the sources recorded in `sites.json`; never type a score by hand. After changing a claim or a source, rerun the script.
 - A claim in `sites.json` with no source id is shown on the page as "our reading". A pairing we propose ourselves is labelled `hypothesis` and is never shown as a finding.
 - Every number on the page comes from a file. The browser never invents or recomputes a measurement.
 - Do not change a test's expected value to make it pass. Explain the failure instead.

@@ -3,14 +3,14 @@
 import { $, $$, esc, reduced, fmtLL } from './util.js';
 import { loadField, drawTerrain, drawHillshade } from './terrain.js';
 import { Globe, loadTextures, refreshAll, kick } from './globe.js';
-import { renderPair, renderExplore, renderMethod, labelChip, legendHtml, measTableHtml, srcLinks, matrixHtml } from './pages.js';
+import { renderPair, renderExplore, renderMethod, labelChip, legendHtml, measTableHtml, srcLinks, matrixHtml, confText, simHtml } from './pages.js';
 import { initAscii } from './ascii.js';
 
 const TABS = ['worlds', 'explore', 'planets', 'side-by-side', 'method'];
 const VIEWS = [...TABS, 'pair'];   // 'pair' is reached as #pair/<site id>, not from the tab bar
 const S = { tab: 'worlds', site: 'kamestastin', other: 'moon', side: 'list', filter: 'moon', planet: 'moon', pair: 'degerlache', mode: '3d', T: { view: 35, az: 300, el: 14, ve: 2 }, ex: { world: 'all', label: 'all' } };
 let D, G = {}, PG = {}, TEX = null;
-const fields = new Map();           // terrain id -> field (real or sample)
+const fields = new Map();           // terrain id -> field (a real export, or a 'missing' marker)
 const byId = id => D.sites.find(s => s.id === id);
 const pairById = id => D.pairs.find(p => p.id === id);
 const bodyName = b => ({ earth: 'Earth', moon: 'the Moon', mars: 'Mars' }[b]);
@@ -20,11 +20,10 @@ const count = (s, code) => D.dims.filter(d => s.d[d[0]][0] === code).length;
 async function boot() {
   try { D = await (await fetch('data/sites.json', { cache: 'no-cache' })).json(); }
   catch (e) { $('main').innerHTML = `<p class="err" style="margin:24px">Could not load data/sites.json. Serve the web folder over http (for example: python -m http.server) instead of opening the file directly.</p>`; return; }
-  // A pair marked hideIfSample is shown only once its real terrain export exists, so placeholder terrain never reaches the page
-  for (const p of D.pairs.filter(x => x.hideIfSample)) if ((await getField(p.other, 'moon')).sample) D.pairs = D.pairs.filter(x => x !== p);
-  $('#credit').textContent = D.imagery;
+  // A pair marked hideIfMissing is listed only once its terrain export exists
+  for (const p of D.pairs.filter(x => x.hideIfMissing)) if ((await getField(p.other, 'moon')).missing) D.pairs = D.pairs.filter(x => x !== p);
   $('#pnote').textContent = D.planetsNote || '';
-  initAscii(); buildIntro(); buildGlobes(); buildFilters(); buildSiteList(); buildPlanets(); buildPairs(); bindSbs();
+  initAscii(); buildGlobes(); bindDock(); buildFilters(); buildSiteList(); buildPlanets(); buildPairs(); bindSbs();
   $$('nav.tabs button').forEach(b => b.addEventListener('click', () => { location.hash = '#' + b.dataset.tab; }));
   addEventListener('hashchange', route);
   try { const s = localStorage.getItem('atlas-site'); if (s && byId(s)) S.site = s; } catch (e) { /* storage may be blocked */ }
@@ -34,36 +33,30 @@ async function boot() {
 }
 
 // Shared with the argument pages (pages.js): terrain loading, and the jump to Side by side
-const ctx = { getField: (id, kind) => getField(id, kind), openSbs: id => { S.pair = id; syncPairs(); location.hash = '#side-by-side'; } };
+let tempP = null;   // the temperature file is read once
+const getTemp = () => tempP || (tempP = fetch('data/temperature.json', { cache: 'no-cache' }).then(r => (r.ok ? r.json() : null)).catch(() => null));
+let climP = null;
+const getClimate = () => climP || (climP = fetch('data/climate.json', { cache: 'no-cache' }).then(r => (r.ok ? r.json() : null)).catch(() => null));
+const ctx = { getField: (id, kind) => getField(id, kind), getTemp, getClimate, openSbs: id => { S.pair = id; syncPairs(); location.hash = '#side-by-side'; } };
 function route() {
   const h = location.hash.slice(1), ps = h.startsWith('pair/') ? byId(h.slice(5)) : null;
   const t = ps ? 'pair' : TABS.includes(h) ? h : 'worlds';
-  S.tab = t;
+  S.tab = t; document.body.dataset.tab = t;   // the stylesheet shows the globe switch only where there are globes
   for (const id of VIEWS) $('#view-' + id).hidden = id !== t;
   $$('nav.tabs button').forEach(b => b.setAttribute('aria-pressed', b.dataset.tab === (t === 'pair' ? 'explore' : t)));
   if (t === 'side-by-side') loadPair();
   else if (t === 'pair') { selectSite(ps.id); renderPair(D, ps, ctx); }
-  else if (t === 'explore') renderExplore(D, S.ex, route);
+  else if (t === 'explore') renderExplore(D, S.ex, route, ctx);
   else if (t === 'method') renderMethod(D, ctx);
   else refreshAll();
   kick();
 }
 
 /* ---------- 1. three worlds ---------- */
-// One line above the globes that says what the site argues, and where to start. Counts come from the data.
-function buildIntro() {
-  const I = D.intro, el = $('#intro'); if (!I || !el) return;
-  const n = b => D.sites.filter(s => s.body === b).length, start = byId(I.start);
-  el.innerHTML = `<span class="k">${D.sites.length} Earth sites · ${n('moon')} for the Moon · ${n('mars')} for Mars</span>
-    <span class="l">${esc(I.before)} <em>${esc(I.hold)}</em>${esc(I.mid)} <em class="brk">${esc(I.brk)}</em>${esc(I.after)}</span>
-    ${start ? `<a class="btn" href="#pair/${start.id}">${esc(I.cta)}</a>` : ''}`;
-}
-
 // Pin lists for each world. Used by the Three worlds globes and the Planets globes, so both show the same pins.
 function makePins() {
   const pinFor = body => { const m = new Map(); for (const s of D.sites) if (s.body === body && s.tlat != null) { const k = s.tlat + ',' + s.tlon; if (!m.has(k)) m.set(k, { lat: s.tlat, lon: s.tlon, label: s.target, ids: [] }); m.get(k).ids.push(s.id); } return [...m.values()]; };
-  const earth = D.sites.map(s => ({ lat: s.lat, lon: s.lon, label: s.short, ids: [s.id] }))
-    .concat(D.context.map(c => ({ lat: c.lat, lon: c.lon, label: c.name + ': already a well-known analog', ctx: true })));
+  const earth = D.sites.map(s => ({ lat: s.lat, lon: s.lon, label: s.short, ids: [s.id] }));
   return { earth, moon: pinFor('moon'), mars: pinFor('mars') };
 }
 
@@ -79,7 +72,23 @@ function buildGlobes() {
     setOther(b.dataset.b);
     if (byId(S.site).body !== b.dataset.b) { const first = D.sites.find(s => s.body === b.dataset.b); if (first) selectSite(first.id); }
   }));
+}
+
+/* The site panel is a sidebar docked on the right. It sits beside the globes, which shrink to make room and stay usable.
+   The handle on its inner edge hides or shows it; the choice is remembered. */
+function setDock(open) {
+  const d = $('#sites-dock'), t = $('#sites-toggle');
+  d.classList.toggle('shut', !open);
+  t.setAttribute('aria-expanded', open); t.setAttribute('aria-label', open ? 'Hide the site panel' : 'Show the site panel'); t.title = open ? 'Hide' : 'Show sites';
+  try { localStorage.setItem('atlas-sites', open ? 'open' : 'shut'); } catch (e) { /* storage may be blocked */ }
+}
+function bindDock() {
+  let open = innerWidth > 1000;                                   // shown by default where there is room for it
+  try { const v = localStorage.getItem('atlas-sites'); if (v) open = v === 'open'; } catch (e) { /* ignore */ }
+  setDock(open);
+  $('#sites-toggle').addEventListener('click', () => setDock($('#sites-dock').classList.contains('shut')));
   document.addEventListener('keydown', e => { if (e.key === 'Escape' && S.tab === 'worlds' && S.side === 'detail') showSideList(); });
+  new ResizeObserver(() => refreshAll()).observe($('.globes'));    // the globes redraw at their new size as the panel moves
 }
 
 function setOther(b) {
@@ -90,7 +99,6 @@ function setOther(b) {
   $$('#other-toggle button').forEach(x => x.setAttribute('aria-pressed', x.dataset.b === b));
   refreshAll();   // the newly shown globe needs to be drawn
 }
-
 
 function buildFilters() {
   const F = [['all', 'All'], ['moon', 'Moon'], ['mars', 'Mars'], ['hyp', 'Hypotheses']];
@@ -108,7 +116,7 @@ function visibleSites() {
 }
 function buildSiteList() {
   $('#sitelist').innerHTML = visibleSites().map(s => `<li><button class="site" data-id="${s.id}" aria-pressed="${s.id === S.site}" title="${esc(s.labelNote || '')}">
-    <span class="r1"><i class="dot earth"></i>${esc(s.short)}<em class="lb-${esc(s.label)}">${esc((D.labels[s.label] || [s.label])[0])}</em></span>
+    <span class="r1"><i class="dot earth"></i>${esc(s.short)}<em class="lb-${esc(s.label)}">${esc((D.labels[s.label] || [s.label])[0])}${s.conf ? ' · ' + s.conf.score + '%' : ''}</em></span>
     <span class="r2"><i class="dot ${s.body}"></i>${esc(s.target)}</span>
     <span class="r3">${count(s, 'M')} measured, ${count(s, 'C')} cited</span></button></li>`).join('')
     + (S.filter === 'moon' || S.filter === 'all' ? `<li class="neg"><b>${esc(D.negative.head)}</b>${esc(D.negative.text)}</li>` : '');
@@ -126,6 +134,7 @@ function selectSite(id, open = false) {
   $('#cap-earth').textContent = `${s.name}, ${s.where}`;
   $('#cap-moon').textContent = s.body === 'moon' ? s.target : 'No counterpart selected';
   $('#cap-mars').textContent = s.body === 'mars' ? s.target : 'No counterpart selected';
+  if (open) setDock(true);
   if (open || S.side === 'detail') showSideDetail(s);   // pressing a site opens its details; the toggle only updates them if already open
 }
 
@@ -153,7 +162,7 @@ function showSideDetail(s) {
       <div class="place anchor"><span class="role">Anchor · ${world}</span><strong>${esc(s.target)}</strong><span class="mono muted">${s.tlat != null ? fmtLL(s.tlat, s.tlon) : 'A process, with no single place'}</span></div>
       <div class="place cand"><span class="role">Earth analog</span><strong>${esc(s.name)}</strong><span class="mono muted">${esc(s.where)} · ${fmtLL(s.lat, s.lon)}</span></div>
     </div>
-    <div class="chips">${labelChip(D, s)}<span>Confidence: ${esc(s.confidence || 'not rated')}</span><span>${esc(s.kind)}</span></div>
+    <div class="chips">${labelChip(D, s)}<span>${confText(s)}</span><span>${esc(s.kind)}</span></div>
     <p>${esc(s.claim || '')}</p>
     <a class="btn go" href="#pair/${s.id}">Open the full case: alike, and where it breaks →</a>
     <p><span class="muted">How it helps exploration: </span>${esc(s.helps)}</p>
@@ -171,14 +180,14 @@ function showSideDetail(s) {
   fillTerrainMetrics(pair);
 }
 
-/* Terrain rows: real numbers for both places, but only when both windows have a real export (never sample terrain) */
+/* Terrain rows: real numbers for both places, shown only when both windows have an export */
 async function fillTerrainMetrics(pair) {
   const slot = $('#tmslot'); if (!slot) return;
   const say = t => { slot.outerHTML = `<tr class="n end"><td colspan="3"><em>${t}</em></td></tr>`; };
   if (!pair) return say('No terrain window for this site yet.');
   const [e, o] = await Promise.all([getField(pair.earth, 'earth'), getField(pair.other, 'moon')]);
   if (!slot.isConnected) return;   // the panel was replaced while loading
-  if (e.sample || o.sample) return say('Waiting for real terrain exports of both windows.');
+  if (e.missing || o.missing) return say('Waiting for terrain exports of both windows.');
   const M = [['relief_p5_p95_m', 'Relief (5th to 95th percentile)', 'm'], ['median_slope_deg', 'Median slope', '°'], ['p95_slope_deg', '95th percentile slope', '°'], ['roughness_m', 'Roughness', 'm']];
   slot.outerHTML = M.map(([k, l, u]) => `<tr class="m"><th scope="row">${l}</th><td>${o.meta.metrics[k].toFixed(1)} ${u}</td><td>${e.meta.metrics[k].toFixed(1)} ${u}</td></tr>`).join('')
     + `<tr class="n end"><td colspan="3"><em>Both windows are 40 km, measured on one 80 m grid (${esc((o.meta.source || {}).dataset || '')}; ${esc((e.meta.source || {}).dataset || '')}).</em></td></tr>`;
@@ -224,12 +233,12 @@ function showPop(k, ids) {
   const pop = $('#pop');
   pop.innerHTML = `<button class="x" aria-label="Close">×</button>${body}<canvas class="thumb" hidden></canvas><div class="thumbnote fineprint"></div>${pair ? `<button class="btn" data-pair="${pair.id}">Compare terrain side by side</button>` : ''}`;
   pop.hidden = false;
-  // Small terrain picture: drawn only from a real export, never from the labelled sample terrain
+  // Small terrain picture, drawn only from an export
   const thumb = $('.thumb', pop), note = $('.thumbnote', pop), tid = pair && (k === 'earth' ? pair.earth : pair.other);
   if (!tid) note.textContent = 'No terrain window for this place yet.';
   else getField(tid, k === 'earth' ? 'earth' : 'moon').then(f => {
     if (!pop.contains(thumb)) return;            // the card was closed or replaced while loading
-    if (f.sample) { note.textContent = 'No real terrain export for this window yet.'; return; }
+    if (f.missing) { note.textContent = 'No terrain export for this window yet.'; return; }
     drawHillshade(thumb, f, { view: 35, az: 300, el: 30, ve: 2 }); thumb.hidden = false;
     const src = f.meta.source || {};
     note.textContent = `Shaded relief of the ${f.windowKm} km window${src.dataset ? ', ' + src.dataset : ''}. Light from the north-west.`;
@@ -266,23 +275,22 @@ async function loadPair() {
 }
 
 function panelHtml(f, title, coords, cls, id) {
-  const m = f.meta || {};
-  const note = f.sample ? `<span class="tag">SAMPLE · ${esc(f.why || 'no export yet')}</span>` : '';
-  const cap = f.sample ? 'Generated placeholder terrain. Replace it by exporting the real window (see README).'
-    : `${esc((m.source && m.source.dataset) || 'Elevation export')}${m.source && m.source.pixel_m ? `, ${m.source.pixel_m} m source pixels` : ''}. Heights are drawn relative to the median of the dry ground.`;
-  return `<figure class="panel"><div class="ph"><i class="dot ${cls}"></i><strong>${esc(title)}</strong><span class="mono">${esc(coords)}</span></div>
-    <div class="cv">${note ? `<span class="tg">${note}</span>` : ''}<canvas id="${id}" role="img" aria-label="3D terrain view of ${esc(title)}"></canvas></div><figcaption>${cap}</figcaption></figure>`;
+  const m = f.meta || {}, top = `<div class="ph"><i class="dot ${cls}"></i><strong>${esc(title)}</strong><span class="mono">${esc(coords)}</span></div>`;
+  // No export, no picture: a message stands in, never made-up terrain
+  if (f.missing) return `<figure class="panel">${top}<div class="cv"><p class="err">No terrain export for this window (${esc(f.why)}). Nothing is drawn in its place.</p></div></figure>`;
+  const cap = `${esc((m.source && m.source.dataset) || 'Elevation export')}${m.source && m.source.pixel_m ? `, ${m.source.pixel_m} m source pixels` : ''}. Heights are drawn relative to the median of the dry ground.`;
+  return `<figure class="panel">${top}<div class="cv"><canvas id="${id}" role="img" aria-label="3D terrain view of ${esc(title)}"></canvas></div><figcaption>${cap}</figcaption></figure>`;
 }
 function renderPanels(p, e, o) {
   const site = byId(p.site), oc = p.otherCentre;
   // show the centre the data was actually cut at, when there is an export
-  const ec = (!e.sample && e.meta.centre) || { lat: site.lat, lon: site.lon };
-  const occ = (!o.sample && o.meta.centre) || oc;
+  const ec = (!e.missing && e.meta.centre) || { lat: site.lat, lon: site.lon };
+  const occ = (!o.missing && o.meta.centre) || oc;
   $('#panels').innerHTML = panelHtml(e, p.earthTitle, fmtLL(ec.lat, ec.lon), 'earth', 'terr-earth') +
     panelHtml(o, p.otherTitle, fmtLL(occ.lat, occ.lon) + (oc.provisional ? ' (provisional)' : ''), 'moon', 'terr-other');
   // drag to turn, on either canvas, shared camera
   for (const id of ['terr-earth', 'terr-other']) {
-    const cv = $('#' + id); let on = false, lx = 0;
+    const cv = $('#' + id); if (!cv) continue; let on = false, lx = 0;
     cv.addEventListener('pointerdown', ev => { on = true; lx = ev.clientX; cv.setPointerCapture(ev.pointerId); cv.style.cursor = 'grabbing'; });
     cv.addEventListener('pointermove', ev => { if (!on) return; S.T.view = Math.round((S.T.view - (ev.clientX - lx) * 0.5 + 360) % 360); lx = ev.clientX; $('#ctl-view').value = S.T.view; drawSbs(); });
     const end = () => { on = false; cv.style.cursor = ''; }; cv.addEventListener('pointerup', end); cv.addEventListener('pointercancel', end);
@@ -297,6 +305,7 @@ function drawSbs() {
   raf = requestAnimationFrame(() => {
     raf = 0; if (S.tab !== 'side-by-side') return;
     const p = pairById(S.pair), e = fields.get(p.earth), o = fields.get(p.other); if (!e || !o) return;
+    if (e.missing || o.missing) { $('#printed').textContent = 'A terrain export is missing, so nothing is compared.'; return; }
     if (S.mode === '3d') { const a = $('#terr-earth'), b = $('#terr-other'); if (a && b) { drawTerrain(a, e, S.T); drawTerrain(b, o, S.T); } }
     else { drawHillshade($('#hs-earth'), e, S.T); drawHillshade($('#hs-other'), o, S.T); }
     $('#out-view').textContent = S.T.view + '°'; $('#out-az').textContent = S.T.az + '°'; $('#out-el').textContent = S.T.el + '°'; $('#out-ve').textContent = S.T.ve.toFixed(1) + '×';
@@ -312,8 +321,7 @@ function printLine(e, o) {
   // measured share from the 80 m grid, so it matches the table
   const m = e.meta && e.meta.metrics;
   const share = m && m.masked_share != null ? m.masked_share : e.water.reduce((a, b) => a + b, 0) / e.water.length;
-  if (!e.sample && share > 0) parts.push(`Earth lake masked: ${(share * 100).toFixed(1)}% of window`);
-  if (e.sample || o.sample) parts.push('SAMPLE terrain shown where no export exists');
+  if (share > 0) parts.push(`Earth lake masked: ${(share * 100).toFixed(1)}% of window`);
   $('#printed').textContent = parts.join(' · ');
 }
 function applyMode() {
@@ -340,7 +348,7 @@ function bindSbs() {
 // Numbers come from the export's "metrics" (computed in Python on the shared 80 m grid). The browser never recomputes them.
 function renderMeasurements(p, e, o) {
   const me = (e.meta && e.meta.metrics) || null, mo = (o.meta && o.meta.metrics) || null;
-  const pending = e.sample || o.sample || !me || !mo;
+  const pending = e.missing || o.missing || !me || !mo;
   $('#meas').innerHTML = `
     <h2>Measured on one grid</h2>
     ${pending ? `<p class="err">Measurements appear when both windows have a real export with metrics. Until then every number here is blank on purpose.</p>` : ''}
@@ -348,13 +356,14 @@ function renderMeasurements(p, e, o) {
     <p class="fineprint">The last column is a plain ratio, not a verdict. We report each measure separately and do not combine them into one score.</p>
     ${histHtml(e, o)}
     <div class="box"><b>Does the method work? Controls</b><ul>${D.controls.map(c => `<li>${esc(c.text)}: ${esc(c.state)}</li>`).join('')}</ul></div>
+    ${simHtml(p)}
     <div class="box"><b>What it means for operations</b><div>${esc(D.operations)}${srcLinks(D, D.operationsSrc)}</div></div>
     <div class="box brk"><b>Where it breaks</b><div>${esc(D.breaks)}</div><a href="#pair/${p.site}">Read the full case for this pair →</a></div>`;
 }
 function histHtml(e, o) {
   const ha = e.meta && e.meta.slope_hist, hb = o.meta && o.meta.slope_hist;
-  const head = `<figcaption>Slope distribution, same bins both sides ${(!ha || !hb || e.sample || o.sample) ? '<span class="tag">PENDING</span>' : ''}</figcaption>`;
-  if (!ha || !hb || e.sample || o.sample || ha.frac.length !== hb.frac.length) return `<figure class="hist">${head}<p class="fineprint">Appears when both exports carry a slope histogram.</p></figure>`;
+  const head = `<figcaption>Slope distribution, same bins both sides ${(!ha || !hb) ? '<span class="tag">PENDING</span>' : ''}</figcaption>`;
+  if (!ha || !hb || ha.frac.length !== hb.frac.length) return `<figure class="hist">${head}<p class="fineprint">Appears when both exports carry a slope histogram.</p></figure>`;
   const W = 300, H = 140, x0 = 30, x1 = 290, y0 = 112, y1 = 8, nb = ha.frac.length, top = Math.max(...ha.frac, ...hb.frac) || 1;
   const pts = f => f.map((v, i) => `${(x0 + (i + 0.5) / nb * (x1 - x0)).toFixed(1)},${(y0 - v / top * (y0 - y1)).toFixed(1)}`).join(' ');
   const maxDeg = ha.edges_deg[ha.edges_deg.length - 1];

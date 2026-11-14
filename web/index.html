@@ -13,10 +13,9 @@
 <link rel="stylesheet" href="css/theme-ascii.css"><!-- ASCII square space theme: remove this line for the previous look -->
 </head>
 <body>
-<canvas id="stars" aria-hidden="true"></canvas>
 <div class="app">
   <header class="mast">
-    <a class="brand" href="#worlds"><b>ATLAS</b><span>WHERE EARTH STANDS IN, AND WHERE IT STOPS</span></a>
+    <a class="brand" href="#worlds"><b>ATLAS</b></a>
     <nav class="tabs" aria-label="Main">
       <button data-tab="worlds" aria-pressed="true">Three worlds</button>
       <button data-tab="explore" aria-pressed="false">All pairs</button>
@@ -24,19 +23,17 @@
       <button data-tab="side-by-side" aria-pressed="false">Side by side</button>
       <button data-tab="method" aria-pressed="false">Method</button>
     </nav>
-    <div class="viewmode"><span>Globes</span>
-      <div class="seg" id="viewmode" role="group" aria-label="How the globes are drawn">
-        <button data-view="ascii" aria-pressed="true" title="Characters drawn from the NASA imagery">ASCII</button>
-        <button data-view="image" aria-pressed="false" title="The NASA imagery itself">Image</button>
-      </div>
-    </div>
   </header>
 
   <main>
     <!-- 1. THREE WORLDS -->
     <section class="view" id="view-worlds">
       <div class="main-col">
-        <div class="intro" id="intro"></div>
+        <div class="globes">
+          <figure><figcaption><span class="dot earth"></span>Earth</figcaption><div class="globe earth" id="globe-earth" role="img" aria-label="Globe of Earth with analog site pins"><canvas></canvas></div><p class="cap" id="cap-earth"></p></figure>
+          <figure id="fig-moon"><figcaption><span class="dot moon"></span>Moon</figcaption><div class="globe moon" id="globe-moon" role="img" aria-label="Globe of the Moon with counterpart pins"><canvas></canvas></div><p class="cap" id="cap-moon"></p></figure>
+          <figure id="fig-mars" hidden><figcaption><span class="dot mars"></span>Mars</figcaption><div class="globe mars" id="globe-mars" role="img" aria-label="Globe of Mars with counterpart pins"><canvas></canvas></div><p class="cap" id="cap-mars"></p></figure>
+        </div>
         <div class="otherbar">
           <span class="mono">Compare Earth with</span>
           <div class="seg" id="other-toggle" role="group" aria-label="Second world">
@@ -44,23 +41,16 @@
             <button data-b="mars" aria-pressed="false">Mars</button>
           </div>
         </div>
-        <div class="globes">
-          <figure><figcaption><span class="dot earth"></span>Earth</figcaption><div class="globe earth" id="globe-earth" role="img" aria-label="Globe of Earth with analog site pins"><canvas></canvas></div><p class="cap" id="cap-earth"></p></figure>
-          <figure id="fig-moon"><figcaption><span class="dot moon"></span>Moon</figcaption><div class="globe moon" id="globe-moon" role="img" aria-label="Globe of the Moon with counterpart pins"><canvas></canvas></div><p class="cap" id="cap-moon"></p></figure>
-          <figure id="fig-mars" hidden><figcaption><span class="dot mars"></span>Mars</figcaption><div class="globe mars" id="globe-mars" role="img" aria-label="Globe of Mars with counterpart pins"><canvas></canvas></div><p class="cap" id="cap-mars"></p></figure>
-        </div>
-        <div class="legend">
-          <span><i class="dot earth"></i>Our sites</span>
-          <span><i class="dot" style="border:2px solid var(--ink-3);width:7px;height:7px"></i>Well-known analogs, for context</span>
-          <span>Drag a globe to turn it</span>
-        </div>
       </div>
-      <aside class="side" aria-label="Analog sites">
-        <div class="slist" id="slist">
-          <div class="top"><h2>Sites</h2><div class="pills" id="filters" role="group" aria-label="Filter"></div></div>
-          <ul class="sites" id="sitelist"></ul>
+      <aside class="side dock" id="sites-dock" aria-label="Analog sites">
+        <button class="rail" id="sites-toggle" aria-controls="sites-body" aria-expanded="true"><span class="chev" aria-hidden="true"></span><span class="lbl">Sites</span></button>
+        <div class="dockbody" id="sites-body">
+          <div class="slist" id="slist">
+            <div class="top"><h2>Sites</h2><div class="pills" id="filters" role="group" aria-label="Filter"></div></div>
+            <ul class="sites" id="sitelist"></ul>
+          </div>
+          <div class="sdetail" id="sdetail" hidden></div>
         </div>
-        <div class="sdetail" id="sdetail" hidden></div>
       </aside>
     </section>
 
@@ -119,7 +109,14 @@
     <section class="view doc" id="view-pair" hidden></section>
     <section class="view doc" id="view-method" hidden></section>
   </main>
-  <footer class="credit" id="credit"></footer>
+  <footer class="credit">
+    <div class="viewmode"><span>Globes</span>
+      <div class="seg" id="viewmode" role="group" aria-label="How the globes are drawn">
+        <button data-view="ascii" aria-pressed="true" title="Characters drawn from the NASA imagery">ASCII</button>
+        <button data-view="image" aria-pressed="false" title="The NASA imagery itself">Image</button>
+      </div>
+    </div>
+  </footer>
 </div>
 
 <script type="module" src="js/app.js"></script>

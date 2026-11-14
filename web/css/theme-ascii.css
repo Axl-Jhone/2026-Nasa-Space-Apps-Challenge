@@ -82,7 +82,6 @@ body{font-size:14px;line-height:1.55;background:var(--bg)}
 :focus-visible{outline:1px solid var(--accent);outline-offset:2px}
 
 /* starfield behind everything */
-#stars{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none}
 .app{position:relative;z-index:1}
 .planets{background:transparent}
 .view.doc{background:rgba(4,6,11,.88)}
@@ -214,8 +213,146 @@ ul.claims,.breaks>p{max-width:70ch}
 @media (max-width:1000px){
   header.mast{display:grid;grid-template-columns:1fr auto}
   .brand{grid-row:1;grid-column:1;border-right:0;padding:10px 16px}
-  .viewmode{grid-row:1;grid-column:2;border-left:0;padding:0 12px}
-  .viewmode>span{display:none}
   nav.tabs{grid-row:2;grid-column:1/-1;margin:0;padding:4px 8px;flex-wrap:nowrap;overflow-x:auto;border-top:1px solid var(--line-2)}
   nav.tabs button{flex:none;white-space:nowrap}
+}
+
+/* ---------- minimal pass (15 November) ---------- */
+/* Same content, far less furniture: no ornaments, no boxes, hairlines only where rows need separating.
+   Two colours carry meaning: ochre for measured and selected, orange for where an analogy breaks. The rest is ink. */
+:root{--line:#181e2c;--line-2:#2a3246}
+.view.doc,aside.side,aside.meas,header.mast,footer.credit{background:none}
+
+/* ornaments off */
+.place::before,.place::after,.box::before,.box::after,.breaks::before,.breaks::after,.pcard::before,.pcard::after,.hypo::before,.hypo::after,.panel .cv::before,.panel .cv::after,.intro::before,.intro::after,
+.docin h2::before,.docin h2::after,nav.tabs button::before,nav.tabs button::after,.pill::before,.pill::after,.btn::before{content:none}
+.globe.earth,.globe.moon,.globe.mars,#pglobe-earth,#pglobe-moon,#pglobe-mars{background:none}
+
+/* masthead and controls: plain words, the current one underlined */
+header.mast{border-bottom:1px solid var(--line)}
+.brand{border-right:0}
+.viewmode{border-left:0}
+.viewmode>span{display:none}
+footer.credit{border-top:0}
+nav.tabs button,.pill,.seg button,.btn,.back{text-transform:none;letter-spacing:0}
+nav.tabs button,.pill,.seg button{background:none;color:var(--ink-3)}
+nav.tabs button[aria-pressed="true"],.pill[aria-pressed="true"],.seg button[aria-pressed="true"]{background:none;color:var(--ink);box-shadow:inset 0 -1px 0 var(--accent)}
+.pill{padding:4px 0;margin-right:14px}
+nav.tabs{gap:22px}
+nav.tabs button{padding:8px 0}
+.seg{border:0;gap:16px}
+.seg button{padding:4px 0;min-height:30px}
+.seg button+button{border-left:0}
+.btn,.btn.alt{min-height:0;padding:6px 0;border:0;background:none;color:var(--accent);text-decoration:underline;text-underline-offset:4px}
+.btn:hover,.btn.alt:hover{background:none;color:var(--ink)}
+.btn.go{align-self:flex-start}
+
+/* headings: plain, a step above body text */
+.docin h1,.sbs h1{text-transform:none;letter-spacing:0}
+.docin h2,aside.side h2,aside.meas h2,.sdetail h3{display:block;font-size:16px;font-weight:500;letter-spacing:0;text-transform:none;color:var(--ink)}
+.breaks h2{color:var(--signal)}
+.pcard h2{font-size:20px;letter-spacing:.24em}
+.globes figcaption{text-transform:none;letter-spacing:0;color:var(--ink-3)}
+th{text-transform:none;letter-spacing:0}
+.docin{gap:44px}
+
+/* boxes off */
+.place,.place.cand,.box,.hypo,.intro,.printed,.xwrap,table.figs,.pcard,.panel .cv{border:0;background:none}
+.place,.box,.hypo,.intro,.printed{padding:0}
+.docin .two{gap:36px}
+.printed,ol.srclist{max-width:76ch}
+.pcard h2,.pcard .desc,.pcard .sl{padding-left:0;padding-right:0;border:0}
+.figs td:first-child,.figs th:first-child{padding-left:0}
+.chips{gap:4px 18px}
+.chips span{padding:0;border:0}
+.lab.lab-benchmark,.lab.lab-established,.lab.lab-hypothesis,.lab.lab-team{padding:0;border:0;background:none}
+.lab.lab-benchmark{color:var(--ink-3)}.lab.lab-established{color:var(--ink-2)}.lab.lab-hypothesis{color:var(--accent)}.lab.lab-team{color:var(--ink-3)}
+.site .r1 em.lb-established{color:var(--ink-3)}
+.src{margin-left:6px;padding:0;border:0}
+a.src:hover{background:none;text-decoration:underline}
+.own{padding:0;border:0}
+ul.claims li::before{width:4px;height:4px;background:var(--ink-3)}
+
+/* the one emphasised thing: where it breaks, marked by a single orange rule */
+.breaks,.box.brk,.sites li.neg,.pcard .limit{border:0;border-left:2px solid var(--signal);background:none}
+.breaks{padding:2px 0 2px 22px}
+.box.brk,.pcard .limit{padding:0 0 0 14px}
+.sites li.neg{padding:4px 0 4px 12px;margin-top:10px}
+.limits{border-top:1px solid var(--line)}
+
+/* site list: rows, not cards */
+ul.sites{gap:0}
+.site,.site[aria-pressed="true"]{padding:11px 4px;border:0;border-top:1px solid var(--line);background:none}
+.site[aria-pressed="true"] .r1{color:var(--accent)}
+.site .r3{display:none}
+
+/* status: a coloured word or letter, no cell */
+.st-M,.st-C,.st-P,.st-H,.st-B,.st-N{border:0!important;background:none}
+.st-M i{color:var(--accent)}.st-B i{color:var(--break)}.st-C i{color:var(--ink)}.st-P i{color:var(--ink-2)}.st-N i{color:var(--ink-3)}
+.st-H i{color:var(--accent);text-decoration:underline dashed;text-underline-offset:3px}
+.xt td.cell span,.dt td.s span{padding:0;border:0}
+.matrix.one li{padding:9px 0;border-top:1px solid var(--line)!important}
+.cmp2 tr.p th{padding-left:0;border:0}
+.mhead .lg .sw{width:auto;height:auto;border:0;background:none;font-style:normal;font-family:var(--mono);font-size:12px}
+.sw.st-M{color:var(--accent)}.sw.st-B{color:var(--break)}.sw.st-C{color:var(--ink)}.sw.st-P{color:var(--ink-2)}.sw.st-N{color:var(--ink-3)}.sw.st-H{color:var(--accent)}
+
+/* ---------- layout pass (15 November) ---------- */
+/* Three worlds: the globes and, beside them, the docked site panel. The world switch sits under the globes. */
+#view-worlds{position:relative;overflow:hidden}
+.main-col{position:relative;align-items:center}
+.globes{align-self:stretch}
+.globe{width:min(100%,clamp(150px,calc(100vh - 320px),560px))}
+.otherbar{margin-top:6px}
+
+/* Globe switch: small, lower left, only where there are globes */
+footer.credit{display:flex;align-items:center;gap:18px}
+.viewmode{display:none;flex:none;align-items:center;gap:8px;padding:0;border:0;font-size:12px;letter-spacing:0;color:var(--ink-3)}
+body[data-tab="worlds"] .viewmode,body[data-tab="planets"] .viewmode{display:flex}
+.viewmode>span{display:inline}
+.viewmode .seg{gap:10px}
+.viewmode .seg button{min-height:24px;padding:2px 0;font-size:12px}
+@media (max-width:1000px){header.mast{display:flex}.brand{padding:10px 16px}footer.credit{flex-wrap:wrap;gap:6px 18px}}
+
+/* Confidence: one number, then the parts it is made of */
+.cfnum{font-size:16px;color:var(--ink)!important}
+.cfnum b{font-size:25px;font-weight:600;color:var(--accent)}
+.dt td.n{font-family:var(--mono);white-space:nowrap}
+.xt td.n{font-family:var(--mono);color:var(--ink)}
+
+/* ---------- feedback pass (15 November) ---------- */
+/* Moon | Mars: two framed cells, the current one filled, so the two options cannot run together */
+.otherbar .seg{gap:0;border:1px solid var(--line-2)}
+.otherbar .seg button{min-height:34px;padding:6px 18px}
+.otherbar .seg button+button{border-left:1px solid var(--line-2)}
+.otherbar .seg button[aria-pressed="true"]{background:var(--accent);color:var(--bg);box-shadow:none}
+/* the other two-way switches get a rule between their options */
+.viewmode .seg button+button,.sbs .seg button+button{padding-left:12px;border-left:1px solid var(--line-2)}
+/* footer: only the small globe switch is left, so it is hidden where there are no globes */
+footer.credit{padding:8px 16px}
+body:not([data-tab="worlds"]):not([data-tab="planets"]) footer.credit{display:none}
+
+/* ---------- docked site panel (15 November) ---------- */
+/* The panel is part of the layout, never an overlay: the globes shrink to make room and stay usable.
+   The handle on its inner edge hides it (to a slim strip) or shows it. */
+aside.side.dock{flex:none;flex-direction:row;width:min(440px,38vw);max-width:none;overflow:hidden;border-left:1px solid var(--line-2);transition:width .18s ease-out}
+aside.side.dock.wide{flex:none;width:min(600px,46vw)}
+aside.side.dock.shut{width:44px}
+.dockbody{flex:1;min-width:0;min-height:0;display:flex;flex-direction:column}
+.shut .dockbody{display:none}
+.rail{flex:none;width:44px;display:flex;flex-direction:column;align-items:center;gap:14px;padding:18px 0;border:0;border-right:1px solid var(--line);background:none;color:var(--ink-3)}
+.rail:hover{color:var(--accent)}
+.shut .rail{border-right:0;color:var(--ink)}
+.rail .chev{width:8px;height:8px;border-top:1px solid currentColor;border-right:1px solid currentColor;transform:rotate(45deg)}            /* points right: hide */
+.shut .rail .chev{transform:rotate(-135deg)}                                                                                            /* points left: show */
+.rail .lbl{writing-mode:vertical-rl;font-size:12px;letter-spacing:.16em;text-transform:uppercase}
+aside.side.dock .back{background:var(--bg)}
+@media (prefers-reduced-motion:reduce){aside.side.dock{transition:none}}
+/* narrow screens: the panel goes under the globes, and the handle becomes a bar across its top */
+@media (max-width:1000px){
+  aside.side.dock,aside.side.dock.wide,aside.side.dock.shut{flex-direction:column;width:100%;border-left:0;border-top:1px solid var(--line-2)}
+  .rail,.shut .rail{flex-direction:row;width:100%;padding:12px 16px;border-right:0;border-bottom:1px solid var(--line)}
+  .shut .rail{border-bottom:0}
+  .rail .lbl{writing-mode:horizontal-tb}
+  .rail .chev{transform:rotate(-45deg);margin-top:4px}        /* points up: hide */
+  .shut .rail .chev{transform:rotate(135deg);margin-top:-4px}  /* points down: show */
 }

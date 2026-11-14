@@ -1,7 +1,7 @@
-// ATLAS: ASCII square space theme. A character starfield, and globes drawn as characters in square cells.
+// ATLAS: ASCII square space theme. Globes drawn as characters in square cells, and the switch back to the imagery.
 // The characters come from the same NASA imagery as the image view: brightness picks the character and the image gives its colour.
 // Written with an AI assistant (Claude), directed by the team. See the Method and sources tab.
-import { $, $$, mulberry } from './util.js';
+import { $$ } from './util.js';
 import { setPost, refreshAll } from './globe.js';
 
 const RAMP = ' .:-=+*#%@';   // sparse to dense: darker ground gets a lighter character
@@ -63,19 +63,6 @@ function paint(g) {
   a.ctx.putImageData(a.img, 0, 0);
 }
 
-/* ---------- starfield: sparse characters on a square grid, the same every visit ---------- */
-function stars() {
-  const cv = $('#stars'); if (!cv) return;
-  const dpr = Math.min(2, devicePixelRatio || 1), W = cv.width = Math.round(innerWidth * dpr), H = cv.height = Math.round(innerHeight * dpr);
-  const x = cv.getContext('2d'), cell = 14 * dpr, rnd = mulberry(7);
-  x.clearRect(0, 0, W, H); x.font = `${Math.round(11 * dpr)}px ${FONT}`; x.textBaseline = 'top';
-  for (let py = 0; py < H; py += cell) for (let px = 0; px < W; px += cell) {
-    const r = rnd(), a = rnd(); if (r > 0.03) continue;
-    x.fillStyle = `rgba(200,210,235,${(0.22 + a * 0.5).toFixed(2)})`;
-    x.fillText(r < 0.002 ? '+' : r < 0.007 ? '*' : r < 0.017 ? '·' : '.', px, py);
-  }
-}
-
 /* ---------- the ASCII / image switch in the masthead ---------- */
 function setMode(v) {
   mode = v === 'image' ? 'image' : 'ascii';
@@ -88,7 +75,6 @@ export function initAscii() {
   try { const v = localStorage.getItem('atlas-view'); if (v) mode = v === 'image' ? 'image' : 'ascii'; } catch (e) { /* ignore */ }
   $$('#viewmode button').forEach(b => { b.setAttribute('aria-pressed', b.dataset.view === mode); b.addEventListener('click', () => setMode(b.dataset.view)); });
   setPost(paint);
-  stars();
-  let t = 0; addEventListener('resize', () => { clearTimeout(t); t = setTimeout(() => { stars(); refreshAll(); }, 120); });
-  if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { sheets.clear(); stars(); refreshAll(); });   // redraw once the typeface has loaded
+  let t = 0; addEventListener('resize', () => { clearTimeout(t); t = setTimeout(refreshAll, 120); });
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { sheets.clear(); refreshAll(); });   // redraw once the typeface has loaded
 }

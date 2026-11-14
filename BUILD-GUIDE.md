@@ -140,6 +140,33 @@ The team built a different app from the 4:25 pm plan, and it works, so the plan 
 4. The Shackleton pair has no export yet, so its terrain is tagged SAMPLE. Rerun `moon_dem.ipynb` with Shackleton's name, centre and source notes in the settings cell.
 5. The controls (C4).
 
+## Overnight build (15 November, 2 am)
+
+Built with the AI assistant while the team slept. Nothing here is checked by a person yet: the list at the end says who checks what.
+
+**What changed**
+
+- **Name.** The masthead now reads ATLAS.
+- **Pair pages** (`#pair/<site id>`): label (benchmark, established, hypothesis), confidence, what matches with a source link per claim, cited figures on both worlds, and an orange "where it breaks" block that ends with the limits no Earth site can reproduce.
+- **All pairs** tab: every site against the eight dimensions in one table. It replaces the planned map.
+- **Method and sources** tab: how terrain is measured, the controls, the source-check result, credits, the AI-use statement and all 51 sources.
+- **Sites.** The plan's ten are back (Matanomadh, Azerbaijan mud volcanoes and Makgadikgadi added; Bodélé visible). Río Tinto and Yungay stay, marked as team additions.
+- **Slope limit.** 8°, the Human Landing System tilt threshold, replaces the 10° placeholder. Kamestastin is 83% gentle ground; de Gerlache is 26%.
+- **Shackleton** has a real export. No SAMPLE terrain is left on the site.
+- **Controls** are run. Two lunar craters measure alike; a flat lake bed is clearly different; a dune field is **not** separated from Kamestastin. The site reports that as a finding.
+- **Coordinates** now carry a source or a note saying they are approximate.
+- `pipeline/run_notebook.py` reruns a notebook's own cells for another site. `SUBMISSION.md` holds drafts for the form and the demo script.
+
+**Who checks what before the 5 pm freeze**
+
+| Who | Check | Time |
+| --- | --- | --- |
+| Prince | Read every pair page against its sources. Open the primary paper for Galena Creek (Petersen 2020) and Kamestastin. Read `SUBMISSION.md` | 2 h |
+| Mico | Method tab: the metric definitions, the 8° limit and its caveat, the wording of the control results | 45 min |
+| Leander | Rerun one window with `run_notebook.py` and confirm the numbers match the site. Decide whether the control window positions are sensible | 45 min |
+| Axl | Click through every tab on a phone and on a second laptop. Record the 30-second demo from the script | 1.5 h |
+| Everyone | Read the "Use of AI" text on the Method tab and in `SUBMISSION.md`. It must describe what actually happened | 15 min |
+
 ## The clock
 
 | When (PHT) | What | You are done when |

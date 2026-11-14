@@ -1,14 +1,15 @@
 # 2026-Nasa-Space-Apps-Challenge
 Identify Earth Locations that Analog the Permanent Moon Base Locations and Mars
 
-**Earth Analog Atlas**: this place on Earth is like that place on the Moon or Mars in these measured ways, and unlike it in these.
+**ATLAS (Earth Analog Atlas)**: this place on Earth is like that place on the Moon or Mars in these measured ways, and unlike it in these.
 
 | Path | What |
 | --- | --- |
 | `web/` | The website (static, no build step). Run: `cd web`, `python -m http.server 8000` |
-| `web/data/sites.json` | Site text, analogy matrix, pairs, controls |
+| `web/data/sites.json` | All page text: sites, labels, claims with source ids, the analogy matrix, method text, source list |
 | `web/data/terrain/` | Terrain exports the site reads |
-| `pipeline/` | Notebooks that cut the Earth and Moon windows, and `export_terrain.py` that measures them |
+| `pipeline/` | Notebooks that cut the Earth and Moon windows, `export_terrain.py` that measures them, and `run_notebook.py` that reruns a notebook for another site |
+| `SUBMISSION.md` | Drafts for the Space Apps form, the 30-second demo script, and the source list |
 | `data/raw/` | Raw downloads (only the `.LBL` labels are committed) |
 
 Start with [BUILD-GUIDE.md](BUILD-GUIDE.md). Rules for AI sessions are in [CLAUDE.md](CLAUDE.md).

@@ -1,729 +1,845 @@
 {
- "_note": "Draft content lifted from the mockup. Matrix notes are unverified until each claim has a primary source. Status codes: M measured, C cited, P partial match, B breaks here, N not assessed. Sites with no counterpart location are hidden by the page. Rio Tinto and Yungay were added with sources named in each site's data field; blank cells are Not assessed, not guesses.",
- "status": {
-  "M": "Measured",
-  "C": "Cited",
-  "P": "Partial match",
-  "B": "Breaks here",
-  "N": "Not assessed"
- },
- "dims": [
-  [
-   "geo",
-   "Geology and materials"
+  "_note": "All page text lives here. Edit this file, not the code. Claims for the ten plan sites come from the research plan's source check; each carries the ids of its sources (see \"sources\"). A claim with no source id is shown on the page as \"our reading\". Rio Tinto and Yungay were added by the team and were not part of that check. Never add a number, a source or a coordinate that nobody has opened.",
+  "status": {
+    "M": "Measured",
+    "C": "Cited",
+    "P": "Partial match",
+    "H": "Hypothesis",
+    "B": "Breaks here",
+    "N": "Not assessed"
+  },
+  "statusHelp": {
+    "M": "The same quantity, from data, on both worlds",
+    "C": "A published source says so",
+    "P": "Alike in kind only",
+    "H": "Proposed by us. Not published, not tested",
+    "B": "Known not to match",
+    "N": "Nobody on the team has checked"
+  },
+  "labels": { "benchmark": ["Benchmark", "A well-studied pair, shown for comparison. Not new."], "established": ["Established", "Published as an analog, or used by a space agency. Not new."], "hypothesis": ["Hypothesis", "Proposed by us. Not published as this analog, and not tested."] },
+  "dims": [
+    ["geo", "Geology and materials", "Geology"],
+    ["terrain", "Terrain and topography", "Terrain"],
+    ["temp", "Temperature and light", "Temp, light"],
+    ["ice", "Water, ice, resources", "Water, ice"],
+    ["dust", "Dust, wind, erosion", "Dust, wind"],
+    ["bio", "Biology and habitability", "Biology"],
+    ["sub", "Subsurface and caves", "Subsurface"],
+    ["ops", "Landing, mobility, operations", "Operations"]
   ],
-  [
-   "terrain",
-   "Terrain and topography"
+  "sites": [
+    {
+      "id": "galena",
+      "short": "Galena Creek",
+      "name": "Galena Creek rock glacier",
+      "where": "Absaroka Mountains, Wyoming, USA",
+      "lat": 44.64,
+      "lon": -109.79,
+      "coordNote": "Approximate; not yet taken from a primary source",
+      "body": "mars",
+      "target": "Deuteronilus Mensae ice aprons",
+      "tlat": 43.56,
+      "tlon": 22.6,
+      "kind": "Process: ice under debris",
+      "label": "established",
+      "labelNote": "Papers in 2020 and 2026. The 2026 work calls these glaciers some of the best analogs.",
+      "confidence": "High",
+      "role": "Lead Mars story: the only pair where the same quantity, ice purity, has been estimated on both worlds.",
+      "claim": "Both are bodies of nearly pure ice buried under a thin layer of rock debris.",
+      "scale": "One rock glacier, 1.6 km long",
+      "scored": false,
+      "figures": [
+        {
+          "q": "How pure the buried ice is",
+          "earth": "80 to 95%",
+          "earthNote": "Estimated from how fast the glacier flows, not from cores",
+          "earthSrc": ["S20"],
+          "other": "more than 80%",
+          "otherNote": "Regional radar survey of the debris aprons",
+          "otherSrc": ["S23"]
+        },
+        {
+          "q": "Debris lying over the ice",
+          "earth": "1 to 1.5 m",
+          "earthNote": "Upper section. Drone radar matched digging and drilling",
+          "earthSrc": ["S20", "S21"],
+          "other": "not verified",
+          "otherNote": "We found no checked figure for Mars",
+          "otherSrc": []
+        }
+      ],
+      "matches": [
+        { "t": "Galena Creek carries rock debris 1 to 1.5 m thick on its upper section, over ice estimated at 80 to 95% pure.", "src": ["S20"] },
+        { "t": "Radar shows the debris aprons of Deuteronilus Mensae are more than 80% water ice.", "src": ["S23"] },
+        { "t": "Deuteronilus Mensae and Arcadia Planitia are named as where ice on Mars is most accessible.", "src": ["S8"] }
+      ],
+      "breaks": [
+        { "t": "The Earth figure is inferred from flow speed. Nobody has cored the ice to check it.", "src": ["S20"] },
+        { "t": "Debris thickness on Mars is not verified, and that thickness decides how reachable the water is.", "src": ["S22"] },
+        { "t": "Scale: one glacier 1.6 km long against debris aprons surveyed across a whole region.", "src": ["S20", "S23"] },
+        { "t": "Wyoming is far warmer, has liquid water in summer, and has life.", "src": [] },
+        { "t": "Terrain was not measured for this pair. The open Mars elevation grid is too coarse to resolve a 1.6 km glacier.", "src": [] }
+      ],
+      "helps": "Drone radar at Galena Creek measured debris thickness that matched digging and drilling. On Mars, that thickness decides how reachable the water is for a crew.",
+      "helpsSrc": ["S21", "S22"],
+      "prior": "Established. Not our discovery.",
+      "data": "Published radar and glaciology; no terrain run",
+      "d": {
+        "geo": ["P", "Rock debris over ice"],
+        "terrain": ["N", "Not measured: the open Mars grid is too coarse for a 1.6 km glacier"],
+        "temp": ["B", "Warmer, with liquid water in summer"],
+        "ice": ["C", "Ice under 1 to 1.5 m of debris, estimated 80 to 95% pure"],
+        "dust": ["N", "Not looked at"],
+        "bio": ["B", "Earth life present"],
+        "sub": ["C", "Buried ice body sounded by radar"],
+        "ops": ["C", "Radar method for finding drillable ice"]
+      },
+      "tcoordSrc": ["G1"],
+      "tcoordNote": "Centre of Deuteronilus Mensae"
+    },
+    {
+      "id": "kamestastin",
+      "short": "Kamestastin",
+      "name": "Kamestastin Lake impact structure",
+      "where": "Labrador, Canada",
+      "lat": 55.883,
+      "lon": -63.3,
+      "body": "moon",
+      "target": "de Gerlache crater, south pole",
+      "tlat": -88.48,
+      "tlon": -88.34,
+      "kind": "Place",
+      "label": "established",
+      "labelNote": "Used by space agencies: astronauts trained here in September 2021.",
+      "confidence": "High as geology, low novelty",
+      "role": "The one pair with measured terrain on both worlds.",
+      "claim": "Alike in rock, unlike in terrain: the same anorthosite as the lunar highlands, in a crater far shallower and gentler than de Gerlache.",
+      "scale": "28 km crater, 40 km window",
+      "scored": true,
+      "terrainVerdict": "Measured, and it does not match. On the same 80 m grid the lunar crater has many times the relief and much steeper slopes.",
+      "terrainReading": "Our reading, not tested here: Kamestastin has had about 36 million years of weather and holds a lake; de Gerlache has had no weather at all. The controls on the Method page show these measures capture ruggedness, not shape: they cannot tell a crater from a dune field.",
+      "matches": [
+        { "t": "A 28 km impact crater about 36 million years old.", "src": ["S16"] },
+        { "t": "Formed in anorthosite, the main rock of the lunar highlands.", "src": ["S14"] },
+        { "t": "One of only two craters on Earth with substantial anorthosite.", "src": ["S15"] },
+        { "t": "Astronauts trained here in September 2021.", "src": ["S15", "S16"] }
+      ],
+      "breaks": [
+        { "t": "Terrain, measured: the two craters do not have similar relief or slopes. See the numbers above.", "src": [], "measured": true },
+        { "t": "A lake-filled site with water, weather and life.", "src": [] },
+        { "t": "Soil, temperature and lighting do not match.", "src": [] },
+        { "t": "The elevation model cannot see under the lake or the forest. The lake is masked out of every measure.", "src": [] }
+      ],
+      "helps": "Sampling of impact rocks, traverse planning and crew geology training.",
+      "helpsSrc": ["S14", "S15"],
+      "prior": "Not new: this is an agency training site.",
+      "data": "Copernicus DEM GLO-30, LRO LOLA",
+      "d": {
+        "geo": ["C", "Formed in anorthosite, the main rock of the lunar highlands"],
+        "terrain": ["M", "Measured on one 80 m grid, and it does not match: de Gerlache is far deeper and steeper"],
+        "temp": ["B", "Subarctic; nothing like polar cold traps or low sun"],
+        "ice": ["B", "A lake and seasonal snow, not cold-trapped ice"],
+        "dust": ["B", "Soil and glacial deposits, not regolith"],
+        "bio": ["B", "Forest and lake life"],
+        "sub": ["N", "Not looked at"],
+        "ops": ["M", "Share of ground under the 8° landing tilt limit, measured on both. Far more of Kamestastin is gentle"]
+      },
+      "cmp": {
+        "geo": ["Highlands crust, mostly anorthosite", "Anorthosite"],
+        "temp": ["Polar cold traps, low sun", "Subarctic"],
+        "ice": ["Cold-trapped ice", "A lake and seasonal snow"],
+        "dust": ["Regolith", "Soil and glacial deposits"],
+        "bio": [null, "Forest and lake life"]
+      },
+      "cmpNote": "Anchor and analog wording is taken from this site's notes; it is not independently sourced.",
+      "coordSrc": ["R1"],
+      "coordNote": "55°53′N, 63°18′W; rim diameter 28 km",
+      "tcoordSrc": ["G1"],
+      "tcoordNote": "The Gazetteer lists three centres; this is the first, and the one the terrain window was cut at. Diameter 32.71 km"
+    },
+    {
+      "id": "sittampundi",
+      "short": "Sittampundi",
+      "name": "Sittampundi anorthosite complex",
+      "where": "Tamil Nadu, India",
+      "lat": 11.233,
+      "lon": 77.9,
+      "body": "moon",
+      "target": "South-polar highland soil",
+      "tlat": -89.5,
+      "tlon": -137,
+      "tcoordNote": "Approximate pin on the ridge between Shackleton and de Gerlache, not from a primary source. The soil claim is regional",
+      "kind": "Material",
+      "label": "established",
+      "labelNote": "Established as a source of simulant. Unstudied as a field site.",
+      "confidence": "Medium-high on composition, low otherwise",
+      "role": "Moon materials story.",
+      "claim": "The rock matches the composition of lunar highland soil. Nothing else about the place does.",
+      "scale": "A rock complex",
+      "scored": false,
+      "matches": [
+        { "t": "ISRO's lunar soil simulant, made from this rock, has major oxides mostly equivalent to lunar highland anorthosite.", "src": ["S12"] },
+        { "t": "The simulant is reported as comparable with Apollo 16 samples.", "src": ["S13"] },
+        { "t": "Chandrayaan-3 found 23 south-polar soil samples to be mostly ferroan anorthosite.", "src": ["S7"] }
+      ],
+      "breaks": [
+        { "t": "Composition only. It says nothing about temperature, lighting or volatiles.", "src": [] },
+        { "t": "A tropical, vegetated, inhabited place.", "src": [] },
+        { "t": "No study of Sittampundi as a field analog site was found, only as a source of rock.", "src": [] }
+      ],
+      "helps": "Bulk material for landing and rover tests. ISRO needed 60 to 70 tonnes.",
+      "helpsSrc": ["S13"],
+      "prior": "One paper and a patent on the simulant.",
+      "data": "Literature only",
+      "d": {
+        "geo": ["C", "Simulant oxides close to highland anorthosite"],
+        "terrain": ["N", "Not looked at"],
+        "temp": ["B", "Tropical"],
+        "ice": ["B", "No ice"],
+        "dust": ["P", "Crushed rock stands in for regolith in tests"],
+        "bio": ["B", "Vegetated, inhabited"],
+        "sub": ["N", "Not looked at"],
+        "ops": ["C", "Bulk simulant for landing and wheel tests"]
+      },
+      "coordSrc": ["R2"],
+      "coordNote": "Point seen in a search result only (Mindat). The 1963 paper places the complex within 77°45′ to 78°5′ E, near 11°10′ N"
+    },
+    {
+      "id": "ummjirsan",
+      "short": "Umm Jirsan",
+      "name": "Umm Jirsan lava tube",
+      "where": "Harrat Khaybar, Saudi Arabia",
+      "lat": 25.5888,
+      "lon": 39.757,
+      "coordSrc": ["S17"],
+      "body": "moon",
+      "target": "Mare Tranquillitatis pit",
+      "tlat": 8.3355,
+      "tlon": 33.222,
+      "kind": "Place",
+      "label": "hypothesis",
+      "labelNote": "Our proposal. No study of it as a lunar-pit analog was found, and no measurement tests it.",
+      "confidence": "Low to medium",
+      "role": "Moon subsurface story.",
+      "claim": "A large, dry lava tube that could stand in for a lunar pit. Nobody has measured whether it does.",
+      "scale": "About 1.5 km of passage",
+      "scored": false,
+      "figures": [
+        {
+          "q": "Size of the void",
+          "earth": "8 to 12 m high, up to 45 m wide",
+          "earthNote": "1,481 m of passage in three segments",
+          "earthSrc": ["S17"],
+          "other": "about 100 m deep",
+          "otherNote": "The pit, seen from orbit",
+          "otherSrc": ["S6"]
+        },
+        {
+          "q": "Temperature inside",
+          "earth": "no measurement found",
+          "earthNote": "The site paper gives none, and none was found elsewhere",
+          "earthSrc": ["S17"],
+          "other": "about 17 °C",
+          "otherNote": "In the permanently shadowed part of the pit",
+          "otherSrc": ["S6"]
+        }
+      ],
+      "matches": [
+        { "t": "1,481 m of passage, 8 to 12 m high and up to 45 m wide, in three segments split by two collapses.", "src": ["S17"] },
+        { "t": "A dry site: under 100 mm of rain a year.", "src": ["S17"] },
+        { "t": "Lunar pits are described as thermally stable places that could shelter crews.", "src": ["S6"] }
+      ],
+      "breaks": [
+        { "t": "Scale: the lunar pit is about 100 m deep; the tube is 8 to 12 m high.", "src": ["S6", "S17"] },
+        { "t": "No interior temperature or humidity has been published for Umm Jirsan, so the property that makes a lunar pit useful is untested here.", "src": ["S17"] },
+        { "t": "The site paper is archaeology. It has no Moon or Mars content.", "src": ["S17"] }
+      ],
+      "helps": "Testing skylight entry, cave mapping and radio relay, and measuring how well the tube buffers temperature.",
+      "helpsSrc": [],
+      "prior": "None found as a lunar-pit analog, including in three further searches on 15 November. A 2026 review frames Saudi volcanic fields as analogs for icy moons, so the claim of novelty is only this narrow.",
+      "priorSrc": ["S18"],
+      "data": "The 2024 survey paper; NASA on lunar pits",
+      "d": {
+        "geo": ["P", "Basalt tube; the lunar pit is in mare basalt"],
+        "terrain": ["N", "Not looked at"],
+        "temp": ["N", "No interior measurements found"],
+        "ice": ["B", "No ice"],
+        "dust": ["N", "Not looked at"],
+        "bio": ["N", "Not looked at"],
+        "sub": ["H", "Proposed by us as a lunar-pit analog. Tube 8 to 12 m high; the pit is about 100 m deep"],
+        "ops": ["H", "Proposed: cave access, mapping and radio relay tests"]
+      },
+      "tcoordSrc": ["R6"],
+      "tcoordNote": "Depth 105 m in the LROC pits list"
+    },
+    {
+      "id": "kobuk",
+      "short": "Great Kobuk",
+      "name": "Great Kobuk Sand Dunes",
+      "where": "Alaska, USA",
+      "lat": 67.05,
+      "lon": -158.95,
+      "coordNote": "Approximate; not yet taken from a primary source",
+      "body": "mars",
+      "target": "North polar dune fields",
+      "tlat": 81.4,
+      "tlon": 180.0,
+      "kind": "Process: cold dune migration",
+      "label": "established",
+      "labelNote": "One research group, several outputs.",
+      "confidence": "Medium to high",
+      "role": "A process, with a satellite record behind it.",
+      "claim": "Cold-climate dunes that researchers chose as the closest match to the dune fields around Mars's north pole.",
+      "scale": "A dune field",
+      "scored": false,
+      "matches": [
+        { "t": "Chosen by researchers as most similar to Mars's north polar dune fields.", "src": ["S30"] },
+        { "t": "The dunes moved 1.3 m a year from 2003 to 2008.", "src": ["S30"] },
+        { "t": "Snow covers them for about two-thirds of the year.", "src": ["S29"] }
+      ],
+      "breaks": [
+        { "t": "Liquid water persists under the dunes all year.", "src": ["S29"] },
+        { "t": "The site may be less useful as its permafrost warms.", "src": ["S29"] }
+      ],
+      "helps": "Change detection from orbit, and mobility on frozen sand.",
+      "helpsSrc": ["S30"],
+      "prior": "Established within one research group.",
+      "data": "Literature only; no Mars dataset chosen",
+      "d": {
+        "geo": ["P", "Active sand dunes"],
+        "terrain": ["N", "Not looked at"],
+        "temp": ["P", "Snow-covered for most of the year"],
+        "ice": ["P", "Seasonal snow and frozen sand"],
+        "dust": ["C", "Dunes moved about 1.3 m a year, 2003 to 2008"],
+        "bio": ["B", "Liquid water persists under the dunes"],
+        "sub": ["N", "Not looked at"],
+        "ops": ["C", "Change detection and mobility on frozen sand"]
+      },
+      "tcoordSrc": ["G1"],
+      "tcoordNote": "Centre of Olympia Undae, the north polar dune field"
+    },
+    {
+      "id": "bodele",
+      "short": "Bodélé",
+      "name": "Bodélé Depression",
+      "where": "Chad",
+      "lat": 16.95,
+      "lon": 17.783,
+      "coordSrc": ["S33"],
+      "body": "mars",
+      "target": "Dust lifting on Mars (a process, no single place)",
+      "tlat": null,
+      "tlon": null,
+      "kind": "Process: dust lifting",
+      "label": "hypothesis",
+      "labelNote": "Our proposal, and a narrow one: Bodélé for dust lifting. The area is already a published Mars analog for other processes.",
+      "confidence": "Low to medium",
+      "role": "The unexpected process.",
+      "claim": "The dustiest place on Earth, proposed here as a test bed for how dust is lifted on Mars.",
+      "scale": "A basin-wide process",
+      "scored": false,
+      "matches": [
+        { "t": "A former lake bed that produces about half the mineral dust leaving the Sahara.", "src": ["S31"] },
+        { "t": "Mountains funnel the wind across it.", "src": ["S31"] },
+        { "t": "The dust forms as flakes of diatomite wear each other down.", "src": ["S32"] }
+      ],
+      "breaks": [
+        { "t": "The dust is the remains of freshwater diatoms: it comes from life.", "src": ["S33"] },
+        { "t": "How dust lifting differs in Mars's thin air is not verified.", "src": [] },
+        { "t": "Novelty is narrow. Bodélé is already in the Mars literature for yardangs and dunes; only the dust-lifting pairing is ours.", "src": ["R8", "R9"] }
+      ],
+      "helps": "Testing dust-emission models and storm forecasting.",
+      "helpsSrc": [],
+      "prior": "We found no published study that uses the Bodélé Depression as an analog for dust lifting on Mars. It is not new as a Mars analog in general: the area around it has been used as an analogue for dunes carving yardangs in Becquerel crater, and dunes north-east of it were compared with dunes at Hellespontus Montes. The search could not read paywalled full texts.",
+      "data": "Literature only",
+      "d": {
+        "geo": ["P", "Its yardangs and dunes have been compared with Martian ones. The diatomite itself has no Mars counterpart"],
+        "terrain": ["N", "Not looked at"],
+        "temp": ["N", "Not looked at"],
+        "ice": ["B", "No ice"],
+        "dust": ["H", "Proposed by us for Mars dust lifting. On Earth it supplies about half the dust leaving the Sahara"],
+        "bio": ["B", "The dust itself is from water life"],
+        "sub": ["N", "Not relevant"],
+        "ops": ["H", "Proposed: dust forecasting for surface operations"]
+      },
+      "priorSrc": ["R8", "R9"]
+    },
+    {
+      "id": "salda",
+      "short": "Lake Salda",
+      "name": "Lake Salda",
+      "where": "Turkey",
+      "lat": 37.55,
+      "lon": 29.68,
+      "coordSrc": ["S10"],
+      "body": "mars",
+      "target": "Jezero crater",
+      "tlat": 18.41,
+      "tlon": 77.69,
+      "kind": "Process: water-driven alteration",
+      "label": "benchmark",
+      "labelNote": "Well covered since fieldwork in 2019.",
+      "confidence": "High, low novelty",
+      "role": "The benchmark the other pairs are held against.",
+      "claim": "A well-studied pair: a living carbonate lake set against the ancient lake of Jezero.",
+      "scale": "A 7 km lake",
+      "scored": false,
+      "figures": [
+        {
+          "q": "Width of the lake",
+          "earth": "7 km",
+          "earthNote": "About 196 m deep, alkaline",
+          "earthSrc": ["S10"],
+          "other": "45 km",
+          "otherNote": "The ancient lake basin",
+          "otherSrc": ["S10"]
+        },
+        {
+          "q": "Carbonate minerals",
+          "earth": "hydrous magnesium carbonates",
+          "earthNote": "The main precipitates, forming today",
+          "earthSrc": ["S10"],
+          "other": "hydrated magnesium carbonate",
+          "otherNote": "Deposits seen from orbit",
+          "otherSrc": ["S10"]
+        }
+      ],
+      "matches": [
+        { "t": "An alkaline lake about 196 m deep and 7 km across, in an ultramafic catchment, where hydrous magnesium carbonates are the main precipitates.", "src": ["S10"] },
+        { "t": "Jezero held a lake 45 km across and has hydrated magnesium carbonate deposits.", "src": ["S10"] }
+      ],
+      "breaks": [
+        { "t": "Modern and biologically active. It cannot show long exposure, burial or the slow changes rock goes through afterwards.", "src": ["S10"] }
+      ],
+      "helps": "Biosignature search strategy, and recognising deposit types.",
+      "helpsSrc": ["S10", "S11"],
+      "prior": "Well known. Shown as a benchmark, not as a find.",
+      "priorSrc": ["S11"],
+      "data": "Field literature",
+      "d": {
+        "geo": ["C", "Magnesium carbonates, as found at Jezero"],
+        "terrain": ["N", "Not looked at"],
+        "temp": ["B", "Temperate"],
+        "ice": ["B", "A living lake"],
+        "dust": ["N", "Not looked at"],
+        "bio": ["P", "Living lake: tests biosignature strategy, not ancient Mars"],
+        "sub": ["N", "Not looked at"],
+        "ops": ["P", "Sampling strategy"]
+      },
+      "tcoordSrc": ["G1"],
+      "tcoordNote": "Centre of Jezero crater"
+    },
+    {
+      "id": "matanomadh",
+      "short": "Matanomadh",
+      "name": "Matanomadh Formation",
+      "where": "Kutch, Gujarat, India",
+      "lat": 23.54,
+      "lon": 68.94,
+      "body": "mars",
+      "target": "Meridiani Planum sulfates",
+      "tlat": -1.946,
+      "tlon": -5.527,
+      "kind": "Place: mineral match",
+      "label": "established",
+      "labelNote": "Published as a Mars analog in 2014 and 2025. Label assigned by us from that record.",
+      "confidence": "Medium",
+      "role": "On the map with its cited evidence. Not measured: no matching open mineral data was confirmed for both worlds.",
+      "claim": "Iron sulfates of the kind reported from Meridiani Planum, in sediments laid over basalt.",
+      "scale": "A rock formation",
+      "scored": false,
+      "matches": [
+        { "t": "Jarosite with gypsum, an association also reported from Meridiani Planum, and with goethite, in sediments over Deccan basalts.", "src": ["S24"] },
+        { "t": "A later paper finds natrojarosite with natroalunite and kaolinite.", "src": ["S25"] }
+      ],
+      "breaks": [
+        { "t": "It is the sodium form of jarosite.", "src": ["S25"] },
+        { "t": "The two sources disagree on how it formed.", "src": ["S24", "S25"] }
+      ],
+      "helps": "Calibrating spectral and X-ray instruments on mixtures of sulfates and clays.",
+      "helpsSrc": [],
+      "prior": "Two items opened, from 2014 and 2025.",
+      "data": "Literature only",
+      "d": {
+        "geo": ["C", "Jarosite with gypsum, as reported from Meridiani"],
+        "terrain": ["N", "Not assessed"],
+        "temp": ["N", "Not assessed"],
+        "ice": ["N", "Not assessed"],
+        "dust": ["N", "Not assessed"],
+        "bio": ["N", "Not assessed"],
+        "sub": ["N", "Not assessed"],
+        "ops": ["N", "Not assessed"]
+      },
+      "coordSrc": ["R3"],
+      "coordNote": "The village of Mata no Madh, not the outcrop. No primary source gave the outcrop's position",
+      "tcoordSrc": ["R7"],
+      "tcoordNote": "Opportunity rover landing site, Meridiani Planum"
+    },
+    {
+      "id": "azerbaijan",
+      "short": "Azerbaijan mud volcanoes",
+      "name": "Azerbaijan mud volcanoes",
+      "where": "Azerbaijan",
+      "lat": 40.43,
+      "lon": 49.7,
+      "body": "mars",
+      "target": "Mound fields of Chryse and Acidalia",
+      "tlat": 46.66,
+      "tlon": -22.0,
+      "kind": "Place: landform match",
+      "label": "established",
+      "labelNote": "Niche but established in the Mars literature.",
+      "confidence": "Medium",
+      "role": "On the map with its cited evidence. Not measured.",
+      "claim": "Mud volcanoes compared in the literature with fields of cones and mounds on the northern plains of Mars.",
+      "scale": "A volcanic province",
+      "scored": false,
+      "matches": [
+        { "t": "Cones in Chryse up to over 1 km wide were compared with Azerbaijani mud volcanoes.", "src": ["S26"] },
+        { "t": "The mapped parts of southern Acidalia have over 18,000 mounds; Azerbaijan has 20 to 40 eruptive centres per 1,000 square km.", "src": ["S27"] }
+      ],
+      "breaks": [
+        { "t": "The 2010 study used edifices under tens of metres wide.", "src": ["S26"] },
+        { "t": "The NASA abstract names submarine mud volcanoes in the Gulf of Cadiz as the closest match in shape.", "src": ["S27"] }
+      ],
+      "helps": "Sampling fine sediment brought up from depth, and methane sensing.",
+      "helpsSrc": [],
+      "prior": "Used as analogs for possible sedimentary volcanoes on Mars.",
+      "priorSrc": ["S28"],
+      "data": "Literature only",
+      "d": {
+        "geo": ["C", "Mud volcano landforms compared with Martian cones and mounds"],
+        "terrain": ["N", "Not assessed"],
+        "temp": ["N", "Not assessed"],
+        "ice": ["N", "Not assessed"],
+        "dust": ["N", "Not assessed"],
+        "bio": ["N", "Not assessed"],
+        "sub": ["P", "Mud brings fine sediment up from depth"],
+        "ops": ["N", "Not assessed"]
+      },
+      "coordSrc": ["R5"],
+      "coordNote": "Bozdag Gobu mud volcano, one of the province's volcanoes. The volcano named in the Mars comparison could not be located",
+      "tcoordSrc": ["G1"],
+      "tcoordNote": "Centre of Acidalia Planitia. The mounds were mapped across its southern part"
+    },
+    {
+      "id": "makgadikgadi",
+      "short": "Makgadikgadi",
+      "name": "Makgadikgadi Pans",
+      "where": "Botswana",
+      "lat": -20.8,
+      "lon": 25.5,
+      "body": "mars",
+      "target": "Lake deposits of Gale and Jezero",
+      "tlat": -5.44,
+      "tlon": 137.7,
+      "kind": "Place: mineral match",
+      "label": "established",
+      "labelNote": "Discussed as an analogue for Martian playas in a 2023 paper and a 2026 abstract. Label assigned by us from that record.",
+      "confidence": "Medium",
+      "role": "On the map with its cited evidence. Not measured.",
+      "claim": "One of Earth's largest salt-pan systems, set against the dried lake deposits of Gale and Jezero.",
+      "scale": "A basin",
+      "scored": false,
+      "matches": [
+        { "t": "One of Earth's largest evaporite systems, considered an analogue for Martian playas.", "src": ["S35"] },
+        { "t": "Satellite spectra show clays and evaporites. The result is described as preliminary.", "src": ["S35"] }
+      ],
+      "breaks": [
+        { "t": "The abstract compares it with orbital spectra of Jezero and Gale but reports no results.", "src": ["S35"] }
+      ],
+      "helps": "Cross-calibrating hyperspectral instruments.",
+      "helpsSrc": [],
+      "prior": "A 2023 paper discusses the pans' implications for Martian playa environments, and a 2026 abstract compares them with Jezero and Gale. Other papers were seen in search results and not checked.",
+      "data": "Literature only",
+      "d": {
+        "geo": ["P", "Clays and evaporites from satellite spectra, preliminary"],
+        "terrain": ["N", "Not assessed"],
+        "temp": ["N", "Not assessed"],
+        "ice": ["N", "Not assessed"],
+        "dust": ["N", "Not assessed"],
+        "bio": ["N", "Not assessed"],
+        "sub": ["N", "Not assessed"],
+        "ops": ["N", "Not assessed"]
+      },
+      "coordSrc": ["R4"],
+      "coordNote": "Centre of the pans as given in a 2023 paper",
+      "tcoordSrc": ["G1"],
+      "tcoordNote": "Pin placed at the centre of Gale crater",
+      "priorSrc": ["R4", "S35"]
+    },
+    {
+      "id": "riotinto",
+      "short": "Río Tinto",
+      "name": "Río Tinto mining district",
+      "where": "Huelva, Spain",
+      "lat": 37.683,
+      "lon": -6.583,
+      "coordNote": "Town of Minas de Riotinto; a tertiary source",
+      "body": "mars",
+      "target": "Meridiani Planum",
+      "tlat": -1.946,
+      "tlon": -5.527,
+      "kind": "Place",
+      "label": "benchmark",
+      "labelNote": "A long-studied analog, shown for context.",
+      "confidence": "Not rated: outside the source check",
+      "origin": "team",
+      "role": "Added by the team after the source check. Its paper was confirmed on 15 November, by abstract only.",
+      "claim": "An acid river system whose iron sulfates and oxides are a partial analog of the rocks at Meridiani Planum.",
+      "scale": "A river basin, not yet sized",
+      "scored": false,
+      "matches": [
+        { "t": "Iron-rich jarosite and hematite deposits, a partial sedimentary analog of the Meridiani rocks.", "src": ["T1"] },
+        { "t": "Traces of microbial life are preserved as textures in the iron oxides.", "src": ["T1"] }
+      ],
+      "breaks": [],
+      "helps": "Practice reading iron-sulfate rocks like those at Meridiani Planum, including how traces of life survive in them.",
+      "helpsSrc": ["T1"],
+      "prior": "Papers from 2003 to 2005.",
+      "data": "Literature only",
+      "d": {
+        "geo": ["C", "Jarosite and hematite deposits, a partial analog of the Meridiani rocks"],
+        "terrain": ["N", "Not assessed"],
+        "temp": ["N", "Not assessed"],
+        "ice": ["N", "Not assessed"],
+        "dust": ["N", "Not assessed"],
+        "bio": ["C", "Traces of microbial life preserved in iron oxides"],
+        "sub": ["N", "Not assessed"],
+        "ops": ["N", "Not assessed"]
+      },
+      "tcoordSrc": ["R7"],
+      "tcoordNote": "Opportunity rover landing site, Meridiani Planum"
+    },
+    {
+      "id": "yungay",
+      "short": "Yungay",
+      "name": "Yungay area, Atacama Desert",
+      "where": "Atacama Desert, Chile",
+      "lat": -24.0,
+      "lon": -69.5,
+      "coordNote": "A regional point for the Atacama, not Yungay itself",
+      "body": "mars",
+      "target": "Viking 1 landing site, Chryse Planitia",
+      "tlat": 22.48,
+      "tlon": -49.97,
+      "tcoordNote": "Sources differ by up to about 0.4 degrees",
+      "kind": "Place",
+      "label": "benchmark",
+      "labelNote": "A long-studied analog, shown for context.",
+      "confidence": "Not rated: outside the source check",
+      "origin": "team",
+      "role": "Added by the team after the source check. Its paper was confirmed on 15 November, by abstract only.",
+      "claim": "Soil so dry and so poor in organic matter that it was described as Mars-like.",
+      "scale": "Hyperarid soils, not yet sized",
+      "scored": false,
+      "matches": [
+        { "t": "Very dry, salty soils with almost no organic matter, described as Mars-like.", "src": ["T2"] },
+        { "t": "Almost no culturable microbes; the soil breaks organics down without life.", "src": ["T2"] }
+      ],
+      "breaks": [],
+      "helps": "Tests whether Viking-type instruments would find organics in very dry, oxidising soil.",
+      "helpsSrc": ["T2"],
+      "prior": "Papers from 2003 to 2020.",
+      "data": "Literature only",
+      "d": {
+        "geo": ["C", "Very dry, salty soils with almost no organic matter"],
+        "terrain": ["N", "Not assessed"],
+        "temp": ["N", "Not assessed"],
+        "ice": ["C", "Driest core of the Atacama; dry enough to limit microbial life"],
+        "dust": ["N", "Not assessed"],
+        "bio": ["C", "Almost no culturable microbes; soil breaks organics down without life"],
+        "sub": ["N", "Not assessed"],
+        "ops": ["N", "Not assessed"]
+      }
+    }
   ],
-  [
-   "temp",
-   "Temperature and light"
+  "limitsHead": "What no Earth site can reproduce",
+  "limits": [
+    ["Gravity", "The Moon pulls at 1.62 m/s² and Mars at 3.73 m/s². Earth pulls at 9.82 m/s² everywhere."],
+    ["The lunar vacuum", "The Moon has essentially no atmosphere."],
+    ["The thin Martian air", "About 0.6 kPa at the surface of Mars, under 1% of Earth's 101.4 kPa."],
+    ["Radiation", "Neither world has Earth's shielding. No Earth site reproduces either radiation environment."]
   ],
-  [
-   "ice",
-   "Water, ice, resources"
+  "limitsNote": "Each site stands in only for the characteristics listed on its page.",
+  "negative": { "head": "The negative result", "text": "No natural Earth site was found that reproduces the cold, the lighting or the volatiles of the lunar south pole. A permanently shadowed part of Cabeus crater averages 37 K. The Moon candidates here match rock and caves only.", "src": ["S5"] },
+  "context": [
+    { "lat": -24, "lon": -69.5, "name": "Atacama Desert" },
+    { "lat": 75.38, "lon": -89.68, "name": "Haughton Crater" },
+    { "lat": 36.5, "lon": -117, "name": "Death Valley" },
+    { "lat": -77.5, "lon": 162, "name": "Antarctica" },
+    { "lat": 64.9, "lon": -18.6, "name": "Iceland" },
+    { "lat": 19.6, "lon": -155.5, "name": "Hawaii" }
   ],
-  [
-   "dust",
-   "Dust, wind, erosion"
+  "planets": {
+    "earth": {
+      "name": "Earth",
+      "caps": "EARTH",
+      "glow": "rgba(80,140,220,0.3)",
+      "desc": "Our test bench. Each site here matches the Moon or Mars in some measured or documented ways and differs in others.",
+      "stats": [
+        ["12,742 km", "Mean diameter"],
+        ["9.82 m/s² (1 g)", "Surface gravity"],
+        ["101.4 kPa", "Surface pressure"],
+        ["about 15 °C", "Mean surface temperature"],
+        ["24 h", "Length of day"],
+        ["Water, weather, life", "What analogs must look past"]
+      ],
+      "sitesHead": "Earth sites and processes in this atlas",
+      "limit": "Liquid water, weather and life act on every Earth site and alter it in ways the Moon and Mars do not."
+    },
+    "moon": {
+      "name": "Moon",
+      "caps": "MOON",
+      "glow": "rgba(200,200,210,0.2)",
+      "desc": "Airless and grey, with highlands of pale anorthosite and craters that have barely eroded in billions of years. The south pole is where Artemis plans to land.",
+      "stats": [
+        ["3,475 km", "Mean diameter"],
+        ["1.62 m/s² (0.17 g)", "Surface gravity"],
+        ["Essentially none", "Atmosphere"],
+        ["about −178 to 117 °C", "Temperature range at the equator"],
+        ["about 29.5 Earth days", "Length of day"],
+        ["Low sun, permanent shadow", "At the south pole"]
+      ],
+      "sitesHead": "Earth analogs for the Moon",
+      "limit": "One sixth of Earth gravity, a vacuum, unshielded radiation, and the cold and lighting of polar craters. No Earth site matches these."
+    },
+    "mars": {
+      "name": "Mars",
+      "caps": "MARS",
+      "glow": "rgba(224,98,63,0.3)",
+      "desc": "A cold desert with a thin carbon dioxide atmosphere, buried ice, dune fields and old lake beds that record a wetter past.",
+      "stats": [
+        ["6,779 km", "Mean diameter"],
+        ["3.73 m/s² (0.38 g)", "Surface gravity"],
+        ["about 0.6 kPa", "Surface pressure"],
+        ["about −59 °C", "Mean surface temperature"],
+        ["about 24 h 40 min", "Length of day (sol)"],
+        ["Global dust storms", "Surface process"]
+      ],
+      "sitesHead": "Earth analogs for Mars",
+      "limit": "About a third of Earth gravity, air under 1% as dense, high radiation and no liquid water at the surface today."
+    }
+  },
+  "planetsNote": "Figures: NASA Planetary Fact Sheets for Earth, the Moon and Mars, read on 15 November 2026.",
+  "pairs": [
+    {
+      "id": "degerlache",
+      "label": "Kamestastin ↔ de Gerlache",
+      "site": "kamestastin",
+      "earth": "kamestastin",
+      "other": "degerlache",
+      "earthTitle": "Kamestastin Lake impact structure, Labrador",
+      "otherTitle": "de Gerlache crater, lunar south pole",
+      "otherCentre": { "lat": -88.48, "lon": -88.34, "provisional": true }
+    },
+    {
+      "id": "shackleton",
+      "label": "Kamestastin ↔ Shackleton (second lunar crater)",
+      "site": "kamestastin",
+      "earth": "kamestastin",
+      "other": "shackleton",
+      "earthTitle": "Kamestastin Lake impact structure, Labrador",
+      "otherTitle": "Shackleton crater, lunar south pole",
+      "otherCentre": { "lat": -89.67, "lon": 129.78, "provisional": true },
+      "hideIfSample": true
+    }
   ],
-  [
-   "bio",
-   "Biology and habitability"
+  "controls": [
+    { "text": "Crater against crater (de Gerlache and Shackleton)", "state": "alike, as expected" },
+    { "text": "Crater against a flat lake bed (Sua Pan)", "state": "clearly different, as expected" },
+    { "text": "Crater against a dune field (Namib Sand Sea)", "state": "not separated. Kamestastin measures closer to the dunes than to either lunar crater" }
   ],
-  [
-   "sub",
-   "Subsurface and caves"
-  ],
-  [
-   "ops",
-   "Landing, mobility, operations"
+  "operations": "Gentle ground is the share of each window with a slope under 8°, the tilt NASA's Human Landing System must tolerate for surface operations. That requirement gives no baseline and site studies apply it at about 5 m, so on our 80 m grid this is a coarse screen, not a landing-safety assessment. Ground under 8° is also under the rover limits we found (VIPER 15°).",
+  "breaks": "Shape only. Gravity, vacuum, temperature, lighting and erosion all differ, and the elevation model cannot see under the lake or the forest.",
+  "imagery": "Imagery: NASA GIBS Blue Marble; LRO WAC global mosaic and Viking MDIM 2.1 colour mosaic through NASA Trek. NASA is acknowledged as the source and does not endorse this project.",
+  "method": {
+    "sections": [
+      { "h": "The argument", "p": ["Every page argues one thing: this place on Earth is like that place on the Moon or Mars in these ways, and unlike it in these.", "Terrain is the only property we could measure the same way on both worlds with open data, so it is the only one we measure. Every other dimension is shown as cited evidence, with a link to its source.", "There is no combined score. Each measure is shown on its own, with a plain ratio, so no single number hides its parts."] },
+      { "h": "Labels for a pair", "ul": ["Benchmark: a well-studied pair, shown for comparison. Not new.", "Established: published as an analog, or used by a space agency. Not new.", "Hypothesis: proposed by us. Not published as this analog and not tested. A hypothesis is never shown as a finding."] },
+      { "h": "Evidence codes for a dimension", "ul": ["Measured: the same quantity, from data, on both worlds. Today that is terrain only.", "Cited: a published source says so. The link is on the page.", "Partial match: alike in kind only.", "Hypothesis: our proposal, not published and not tested.", "Breaks here: known not to match.", "Not assessed: nobody on the team has checked. This is an allowed answer, and an empty cell is never filled by a guess."] },
+      { "h": "How terrain is measured", "p": ["Both windows are 40 km squares. Each is area-averaged onto one 80 m grid before anything is measured, because slope depends on the distance between samples: two terrains are only comparable at one resolution. Slope is computed from height differences in metres."], "ul": ["Relief: 95th minus 5th percentile height of the unmasked cells.", "Median slope and 95th percentile slope, in degrees.", "Roughness: the spread of height left after removing a 5 by 5 cell (400 m) moving average.", "Gentle ground: the share of unmasked cells with a slope under 8°. That is the tilt NASA's Human Landing System must tolerate for surface operations (Chavers et al. 2020; NASA Inspector General report IG-26-004). The requirement gives no baseline and site studies apply it at about 5 m, so at 80 m this is a coarse screen, not a landing-safety assessment.", "Slope histogram: 2 degree bins from 0 to 40, the same bins on both sides."], "p2": ["Earth: Copernicus DEM GLO-30, read from Microsoft Planetary Computer and reprojected to UTM zone 20N at 30 m, with the lake masked. Moon: LRO LOLA polar gridded elevation LDEM_80S_80M at 80 m, with every scale factor and offset read from the product label.", "The measures are computed in Python and written to a file. The browser draws what is in the file and never invents or recomputes a measurement. The script checks itself on made-up terrain first: a flat plane must give zero slope, and a uniform 20 degree ramp must read as 20 degrees."] },
+      { "h": "What the measures cannot see", "p": ["The elevation model stores the lake surface, not the lake bed, and the top of the forest, not the ground under it. The lake is masked out of every measure.", "Shape says nothing about gravity, vacuum, temperature, lighting, or what the ground is made of."] },
+      {
+        "h": "Does the method work? Controls",
+        "p": ["The measures should agree on terrains that are alike and separate terrains that are not. We ran the same measures on five 40 km windows: two lunar craters, Kamestastin, a dune field and a flat lake bed."],
+        "id": "controls",
+        "ul": ["Two lunar craters measure alike, as expected.", "A flat lake bed is clearly different from every crater, as expected.", "A dune field is not separated from Kamestastin. On these measures the Earth crater sits closer to the dunes than to either lunar crater."],
+        "p2": ["What that means: relief, slope and roughness describe how rugged the ground is, not what shape it has. They show that Kamestastin is far gentler than de Gerlache. They cannot show whether ground is crater-shaped. A measure of shape, such as a crater's depth against its width, is the next thing to add.", "The two control windows were placed by us, not taken from a source: Sua Pan near 20.75° S, 25.95° E, and the Namib Sand Sea near 24.75° S, 15.30° E. In the Sua Pan window the notebook's lake test masked 0.4% of the cells."]
+      },
+      { "h": "How the claims were checked", "p": ["The research behind the candidate list made 416 factual claims. Each was checked against the source it cited: 391 were supported, 23 were not and were corrected or removed, and 2 sources could not be opened.", "The limits of that check: much of the evidence is abstracts and press releases, and most pages were read through a tool that returns a summary of the page, not its raw text. The source list below says how much of each source was read.", "Río Tinto and Yungay were added by the team after that check. Their two papers were confirmed on 15 November, by abstract only. Coordinates, the slope limit and the Bodélé literature search were also added on 15 November; their sources carry ids starting with R, G or F."] },
+      { "h": "Use of AI", "p": ["This site was built with an AI assistant (Claude, by Anthropic), directed by the team. The assistant did the literature research and the source check, drafted the text, and wrote most of the code.", "An AI assistant can state a wrong fact with confidence. That is why every claim here carries a link to its source, the source list says how much of each source was actually read, and a claim with no source is marked \"our reading\".", "No image on this site is AI-generated. The globes are NASA imagery and the terrain pictures are drawn from the elevation data."] }
+    ],
+    "datasets": [
+      ["Copernicus DEM GLO-30", "Earth elevation, 30 m. Read through Microsoft Planetary Computer. https://doi.org/10.5270/ESA-c5d3d65", "https://dataspace.copernicus.eu/explore-data/data-collections/copernicus-contributing-missions/collections-description/COP-DEM"],
+      ["LRO LOLA gridded elevation, LDEM_80S_80M", "Moon south-polar elevation, 80 m. NASA Planetary Data System, data set LRO-L-LOLA-4-GDR-V1.0.", "https://pds-geosciences.wustl.edu/missions/lro/lola.htm"],
+      ["NASA GIBS, Blue Marble", "Earth globe imagery.", "https://nasa-gibs.github.io/gibs-api-docs/"],
+      ["LRO WAC global mosaic, through NASA Trek", "Moon globe imagery.", "https://trek.nasa.gov/"],
+      ["Mars Viking Colorized Global Mosaic (MDIM 2.1), through NASA Trek", "Mars globe imagery. The colour is added, not natural.", "https://astrogeology.usgs.gov/search/map/mars_viking_colorized_global_mosaic_232m"]
+    ],
+    "credits": ["NASA is acknowledged as the source of the Moon and Mars data and imagery and of the Blue Marble imagery. NASA does not endorse this project. The NASA insignia is not used.", "Earth terrain: produced using Copernicus WorldDEM-30 © DLR e.V. 2010-2014 and © Airbus Defence and Space GmbH 2014-2018 provided under COPERNICUS by the European Union and ESA; all rights reserved.", "Moon terrain: Neumann, G.A., 2009 Lunar Orbiter Laser Altimeter Raw Data Set, LRO-L-LOLA-4-GDR-V1.0, NASA Planetary Data System, 2010. Instrument: Smith, D.E., et al. (2010), The Lunar Orbiter Laser Altimeter Investigation on the Lunar Reconnaissance Orbiter Mission, Space Science Reviews 150, 209–241.", "We acknowledge the use of imagery provided by services from NASA's Global Imagery Browse Services (GIBS), part of NASA's Earth Science Data and Information System (ESDIS).", "Moon imagery: NASA/GSFC/Arizona State University. Mars imagery: Mars Viking Colorized Global Mosaic, USGS Astrogeology Science Center and NASA Ames; public domain.", "Earth data were read through the Microsoft Planetary Computer (Microsoft Open Source et al. 2022, doi 10.5281/zenodo.7261897).", "Typefaces: Fraunces, IBM Plex Mono and Inter, under the SIL Open Font License."]
+  },
+  "sources": {
+    "S1": { "title": "NASA, Artemis III landing regions update", "url": "https://www.nasa.gov/news-release/nasa-provides-update-on-artemis-iii-moon-landing-regions/", "read": "Full page" },
+    "S2": { "title": "NASA, Moon Base: Blue Moon Mark 1 flight", "url": "https://www.nasa.gov/event/clps-flight-blue-origins-blue-moon-mark-1/", "read": "Full page" },
+    "S3": { "title": "EarthSky, Moon Base update", "url": "https://earthsky.org/space/moon-base-update-nasa-unveils-next-steps/", "read": "Full page" },
+    "S4": { "title": "NASA NTRS, polar illumination study", "url": "https://ntrs.nasa.gov/archive/nasa/casi.ntrs.nasa.gov/20170007365.pdf", "read": "Full text, extracted by the fetch tool" },
+    "S5": { "title": "EurekAlert, Diviner cold traps", "url": "https://www.eurekalert.org/news-releases/648084", "read": "Full page; a press release" },
+    "S6": { "title": "NASA, lunar pit temperatures", "url": "https://www.nasa.gov/solar-system/nasas-lro-finds-lunar-pits-harbor-comfortable-temperatures/", "read": "Full page" },
+    "S7": { "title": "Phys.org, Chandrayaan-3 soil analysis", "url": "https://phys.org/news/2024-08-analysis-soil-moon-south-pole.html", "read": "Full page; a news summary" },
+    "S8": { "title": "JPL, Mars ice mapping", "url": "https://www.jpl.nasa.gov/news/where-should-future-astronauts-land-on-mars-follow-the-water/", "read": "Full page" },
+    "S9": { "title": "Universe Today, Tianwen-3", "url": "https://www.universetoday.com/articles/china-plans-to-retrieve-mars-samples-by-2031", "read": "Full page" },
+    "S10": { "title": "Garczynski, Lake Salda field report", "url": "https://astrobiology.nasa.gov/uploads/filer_public/29/d1/29d15953-db5c-4e96-aff3-e190686acfa3/report_lc_garczynski_project.pdf", "read": "Full text, read directly" },
+    "S11": { "title": "NASA Earth Matters, Lake Salda", "url": "https://science.nasa.gov/blogs/earth-matters/2021/02/17/what-a-lake-in-turkey-can-tell-us-about-mars", "read": "Full page" },
+    "S12": { "title": "LSS-ISAC-1 lunar simulant, Icarus 2021", "url": "https://cosmochemistry-papers.com/2021/05/07/a-lunar-soil-simulant-lss-isac-1-for-the-lunar-exploration-programme-of-the-indian-space-research-organisation/", "read": "Abstract only" },
+    "S13": { "title": "Onmanorama, ISRO simulant patent", "url": "https://www.onmanorama.com/news/india/2020/05/20/moon-soil-patent-isro.html", "read": "Full page" },
+    "S14": { "title": "Osinski, IAC 2021 abstract", "url": "https://p.iafastro.directory/iac/paper/id/66087/abstract-pdf/IAC-21,B3,8,11,x66087.brief.pdf", "read": "Full abstract, read directly" },
+    "S15": { "title": "Western News, astronaut training", "url": "https://news.westernu.ca/2021/08/astronaut-training/", "read": "Full page" },
+    "S16": { "title": "Global News, Labrador crater", "url": "https://globalnews.ca/news/9427987/labrador-crater-artemis-astronaut-training", "read": "Full page" },
+    "S17": { "title": "Stewart et al. 2024, PLOS ONE", "url": "https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0299292", "read": "Full article with references" },
+    "S18": { "title": "Astrobiology.com, Saudi environments review", "url": "https://astrobiology.com/2026/04/13/extreme-arabian-environments-and-their-microbiomes-new-frontiers-for-astrobiology-and-biosignature-discovery/", "read": "Summary page; the review was not opened" },
+    "S19": { "title": "Xu et al. 2024, lava-tube radar study", "url": "https://journal.hep.com.cn/jdse/EN/10.15982/j.issn.2096-9287.2024.20230138", "read": "Abstract only; marked retracted" },
+    "S20": { "title": "Petersen et al. 2020, Journal of Glaciology", "url": "https://www.cambridge.org/core/product/7431C35C2CD05B5C67F463B0AE5C8EFF", "read": "Full page" },
+    "S21": { "title": "EurekAlert, drone radar on glaciers", "url": "https://www.eurekalert.org/news-releases/1126400", "read": "Full page; a press release" },
+    "S22": { "title": "Astrobiology.com, Aguilar et al.", "url": "https://astrobiology.com/2026/04/06/revealing-the-internal-structure-of-mars-analog-glaciers-from-drone-based-radar-sounding/", "read": "Summary page; the paper returned 403" },
+    "S23": { "title": "Petersen et al., debris-apron ice purity", "url": "https://experts.arizona.edu/en/publications/high-ice-purity-of-martian-lobate-debris-aprons-at-the-regional-s/", "read": "Abstract only" },
+    "S24": { "title": "Mitra et al., AGU 2014", "url": "https://studio.m-anage.com/agu/fm14/webprogram/Paper20956.html", "read": "Abstract only" },
+    "S25": { "title": "Ray et al. 2025, natrojarosite", "url": "https://cosmochemistry-papers.com/2025/10/10/natrojarosite-formed-in-the-matanomadh-formation-kutch-india-a-na-analog-of-jarosite-on-mars/", "read": "Abstract only" },
+    "S26": { "title": "Komatsu, EPSC 2010", "url": "https://meetingorganizer.copernicus.org/EPSC2010/EPSC2010-131-4.pdf", "read": "Full abstract, read directly" },
+    "S27": { "title": "Allen and Oehler, NASA NTRS", "url": "https://ntrs.nasa.gov/citations/20100033209", "read": "Abstract only" },
+    "S28": { "title": "Komatsu et al., EPSC 2022", "url": "https://meetingorganizer.copernicus.org/EPSC2022/EPSC2022-468.html", "read": "Abstract only" },
+    "S29": { "title": "National Park Service, Kobuk dunes", "url": "https://www.nps.gov/kova/blogs/the-great-kobuk-sand-dunes-a-cloudy-and-warming-crystal-ball-for-mars.htm", "read": "Full page" },
+    "S30": { "title": "NASA Earthdata, Unearthly dunes", "url": "https://earthdata.nasa.gov/news/feature-articles/unearthly-dunes", "read": "Full page" },
+    "S31": { "title": "NASA Earth Observatory, Bodélé", "url": "https://science.nasa.gov/earth/earth-observatory/another-dusty-day-in-the-bodele-depression-150991", "read": "Full page" },
+    "S32": { "title": "Atmospheric Chemistry and Physics 2006, Bodélé dust model", "url": "https://acp.copernicus.org/articles/6/4345/2006/", "read": "Abstract only" },
+    "S33": { "title": "Wikipedia, Bodélé Depression", "url": "https://en.wikipedia.org/wiki/Bod%C3%A9l%C3%A9_Depression", "read": "Full page; a tertiary source" },
+    "S34": { "title": "Franzese, arXiv 1812.10480", "url": "https://arxiv.org/abs/1812.10480", "read": "Abstract only" },
+    "S35": { "title": "EPSC2026-1096, Makgadikgadi", "url": "https://meetingorganizer.copernicus.org/EPSC2026/EPSC2026-1096.html", "read": "Extended abstract" },
+    "S36": { "title": "EPSC2026-568, Oxia Planum analog library", "url": "https://meetingorganizer.copernicus.org/EPSC2026/EPSC2026-568.html", "read": "Abstract only" },
+    "T1": { "title": "Fernández-Remolar et al. 2005, The Río Tinto Basin, Spain, Earth and Planetary Science Letters 240, 149–167", "url": "https://doi.org/10.1016/j.epsl.2005.09.043", "read": "Abstract. Added by the team; citation confirmed on 15 November" },
+    "T2": { "title": "Navarro-González et al. 2003, Mars-like soils in the Atacama Desert, Science 302, 1018–1021", "url": "https://doi.org/10.1126/science.1089143", "read": "Abstract. Added by the team; citation confirmed on 15 November" },
+    "G1": { "title": "IAU and USGS, Gazetteer of Planetary Nomenclature", "url": "https://planetarynames.wr.usgs.gov/", "read": "Feature pages in full. Each page lists more than one coordinate set; the first-listed set is used" },
+    "F1": { "title": "NASA, Planetary Fact Sheets (Earth, Moon, Mars)", "url": "https://nssdc.gsfc.nasa.gov/planetary/factsheet/", "read": "Full pages" },
+    "R1": { "title": "Marion 2009, Mistastin Lake impact crater, M.Sc. thesis, Memorial University", "url": "https://memorial.scholaris.ca/items/7fb0509d-5d7d-47ef-ab6b-2187f67ec432", "read": "Abstract" },
+    "R2": { "title": "Naidu 1963, A layered complex in Sittampundi, Mineralogical Society of America Special Paper 1", "url": "https://msaweb.org/wp-content/uploads/2022/07/MSA_SP1_116-123.pdf", "read": "Full text" },
+    "R3": { "title": "Wikipedia, Mata no Madh", "url": "https://en.wikipedia.org/wiki/Mata_no_Madh", "read": "Full page; a tertiary source" },
+    "R4": { "title": "Schmidt et al. 2023, Makgadikgadi salt pans and martian playa environments, Frontiers in Astronomy and Space Sciences", "url": "https://www.frontiersin.org/journals/astronomy-and-space-sciences/articles/10.3389/fspas.2023.1108386/full", "read": "Body text" },
+    "R5": { "title": "Fenske, Brož and Mazzini 2026, Mud volcano dynamics in Azerbaijan, Earth Surface Dynamics 14", "url": "https://esurf.copernicus.org/articles/14/433/2026/", "read": "Full page" },
+    "R6": { "title": "LROC, lunar pits list", "url": "https://lroc.im-ldi.com/atlases/pits/list", "read": "Full table" },
+    "R7": { "title": "NASA NSSDCA, Mars Exploration Rover Opportunity", "url": "https://nssdc.gsfc.nasa.gov/nmc/spacecraft/display.action?id=2003-032A", "read": "Full page" },
+    "R8": { "title": "Urso, Chojnacki and Vaz 2018, Dune-yardang interactions in Becquerel crater, Mars, JGR Planets 123", "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC5857962/", "read": "Full text, through a reader tool" },
+    "R9": { "title": "Davis, Grindrod and Boazman 2020, linear dunes at Hellespontus Montes, 51st LPSC abstract 1884", "url": "https://www.hou.usra.edu/meetings/lpsc2020/pdf/1884.pdf", "read": "Full two-page abstract" },
+    "R10": { "title": "Chavers et al. 2020, NASA's Human Landing System: the strategy for the 2024 mission, IEEE Aerospace Conference", "url": "https://ntrs.nasa.gov/citations/20200001606", "read": "Full text, extracted from the PDF" },
+    "R11": { "title": "NASA Office of Inspector General, IG-26-004, Human Landing System contracts", "url": "https://oig.nasa.gov/wp-content/uploads/2026/03/final-report-ig-26-004-nasas-management-of-the-human-landing-system-contracts.pdf", "read": "Full text, extracted from the PDF" }
+  },
+  "limitsSrc": ["F1"],
+  "operationsSrc": ["R10", "R11"],
+  "_ai": "Text in this file was drafted with an AI assistant (Claude, by Anthropic) from the research plan and its source check. See method, \"Use of AI\".",
+  "controlWindows": [
+    { "id": "degerlache", "body": "moon", "label": "de Gerlache", "kind": "Lunar crater" },
+    { "id": "shackleton", "body": "moon", "label": "Shackleton", "kind": "Lunar crater" },
+    { "id": "kamestastin", "body": "earth", "label": "Kamestastin", "kind": "Earth crater, 36 million years old, with a lake" },
+    { "id": "namib", "body": "earth", "label": "Namib Sand Sea", "kind": "Dune field (control)" },
+    { "id": "suapan", "body": "earth", "label": "Sua Pan, Makgadikgadi", "kind": "Flat lake bed (control)" }
   ]
- ],
- "sites": [
-  {
-   "id": "kamestastin",
-   "short": "Kamestastin",
-   "name": "Kamestastin Lake impact structure",
-   "where": "Labrador, Canada",
-   "lat": 55.883,
-   "lon": -63.3,
-   "body": "moon",
-   "target": "de Gerlache crater, south pole",
-   "tlat": -88.5,
-   "tlon": -87.1,
-   "kind": "Place",
-   "novelty": "Well known (astronaut training)",
-   "nov": "known",
-   "scale": "28 km crater, 40 km window",
-   "scored": true,
-   "helps": "Crew geology training on anorthosite impact rocks; traverse planning on crater terrain of similar size.",
-   "data": "Copernicus DEM GLO-30, LRO LOLA, Earth Impact Database",
-   "d": {
-    "geo": [
-     "C",
-     "Formed in anorthosite, the main rock of the lunar highlands"
-    ],
-    "terrain": [
-     "M",
-     "Relief, slope and roughness on one 80 m grid"
-    ],
-    "temp": [
-     "B",
-     "Subarctic; nothing like polar cold traps or low sun"
-    ],
-    "ice": [
-     "B",
-     "A lake and seasonal snow, not cold-trapped ice"
-    ],
-    "dust": [
-     "B",
-     "Soil and glacial deposits, not regolith"
-    ],
-    "bio": [
-     "B",
-     "Forest and lake life"
-    ],
-    "sub": [
-     "N",
-     "Not looked at"
-    ],
-    "ops": [
-     "M",
-     "Share of ground gentle enough to land and drive"
-    ]
-   },
-   "cmp": {
-    "geo": [
-     "Highlands crust, mostly anorthosite",
-     "Anorthosite"
-    ],
-    "temp": [
-     "Polar cold traps, low sun",
-     "Subarctic"
-    ],
-    "ice": [
-     "Cold-trapped ice",
-     "A lake and seasonal snow"
-    ],
-    "dust": [
-     "Regolith",
-     "Soil and glacial deposits"
-    ],
-    "bio": [
-     null,
-     "Forest and lake life"
-    ]
-   },
-   "cmpNote": "Anchor and analog wording is taken from this site's existing notes; it is not yet independently sourced."
-  },
-  {
-   "id": "sittampundi",
-   "short": "Sittampundi",
-   "name": "Sittampundi anorthosite complex",
-   "where": "Tamil Nadu, India",
-   "lat": 11.24,
-   "lon": 77.92,
-   "body": "moon",
-   "target": "South-polar highland soil",
-   "tlat": -89.5,
-   "tlon": -137,
-   "kind": "Material",
-   "novelty": "Studied as simulant, not as a field site",
-   "nov": "mid",
-   "scale": "A rock complex",
-   "scored": false,
-   "helps": "Source rock for lunar soil simulant used in landing and rover tests.",
-   "data": "Literature; ASTER (possible)",
-   "d": {
-    "geo": [
-     "C",
-     "Simulant oxides close to highland anorthosite"
-    ],
-    "terrain": [
-     "N",
-     "Not looked at"
-    ],
-    "temp": [
-     "B",
-     "Tropical"
-    ],
-    "ice": [
-     "B",
-     "No ice"
-    ],
-    "dust": [
-     "P",
-     "Crushed rock stands in for regolith in tests"
-    ],
-    "bio": [
-     "B",
-     "Vegetated, inhabited"
-    ],
-    "sub": [
-     "N",
-     "Not looked at"
-    ],
-    "ops": [
-     "C",
-     "Bulk simulant for landing and wheel tests"
-    ]
-   }
-  },
-  {
-   "id": "ummjirsan",
-   "short": "Umm Jirsan",
-   "name": "Umm Jirsan lava tube",
-   "where": "Harrat Khaybar, Saudi Arabia",
-   "lat": 25.59,
-   "lon": 39.76,
-   "body": "moon",
-   "target": "Mare Tranquillitatis pit",
-   "tlat": 8.34,
-   "tlon": 33.22,
-   "kind": "Place",
-   "novelty": "Less studied as an analog (check pending)",
-   "nov": "new",
-   "scale": "About 1.5 km of passage",
-   "scored": false,
-   "helps": "Testing skylight entry, cave mapping and radio relay underground.",
-   "data": "Survey literature; LROC pit list",
-   "d": {
-    "geo": [
-     "P",
-     "Basalt tube; the lunar pit is in mare basalt"
-    ],
-    "terrain": [
-     "N",
-     "Not looked at"
-    ],
-    "temp": [
-     "N",
-     "No interior measurements found"
-    ],
-    "ice": [
-     "B",
-     "No ice"
-    ],
-    "dust": [
-     "N",
-     "Not looked at"
-    ],
-    "bio": [
-     "N",
-     "Not looked at"
-    ],
-    "sub": [
-     "C",
-     "Tube 8 to 12 m high; lunar pit far larger"
-    ],
-    "ops": [
-     "P",
-     "Cave access and navigation tests"
-    ]
-   }
-  },
-  {
-   "id": "galena",
-   "short": "Galena Creek",
-   "name": "Galena Creek rock glacier",
-   "where": "Wyoming, USA",
-   "lat": 44.64,
-   "lon": -109.79,
-   "body": "mars",
-   "target": "Deuteronilus Mensae ice aprons",
-   "tlat": 43.9,
-   "tlon": 22.6,
-   "kind": "Process: ice under debris",
-   "novelty": "Studied (papers 2020 to 2026)",
-   "nov": "mid",
-   "scale": "One rock glacier",
-   "scored": false,
-   "helps": "Radar tests of how thick the debris over buried ice is, which sets how reachable the water is.",
-   "data": "Published radar; SHARAD; Copernicus DEM and MOLA (possible)",
-   "d": {
-    "geo": [
-     "P",
-     "Rock debris over ice"
-    ],
-    "terrain": [
-     "N",
-     "Candidate for the terrain run"
-    ],
-    "temp": [
-     "B",
-     "Warmer, with liquid water in summer"
-    ],
-    "ice": [
-     "C",
-     "Ice under 1 to 1.5 m of debris, estimated 80 to 95% pure"
-    ],
-    "dust": [
-     "N",
-     "Not looked at"
-    ],
-    "bio": [
-     "B",
-     "Earth life present"
-    ],
-    "sub": [
-     "C",
-     "Buried ice body sounded by radar"
-    ],
-    "ops": [
-     "C",
-     "Radar method for finding drillable ice"
-    ]
-   }
-  },
-  {
-   "id": "kobuk",
-   "short": "Great Kobuk",
-   "name": "Great Kobuk Sand Dunes",
-   "where": "Alaska, USA",
-   "lat": 67.05,
-   "lon": -158.95,
-   "body": "mars",
-   "target": "North polar dune fields",
-   "tlat": 81,
-   "tlon": 180,
-   "kind": "Process: cold dune migration",
-   "novelty": "Studied (one research group)",
-   "nov": "mid",
-   "scale": "A dune field",
-   "scored": false,
-   "helps": "Watching dunes move from orbit; driving on frozen sand.",
-   "data": "ASTER time series; Mars dataset not yet chosen",
-   "d": {
-    "geo": [
-     "P",
-     "Active sand dunes"
-    ],
-    "terrain": [
-     "N",
-     "Not looked at"
-    ],
-    "temp": [
-     "P",
-     "Snow-covered for most of the year"
-    ],
-    "ice": [
-     "P",
-     "Seasonal snow and frozen sand"
-    ],
-    "dust": [
-     "C",
-     "Dunes moved about 1.3 m a year, 2003 to 2008"
-    ],
-    "bio": [
-     "B",
-     "Liquid water persists under the dunes"
-    ],
-    "sub": [
-     "N",
-     "Not looked at"
-    ],
-    "ops": [
-     "C",
-     "Change detection and mobility on frozen sand"
-    ]
-   }
-  },
-  {
-   "id": "bodele",
-   "short": "Bod\u00e9l\u00e9",
-   "name": "Bod\u00e9l\u00e9 Depression",
-   "where": "Chad",
-   "lat": 16.9,
-   "lon": 17.8,
-   "body": "mars",
-   "target": "Dust lifting (a process, no single site)",
-   "tlat": null,
-   "tlon": null,
-   "kind": "Process: dust lifting",
-   "novelty": "Less studied as a Mars analog (check pending)",
-   "nov": "new",
-   "scale": "A basin-wide process",
-   "scored": false,
-   "helps": "Testing dust-emission models and storm forecasting.",
-   "data": "MODIS aerosol optical depth; Mars Climate Sounder",
-   "d": {
-    "geo": [
-     "C",
-     "Dried lake bed of diatomite"
-    ],
-    "terrain": [
-     "N",
-     "Not looked at"
-    ],
-    "temp": [
-     "N",
-     "Not looked at"
-    ],
-    "ice": [
-     "B",
-     "No ice"
-    ],
-    "dust": [
-     "C",
-     "About half the dust that leaves the Sahara"
-    ],
-    "bio": [
-     "B",
-     "The dust itself is from water life"
-    ],
-    "sub": [
-     "N",
-     "Not relevant"
-    ],
-    "ops": [
-     "P",
-     "Dust forecasting for surface operations"
-    ]
-   }
-  },
-  {
-   "id": "salda",
-   "short": "Lake Salda",
-   "name": "Lake Salda",
-   "where": "Turkey",
-   "lat": 37.55,
-   "lon": 29.68,
-   "body": "mars",
-   "target": "Jezero crater",
-   "tlat": 18.38,
-   "tlon": 77.58,
-   "kind": "Process: water-driven alteration",
-   "novelty": "Well known (benchmark)",
-   "nov": "known",
-   "scale": "A 7 km lake",
-   "scored": false,
-   "helps": "Recognising carbonate deposits and planning where to look for biosignatures.",
-   "data": "Field literature; CRISM",
-   "d": {
-    "geo": [
-     "C",
-     "Magnesium carbonates, as found at Jezero"
-    ],
-    "terrain": [
-     "N",
-     "Not looked at"
-    ],
-    "temp": [
-     "B",
-     "Temperate"
-    ],
-    "ice": [
-     "B",
-     "A living lake"
-    ],
-    "dust": [
-     "N",
-     "Not looked at"
-    ],
-    "bio": [
-     "P",
-     "Living lake: tests biosignature strategy, not ancient Mars"
-    ],
-    "sub": [
-     "N",
-     "Not looked at"
-    ],
-    "ops": [
-     "P",
-     "Sampling strategy"
-    ]
-   }
-  },
-  {
-   "id": "riotinto",
-   "short": "R\u00edo Tinto",
-   "name": "R\u00edo Tinto mining district",
-   "where": "Huelva, Spain",
-   "lat": 37.683,
-   "lon": -6.583,
-   "body": "mars",
-   "target": "Meridiani Planum",
-   "tlat": -2.0,
-   "tlon": -5.9,
-   "kind": "Place",
-   "novelty": "Studied (papers 2003 to 2005)",
-   "nov": "mid",
-   "scale": "River basin, not yet sized",
-   "scored": false,
-   "helps": "Practice reading iron-sulfate rocks like those at Meridiani Planum, including how traces of life survive in them.",
-   "data": "Fernandez-Remolar et al. 2005, Earth and Planetary Science Letters 240. Terrain not yet run. Coordinates: Minas de Riotinto town (Wikipedia); Meridiani about 2 S, 5.9 W (approximate, NASA/JPL summaries).",
-   "d": {
-    "geo": [
-     "C",
-     "Iron-rich jarosite and hematite deposits, a partial sedimentary analog of the Meridiani rocks (Fernandez-Remolar et al. 2005)"
-    ],
-    "terrain": [
-     "N",
-     "Candidate for the terrain run"
-    ],
-    "temp": [
-     "N",
-     "Not assessed"
-    ],
-    "ice": [
-     "N",
-     "Not assessed"
-    ],
-    "dust": [
-     "N",
-     "Not assessed"
-    ],
-    "bio": [
-     "C",
-     "Traces of microbial life preserved as textures in iron oxides: a test for reading Mars outcrops (Fernandez-Remolar et al. 2005)"
-    ],
-    "sub": [
-     "N",
-     "Not assessed"
-    ],
-    "ops": [
-     "N",
-     "Not assessed"
-    ]
-   }
-  },
-  {
-   "id": "yungay",
-   "short": "Yungay",
-   "name": "Yungay area, Atacama Desert",
-   "where": "Atacama Desert, Chile",
-   "lat": -24.0,
-   "lon": -69.5,
-   "body": "mars",
-   "target": "Viking 1 landing site, Chryse Planitia",
-   "tlat": 22.48,
-   "tlon": -49.97,
-   "kind": "Place",
-   "novelty": "Studied (papers 2003 to 2020)",
-   "nov": "mid",
-   "scale": "Hyperarid soils, not yet sized",
-   "scored": false,
-   "helps": "Tests whether Viking-type instruments would find organics in very dry, oxidising soil.",
-   "data": "Navarro-Gonzalez et al. 2003, Science (Mars-like soils in the Atacama). Terrain not yet run. Atacama point is the regional point from our site list; Yungay coordinates to be confirmed. Viking 1: JPL Photojournal 22.48 N, 49.97 W (sources differ by up to about 0.4 deg).",
-   "d": {
-    "geo": [
-     "C",
-     "Very dry, salty soils with almost no organic matter; called Mars-like (Navarro-Gonzalez et al. 2003)"
-    ],
-    "terrain": [
-     "N",
-     "Candidate for the terrain run"
-    ],
-    "temp": [
-     "N",
-     "Not assessed"
-    ],
-    "ice": [
-     "C",
-     "Driest core of the Atacama; dry enough to limit microbial life (Navarro-Gonzalez et al. 2003)"
-    ],
-    "dust": [
-     "N",
-     "Not assessed"
-    ],
-    "bio": [
-     "C",
-     "Almost no culturable microbes; soil breaks organics down without life (Navarro-Gonzalez et al. 2003)"
-    ],
-    "sub": [
-     "N",
-     "Not assessed"
-    ],
-    "ops": [
-     "N",
-     "Not assessed"
-    ]
-   }
-  }
- ],
- "context": [
-  {
-   "lat": -24,
-   "lon": -69.5,
-   "name": "Atacama Desert"
-  },
-  {
-   "lat": 75.38,
-   "lon": -89.68,
-   "name": "Haughton Crater"
-  },
-  {
-   "lat": 36.5,
-   "lon": -117,
-   "name": "Death Valley"
-  },
-  {
-   "lat": -77.5,
-   "lon": 162,
-   "name": "Antarctica"
-  },
-  {
-   "lat": 64.9,
-   "lon": -18.6,
-   "name": "Iceland"
-  },
-  {
-   "lat": 19.6,
-   "lon": -155.5,
-   "name": "Hawaii"
-  }
- ],
- "planets": {
-  "earth": {
-   "name": "Earth",
-   "caps": "EARTH",
-   "glow": "rgba(80,140,220,0.3)",
-   "desc": "Our test bench. Each site here matches the Moon or Mars in some measured or documented ways and differs in others.",
-   "stats": [
-    [
-     "12,742 km",
-     "Diameter"
-    ],
-    [
-     "9.81 m/s\u00b2 (1 g)",
-     "Surface gravity"
-    ],
-    [
-     "101.3 kPa",
-     "Surface pressure"
-    ],
-    [
-     "about 15 \u00b0C",
-     "Mean surface temperature"
-    ],
-    [
-     "24 h",
-     "Length of day"
-    ],
-    [
-     "Water, weather, life",
-     "What analogs must look past"
-    ]
-   ],
-   "sitesHead": "Earth sites and processes in this atlas",
-   "limit": "Liquid water, weather and life act on every Earth site and alter it in ways the Moon and Mars do not."
-  },
-  "moon": {
-   "name": "Moon",
-   "caps": "MOON",
-   "glow": "rgba(200,200,210,0.2)",
-   "desc": "Airless and grey, with highlands of pale anorthosite and craters that have barely eroded in billions of years. The south pole is where Artemis plans to land.",
-   "stats": [
-    [
-     "3,474 km",
-     "Diameter"
-    ],
-    [
-     "1.62 m/s\u00b2 (0.17 g)",
-     "Surface gravity"
-    ],
-    [
-     "Essentially none",
-     "Atmosphere"
-    ],
-    [
-     "about \u2212173 to 127 \u00b0C",
-     "Equatorial temperature range"
-    ],
-    [
-     "about 29.5 Earth days",
-     "Length of day"
-    ],
-    [
-     "Low sun, permanent shadow",
-     "At the south pole"
-    ]
-   ],
-   "sitesHead": "Earth analogs for the Moon",
-   "limit": "One sixth of Earth gravity, a vacuum, unshielded radiation, and the cold and lighting of polar craters. No Earth site matches these."
-  },
-  "mars": {
-   "name": "Mars",
-   "caps": "MARS",
-   "glow": "rgba(224,98,63,0.3)",
-   "desc": "A cold desert with a thin carbon dioxide atmosphere, buried ice, dune fields and old lake beds that record a wetter past.",
-   "stats": [
-    [
-     "6,779 km",
-     "Diameter"
-    ],
-    [
-     "3.71 m/s\u00b2 (0.38 g)",
-     "Surface gravity"
-    ],
-    [
-     "about 0.6 kPa",
-     "Surface pressure"
-    ],
-    [
-     "about \u221263 \u00b0C",
-     "Mean surface temperature"
-    ],
-    [
-     "about 24 h 40 min",
-     "Length of day (sol)"
-    ],
-    [
-     "Global dust storms",
-     "Surface process"
-    ]
-   ],
-   "sitesHead": "Earth analogs for Mars",
-   "limit": "About a third of Earth gravity, air under 1% as dense, high radiation and no liquid water at the surface today."
-  }
- },
- "pairs": [
-  {
-   "id": "degerlache",
-   "label": "Kamestastin \u2194 de Gerlache",
-   "site": "kamestastin",
-   "earth": "kamestastin",
-   "other": "degerlache",
-   "earthTitle": "Kamestastin Lake impact structure, Labrador",
-   "otherTitle": "de Gerlache crater, lunar south pole",
-   "otherCentre": {
-    "lat": -88.5,
-    "lon": -87.1,
-    "provisional": true
-   }
-  },
-  {
-   "id": "shackleton",
-   "label": "Kamestastin \u2194 Shackleton (sensitivity check)",
-   "site": "kamestastin",
-   "earth": "kamestastin",
-   "other": "shackleton",
-   "earthTitle": "Kamestastin Lake impact structure, Labrador",
-   "otherTitle": "Shackleton crater, lunar south pole",
-   "otherCentre": {
-    "lat": -89.9,
-    "lon": 0,
-    "provisional": true
-   }
-  }
- ],
- "controls": [
-  {
-   "text": "Crater against crater should score alike",
-   "state": "pending"
-  },
-  {
-   "text": "Crater against a flat lake bed should not",
-   "state": "pending"
-  },
-  {
-   "text": "Crater against a dune field should not",
-   "state": "pending"
-  }
- ],
- "operations": "Share of each window gentle enough to land on and drive across, using a published slope limit (to be looked up and cited). A training site with a similar share lets crews and rovers practise on comparable ground.",
- "breaks": "Shape only. Gravity, vacuum, temperature, lighting and erosion all differ, and the elevation model cannot see under the lake or the forest.",
- "imagery": "Imagery: NASA GIBS Blue Marble; LRO WAC global mosaic and Viking MDIM 2.1 colour mosaic through NASA Trek. NASA is acknowledged as the source and does not endorse this project."
 }

@@ -1,24 +1,28 @@
-// Earth Analog Atlas: app logic. Three tabs, all content from data/sites.json and data/terrain/*.json.
-import { $, $$, esc, reduced } from './util.js';
+// ATLAS (Earth Analog Atlas): app logic. All content comes from data/sites.json and data/terrain/*.json.
+// Written with an AI assistant (Claude), directed by the team. See the Method and sources tab.
+import { $, $$, esc, reduced, fmtLL } from './util.js';
 import { loadField, drawTerrain, drawHillshade } from './terrain.js';
 import { Globe, loadTextures, refreshAll, kick } from './globe.js';
+import { renderPair, renderExplore, renderMethod, labelChip, legendHtml, measTableHtml, srcLinks } from './pages.js';
 
-const TABS = ['worlds', 'planets', 'side-by-side'];
-const S = { tab: 'worlds', site: 'kamestastin', other: 'moon', side: 'list', filter: 'moon', planet: 'moon', pair: 'degerlache', mode: '3d', T: { view: 35, az: 300, el: 14, ve: 2 } };
+const TABS = ['worlds', 'explore', 'planets', 'side-by-side', 'method'];
+const VIEWS = [...TABS, 'pair'];   // 'pair' is reached as #pair/<site id>, not from the tab bar
+const S = { tab: 'worlds', site: 'kamestastin', other: 'moon', side: 'list', filter: 'moon', planet: 'moon', pair: 'degerlache', mode: '3d', T: { view: 35, az: 300, el: 14, ve: 2 }, ex: { world: 'all', label: 'all' } };
 let D, G = {}, PG = {}, TEX = null;
 const fields = new Map();           // terrain id -> field (real or sample)
 const byId = id => D.sites.find(s => s.id === id);
 const pairById = id => D.pairs.find(p => p.id === id);
 const bodyName = b => ({ earth: 'Earth', moon: 'the Moon', mars: 'Mars' }[b]);
-const fmtLL = (lat, lon) => `${Math.abs(lat).toFixed(3)}° ${lat < 0 ? 'S' : 'N'}, ${Math.abs(lon).toFixed(3)}° ${lon < 0 ? 'W' : 'E'}`;
 const count = (s, code) => D.dims.filter(d => s.d[d[0]][0] === code).length;
 
 /* ---------- boot ---------- */
 async function boot() {
   try { D = await (await fetch('data/sites.json', { cache: 'no-cache' })).json(); }
   catch (e) { $('main').innerHTML = `<p class="err" style="margin:24px">Could not load data/sites.json. Serve the web folder over http (for example: python -m http.server) instead of opening the file directly.</p>`; return; }
-  D.sites = D.sites.filter(x => x.tlat != null);   // a site with no counterpart location cannot be anchored, so the page hides it (it stays in the data file)
-  $('#credit').textContent = D.imagery + ' Terrain, slope curves and measurements tagged SAMPLE are placeholders, not measurements.';
+  // A pair marked hideIfSample is shown only once its real terrain export exists, so placeholder terrain never reaches the page
+  for (const p of D.pairs.filter(x => x.hideIfSample)) if ((await getField(p.other, 'moon')).sample) D.pairs = D.pairs.filter(x => x !== p);
+  $('#credit').textContent = D.imagery;
+  $('#pnote').textContent = D.planetsNote || '';
   buildGlobes(); buildFilters(); buildSiteList(); buildPlanets(); buildPairs(); bindSbs();
   $$('nav.tabs button').forEach(b => b.addEventListener('click', () => { location.hash = '#' + b.dataset.tab; }));
   addEventListener('hashchange', route);
@@ -28,12 +32,19 @@ async function boot() {
   catch (e) { console.warn('globe textures missing; showing plain discs', e); }
 }
 
+// Shared with the argument pages (pages.js): terrain loading, and the jump to Side by side
+const ctx = { getField: (id, kind) => getField(id, kind), openSbs: id => { S.pair = id; syncPairs(); location.hash = '#side-by-side'; } };
 function route() {
-  const t = TABS.includes(location.hash.slice(1)) ? location.hash.slice(1) : 'worlds';
+  const h = location.hash.slice(1), ps = h.startsWith('pair/') ? byId(h.slice(5)) : null;
+  const t = ps ? 'pair' : TABS.includes(h) ? h : 'worlds';
   S.tab = t;
-  for (const id of TABS) $('#view-' + id).hidden = id !== t;
-  $$('nav.tabs button').forEach(b => b.setAttribute('aria-pressed', b.dataset.tab === t));
-  if (t === 'side-by-side') { loadPair(); } else { refreshAll(); }
+  for (const id of VIEWS) $('#view-' + id).hidden = id !== t;
+  $$('nav.tabs button').forEach(b => b.setAttribute('aria-pressed', b.dataset.tab === (t === 'pair' ? 'explore' : t)));
+  if (t === 'side-by-side') loadPair();
+  else if (t === 'pair') { selectSite(ps.id); renderPair(D, ps, ctx); }
+  else if (t === 'explore') renderExplore(D, S.ex, route);
+  else if (t === 'method') renderMethod(D, ctx);
+  else refreshAll();
   kick();
 }
 
@@ -72,7 +83,7 @@ function setOther(b) {
 
 
 function buildFilters() {
-  const F = [['all', 'All'], ['moon', 'Moon'], ['mars', 'Mars'], ['new', 'Less studied']];
+  const F = [['all', 'All'], ['moon', 'Moon'], ['mars', 'Mars'], ['hyp', 'Hypotheses']];
   $('#filters').innerHTML = F.map(([k, l]) => `<button class="pill" data-f="${k}" aria-pressed="${S.filter === k}">${l}</button>`).join('');
   $$('#filters .pill').forEach(b => b.addEventListener('click', () => {
     S.filter = b.dataset.f;
@@ -83,15 +94,14 @@ function buildFilters() {
 const syncFilters = () => $$('#filters .pill').forEach(x => x.setAttribute('aria-pressed', x.dataset.f === S.filter));
 function visibleSites() {
   return D.sites.filter(s => S.filter === 'all' || (S.filter === 'moon' && s.body === 'moon') || (S.filter === 'mars' && s.body === 'mars') ||
-    (S.filter === 'process' && s.kind.startsWith('Process')) || (S.filter === 'new' && s.nov === 'new'));
+    (S.filter === 'hyp' && s.label === 'hypothesis'));
 }
 function buildSiteList() {
-  const NOV = { known: 'Well known', mid: 'Studied', new: 'Less studied' };
-  $('#sitelist').innerHTML = visibleSites().map(s => `<li><button class="site" data-id="${s.id}" aria-pressed="${s.id === S.site}" title="${esc(s.novelty)}">
-    <span class="r1"><i class="dot earth"></i>${esc(s.short)}<em class="nov-${s.nov}">${NOV[s.nov]}</em></span>
+  $('#sitelist').innerHTML = visibleSites().map(s => `<li><button class="site" data-id="${s.id}" aria-pressed="${s.id === S.site}" title="${esc(s.labelNote || '')}">
+    <span class="r1"><i class="dot earth"></i>${esc(s.short)}<em class="lb-${esc(s.label)}">${esc((D.labels[s.label] || [s.label])[0])}</em></span>
     <span class="r2"><i class="dot ${s.body}"></i>${esc(s.target)}</span>
     <span class="r3">${count(s, 'M')} measured, ${count(s, 'C')} cited</span></button></li>`).join('')
-    + `<li class="fineprint" style="padding:8px 11px;border:1px dashed var(--line-2);border-radius:6px">More candidates would come from a systematic search (not built yet).</li>`;
+    + (S.filter === 'moon' || S.filter === 'all' ? `<li class="neg"><b>${esc(D.negative.head)}</b>${esc(D.negative.text)}</li>` : '');
   $$('#sitelist .site').forEach(b => b.addEventListener('click', () => selectSite(b.dataset.id, true)));
 }
 
@@ -115,7 +125,7 @@ function showSideList() {
 }
 function showSideDetail(s) {
   const pair = D.pairs.find(p => p.site === s.id);
-  const legend = Object.entries(D.status).map(([k, l]) => `<span class="lg"><i class="sw st-${k}"></i>${l}</span>`).join('');
+  const legend = legendHtml(D);
   const cmp = s.cmp || {};
   // An empty cell says why it is empty, so it never contradicts the status next to it
   const empty = (k, c) => k === 'terrain' && c === 'M' ? 'measured, see rows below' : k === 'ops' && c === 'M' ? 'needs a cited slope limit' : 'no data yet';
@@ -130,22 +140,24 @@ function showSideDetail(s) {
   const el = $('#sdetail');
   el.innerHTML = `<button class="back" id="sback">← All sites</button>
     <div class="two">
-      <div class="place anchor"><span class="role">Anchor · ${world}</span><strong>${esc(s.target)}</strong><span class="mono muted">${fmtLL(s.tlat, s.tlon)}</span></div>
+      <div class="place anchor"><span class="role">Anchor · ${world}</span><strong>${esc(s.target)}</strong><span class="mono muted">${s.tlat != null ? fmtLL(s.tlat, s.tlon) : 'A process, with no single place'}</span></div>
       <div class="place cand"><span class="role">Earth analog</span><strong>${esc(s.name)}</strong><span class="mono muted">${esc(s.where)} · ${fmtLL(s.lat, s.lon)}</span></div>
     </div>
-    <div class="chips"><span>${esc(s.kind)}</span><span class="nov-${s.nov}">${esc(s.novelty)}</span><span>Scale: ${esc(s.scale)}</span></div>
+    <div class="chips">${labelChip(D, s)}<span>Confidence: ${esc(s.confidence || 'not rated')}</span><span>${esc(s.kind)}</span></div>
+    <p>${esc(s.claim || '')}</p>
+    <a class="btn go" href="#pair/${s.id}">Open the full case: alike, and where it breaks →</a>
     <p><span class="muted">How it helps exploration: </span>${esc(s.helps)}</p>
     <div class="mhead"><h3>Are they similar? Parameter by parameter</h3></div>
     <div class="mhead">${legend}</div>
     <table class="cmp2"><thead><tr><th></th><th>Anchor<small>${esc(s.target)}</small></th><th>Earth analog<small>${esc(s.short)}</small></th></tr></thead><tbody>${rows}</tbody></table>
     ${s.cmp ? `<p class="fineprint">${esc(s.cmpNote || '')}</p>` : '<p class="fineprint">Anchor values are not in our data for this site yet. Each row still shows how well the Earth site matches (status and note).</p>'}
     <p class="fineprint">Data: ${esc(s.data)}</p>
-    ${pair ? `<button class="btn" id="goside">Compare terrain side by side</button>` : ''}
-    <p class="fineprint">Every site, always: Earth cannot reproduce the reduced gravity, the lunar vacuum, the thin Martian air or their radiation. Notes are drafts until each claim has a primary source.</p>`;
+    ${pair ? `<button class="btn alt" id="goside">Compare terrain side by side</button>` : ''}
+    <p class="fineprint">Every site, always: Earth cannot reproduce the reduced gravity, the lunar vacuum, the thin Martian air or their radiation.</p>`;
   S.side = 'detail'; $('#slist').hidden = true; el.hidden = false; el.scrollTop = 0;
   $('aside.side').classList.add('wide');   // two value columns need more width than the site list
   $('#sback').addEventListener('click', showSideList);
-  const b = $('#goside'); if (b) b.addEventListener('click', () => { S.pair = pair.id; syncPairs(); location.hash = '#side-by-side'; });
+  const b = $('#goside'); if (b) b.addEventListener('click', () => ctx.openSbs(pair.id));
   fillTerrainMetrics(pair);
 }
 
@@ -191,14 +203,14 @@ function showPop(k, ids) {
   if (popFor && popFor !== k) closePop();
   popFor = k; PG[k].spin = false; PG[k].markOn(ids);
   const pair = D.pairs.find(p => ids.includes(p.site));
-  const chips = s => `<div class="chips"><span>${esc(s.kind)}</span><span class="nov-${s.nov}">${esc(s.novelty)}</span><span>Scale: ${esc(s.scale)}</span></div>`;
+  const chips = s => `<div class="chips">${labelChip(D, s)}<span>${esc(s.kind)}</span><span>Scale: ${esc(s.scale)}</span></div>`;
   const body = k === 'earth'
     ? `<h3>${esc(sites[0].name)}</h3><div class="pw">${esc(sites[0].where)}</div>
        <p>Stands in for <strong>${esc(sites[0].target)}</strong> on ${bodyName(sites[0].body)}</p>${chips(sites[0])}
-       <p>${esc(sites[0].helps)}</p><p class="fineprint">Data: ${esc(sites[0].data)}</p>`
+       <p>${esc(sites[0].helps)}</p><p><a href="#pair/${sites[0].id}">Open the full case →</a></p>`
     : `<h3>${esc(sites[0].target)}</h3><div class="pw">${bodyName(k)}</div>
        <p>Earth sites that stand in for this place:</p>
-       <ul>${sites.map(s => `<li><strong>${esc(s.name)}</strong>, ${esc(s.where)}. ${esc(s.helps)}</li>`).join('')}</ul>`;
+       <ul>${sites.map(s => `<li><a href="#pair/${s.id}"><strong>${esc(s.name)}</strong></a>, ${esc(s.where)}. ${esc(s.helps)}</li>`).join('')}</ul>`;
   const pop = $('#pop');
   pop.innerHTML = `<button class="x" aria-label="Close">×</button>${body}<canvas class="thumb" hidden></canvas><div class="thumbnote fineprint"></div>${pair ? `<button class="btn" data-pair="${pair.id}">Compare terrain side by side</button>` : ''}`;
   pop.hidden = false;
@@ -316,33 +328,18 @@ function bindSbs() {
 
 /* ---------- measurements aside ---------- */
 // Numbers come from the export's "metrics" (computed in Python on the shared 80 m grid). The browser never recomputes them.
-const METRICS = [
-  ['relief_p5_p95_m', 'Relief', '5th to 95th percentile height, metres', v => Math.round(v).toLocaleString()],
-  ['median_slope_deg', 'Median slope', 'degrees, on the shared grid', v => v.toFixed(1)],
-  ['p95_slope_deg', 'Steep-end slope', '95th percentile slope, degrees', v => v.toFixed(1)],
-  ['roughness_m', 'Roughness', 'height scatter left after removing the local trend, metres', v => v.toFixed(1)],
-  ['gentle_share', 'Gentle ground', null, v => (v * 100).toFixed(0) + '%'],
-  ['masked_share', 'Masked area', 'lake or no data, left out of the measures', v => (v * 100).toFixed(1) + '%']
-];
 function renderMeasurements(p, e, o) {
   const me = (e.meta && e.meta.metrics) || null, mo = (o.meta && o.meta.metrics) || null;
-  const gs = (me && me.gentle_slope_deg) || (mo && mo.gentle_slope_deg);
-  const rows = METRICS.map(([k, name, def, fmt]) => {
-    const a = me && me[k], b = mo && mo[k], ok = Number.isFinite(a) && Number.isFinite(b);
-    const ratio = ok && k !== 'masked_share' && a !== 0 ? '×' + (b / a).toFixed(1) : '—';
-    const d = def || `share of ground flatter than ${gs != null ? gs + '°' : 'the slope limit'}${(me && me.gentle_slope_source) ? ' (' + esc(me.gentle_slope_source) + ')' : ''}`;
-    return `<tr><td>${name}<small>${d}</small></td><td class="n">${Number.isFinite(a) ? fmt(a) : '—'}</td><td class="n">${Number.isFinite(b) ? fmt(b) : '—'}</td><td class="n">${ratio}</td></tr>`;
-  }).join('');
   const pending = e.sample || o.sample || !me || !mo;
   $('#meas').innerHTML = `
     <h2>Measured on one grid</h2>
     ${pending ? `<p class="err">Measurements appear when both windows have a real export with metrics. Until then every number here is blank on purpose.</p>` : ''}
-    <table><thead><tr><th>Measure</th><th>Earth</th><th>Moon</th><th>Moon ÷ Earth</th></tr></thead><tbody>${rows}</tbody></table>
+    ${measTableHtml(e, o)}
     <p class="fineprint">The last column is a plain ratio, not a verdict. We report each measure separately and do not combine them into one score.</p>
     ${histHtml(e, o)}
     <div class="box"><b>Does the method work? Controls</b><ul>${D.controls.map(c => `<li>${esc(c.text)}: ${esc(c.state)}</li>`).join('')}</ul></div>
-    <div class="box"><b>What it means for operations</b><div>${esc(D.operations)}</div></div>
-    <div class="box brk"><b>Where it breaks</b><div>${esc(D.breaks)}</div></div>`;
+    <div class="box"><b>What it means for operations</b><div>${esc(D.operations)}${srcLinks(D, D.operationsSrc)}</div></div>
+    <div class="box brk"><b>Where it breaks</b><div>${esc(D.breaks)}</div><a href="#pair/${p.site}">Read the full case for this pair →</a></div>`;
 }
 function histHtml(e, o) {
   const ha = e.meta && e.meta.slope_hist, hb = o.meta && o.meta.slope_hist;

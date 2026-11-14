@@ -15,8 +15,7 @@ Usage from a notebook, once you have a square elevation array in metres (north a
 Run `python export_terrain.py --selftest` to check the maths on synthetic terrain.
 
 DRAFT DEFINITIONS: the metric definitions below are a starting point for the team to review,
-not a validated method. GENTLE_SLOPE_DEG is a PLACEHOLDER until a cited landing or traverse
-slope limit is chosen.
+not a validated method. GENTLE_SLOPE_DEG is the NASA Human Landing System tilt threshold (see below).
 """
 import json
 import sys
@@ -28,8 +27,12 @@ import numpy as np
 
 ANALYSIS_CELL_M = 80        # both worlds are brought to this grid before measuring (Moon LOLA polar DEM is 80 m)
 DISPLAY_N = 128             # mesh size used for the 3D picture (display only)
-GENTLE_SLOPE_DEG = 10.0     # PLACEHOLDER: replace with a cited limit and update GENTLE_SOURCE
-GENTLE_SOURCE = "placeholder limit, to be replaced with a cited one"
+# Gentle ground: NASA Human Landing System requirement "Landing Site Vertical Orientation", 0 to 8 degrees from local
+# vertical (threshold) for surface operations. Chavers et al. 2020, https://ntrs.nasa.gov/citations/20200001606 ;
+# NASA OIG report IG-26-004 gives the same 8 degree tilt tolerance. The requirement states no baseline and site
+# studies apply it at about 5 m, so on this 80 m grid the share is a coarse screen, not a landing-safety result.
+GENTLE_SLOPE_DEG = 8.0
+GENTLE_SOURCE = "NASA Human Landing System tilt threshold; at an 80 m baseline this is a coarse screen"
 HIST_EDGES = list(range(0, 42, 2))   # slope histogram bins in degrees, 0 to 40
 TREND_PX = 5                # roughness: remove a 5 x 5 pixel moving average (400 m at 80 m)
 

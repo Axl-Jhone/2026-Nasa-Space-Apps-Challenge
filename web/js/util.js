@@ -7,6 +7,7 @@ export const hex = h => { h = h.replace('#', ''); return [0, 2, 4].map(i => pars
 export const mix = (a, b, t) => a.map((v, i) => v + (b[i] - v) * t);
 export const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 export const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+export const fmtLL = (lat, lon) => `${Math.abs(lat).toFixed(3)}° ${lat < 0 ? 'S' : 'N'}, ${Math.abs(lon).toFixed(3)}° ${lon < 0 ? 'W' : 'E'}`;
 
 export function mulberry(a) { return () => { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
 export function makeNoise(seed) {

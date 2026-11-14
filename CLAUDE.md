@@ -11,10 +11,12 @@ The site argues: this place on Earth is like that place on the Moon or Mars in t
 | `pipeline/earth_dem.ipynb` | Leander | Copernicus GLO-30 window from Planetary Computer, reprojected to UTM |
 | `pipeline/moon_dem.ipynb` | Leander | LOLA `LDEM_80S_80M` window, every number read from the label |
 | `pipeline/export_terrain.py` | Leander, Mico (metric definitions) | Shared 80 m grid, metrics, writes `web/data/terrain/<id>.json`. `--selftest` checks the maths |
+| `pipeline/run_notebook.py` | Leander | Reruns a notebook's own cells for another site (Shackleton, the control windows) |
 | `data/raw/` | | Downloads. Only `.LBL` labels are committed |
 | `data/processed/` | | Notebook outputs (GeoTIFF). Not committed, regenerate from the notebooks |
 | `web/` | Axl | Static site, no build step. Formats are in `web/README.md` |
-| `web/data/sites.json` | Prince | Site text, analogy matrix, planets, pairs, controls |
+| `web/data/sites.json` | Prince | All page text: sites, labels, claims with source ids, matrix, planets, pairs, controls, method text, source list |
+| `SUBMISSION.md` | Everyone | Drafts for the Space Apps form and the demo script |
 | `web/data/terrain/` | written by `export_terrain.py` | Do not hand-edit |
 
 Edit only what the person you are working with owns. If the work needs a change elsewhere, say what and why, and let its owner make it.
@@ -45,13 +47,15 @@ The "How to work with us" rules come first. These skills add discipline on top; 
 ## Honesty rules
 
 - Never invent a source, citation, number or coordinate. If it is unknown, mark it `N` (not assessed) or ask.
-- Placeholders say so on the page: missing terrain is tagged SAMPLE, the 10° gentle-slope limit is labelled a placeholder until a cited limit replaces it.
+- Placeholders say so on the page. A pair whose terrain export is missing is hidden, not shown with sample terrain. The gentle-slope limit is 8°, cited to NASA's Human Landing System tilt threshold and labelled a coarse screen at 80 m.
+- A claim in `sites.json` with no source id is shown on the page as "our reading". A pairing we propose ourselves is labelled `hypothesis` and is never shown as a finding.
 - Every number on the page comes from a file. The browser never invents or recomputes a measurement.
 - Do not change a test's expected value to make it pass. Explain the failure instead.
 
 ## Word lists used in `web/data/sites.json`
 
-- Matrix status codes: `M` measured, `C` cited, `P` partial match, `B` breaks here, `N` not assessed
+- Matrix status codes: `M` measured, `C` cited, `P` partial match, `H` hypothesis (ours), `B` breaks here, `N` not assessed
+- Pair labels: `benchmark`, `established`, `hypothesis`
 - Dimensions: `geo`, `terrain`, `temp`, `ice`, `dust`, `bio`, `sub`, `ops`
 - Bodies: `moon`, `mars`
 

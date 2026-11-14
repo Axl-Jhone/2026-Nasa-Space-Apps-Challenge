@@ -1,6 +1,6 @@
-# Earth Analog Atlas: web app
+# ATLAS (Earth Analog Atlas): web app
 
-A static site. No build step, no framework. Three tabs: **Three worlds**, **Planets**, **Side by side**.
+A static site. No build step, no framework. Five tabs: **Three worlds**, **All pairs**, **Planets**, **Side by side**, **Method and sources**. Each site also has a pair page at `#pair/<site id>`, opened from the site list, the globes or the All pairs table.
 
 ## Run it
 
@@ -17,17 +17,19 @@ To deploy, upload the `web/` folder to GitHub Pages, Netlify or Vercel as it is.
 | Thing | Status |
 |---|---|
 | Globe imagery (`assets/tiles`) | Real NASA imagery (GIBS Blue Marble, LRO WAC, Viking MDIM), credited in the footer |
-| Site list, analogy matrix, planet facts (`data/sites.json`) | **Draft text.** Matrix notes and planet figures are unverified until each has a primary source |
-| 3D terrain and slide view | Real when `data/terrain/<id>.json` exists. Otherwise generated sample terrain, tagged **SAMPLE** |
+| Site list, labels, claims (`data/sites.json`) | Claims for the ten plan sites come from the research plan's source check and carry source ids. A claim with no source id is shown as "our reading". Río Tinto and Yungay are team additions, confirmed by abstract only |
+| Planet figures | NASA Planetary Fact Sheets, read 15 November 2026 |
+| 3D terrain and slide view | Real for both pairs (de Gerlache and Shackleton). A pair marked `hideIfSample` in `sites.json` is hidden if its export is missing, so sample terrain never reaches the page |
 | Measurements table and slope chart | Blank until both windows have an export with metrics. The browser never invents or recomputes them |
-| Control results | "pending" until the controls are run |
+| Control results | Run on 15 November: two lunar craters, Kamestastin, the Namib Sand Sea and Sua Pan. The table on the Method tab reads the exports |
 
 ## Files
 
 ```
 index.html          page shell
 css/style.css       all styling (dark theme)
-js/app.js           tabs, lists, matrix, side-by-side logic
+js/app.js           tabs, routing, lists, globes, side-by-side logic
+js/pages.js         pair page, All pairs table, Method and sources (all text from sites.json)
 js/terrain.js       loads exports, sample fallback, shading, 3D drawing, hillshade
 js/globe.js         textured globes and tile stitching
 js/util.js          small helpers
@@ -39,7 +41,7 @@ assets/tiles/       globe texture tiles
 ## Adding real terrain
 
 Each window is one file, `data/terrain/<id>.json`. The ids the app asks for come from `pairs` in `sites.json`:
-`kamestastin`, `degerlache`, `shackleton`.
+`kamestastin`, `degerlache`, `shackleton`. The control table also reads `namib` and `suapan` (`controlWindows` in `sites.json`).
 
 Write them from the notebook with `pipeline/export_terrain.py` (same function for Earth and Moon, so formats match):
 
@@ -80,13 +82,19 @@ Both windows are first area-averaged onto one 80 m grid, then measured. Slope is
 
 - **Relief**: 95th minus 5th percentile height of unmasked cells.
 - **Roughness**: standard deviation of height minus its 5 x 5 pixel (400 m) moving average.
-- **Gentle ground**: share of unmasked cells with slope under `GENTLE_SLOPE_DEG`. **The 10 degree value is a placeholder.** Replace it with a cited landing or traverse limit and update `GENTLE_SOURCE`.
+- **Gentle ground**: share of unmasked cells with slope under `GENTLE_SLOPE_DEG`, 8 degrees: the tilt NASA's Human Landing System must tolerate for surface operations (Chavers et al. 2020; NASA OIG IG-26-004). The requirement has no stated baseline and is applied at about 5 m in site studies, so at 80 m it is a coarse screen.
 - No combined score. The app shows each measure and a plain ratio, not a verdict.
 
 ## Known gaps
 
-- The matrix notes and planet figures need primary-source checks.
-- The de Gerlache and Shackleton centres are provisional until checked against the USGS Gazetteer.
+- Much of the evidence is abstracts and press releases; the Method tab says how much of each source was read. A team member should open the primary paper for each chosen pair.
+- The de Gerlache and Shackleton centres are the first of three sets the Gazetteer lists for each, so they stay marked provisional.
+- Coordinates for Galena Creek, Great Kobuk, Yungay and Río Tinto are approximate and say so on the page.
+- The measures cannot tell a crater from a dune field (see the controls). A shape measure is the next thing to add.
 - Lake level: the DEM stores 334.5 m, which should be checked against the Copernicus product notes before it is quoted.
-- No Discover (systematic search) tab. See the project notes for the 2 am decision.
+- No Discover (systematic search) tab.
 - Dark theme only. The display mesh (128 x 128) is for pictures; measurements come from the 80 m grid.
+
+## Site records in `data/sites.json`
+
+Each site has: `label` (`benchmark`, `established` or `hypothesis`), `labelNote`, `confidence`, `claim` (one sentence), `matches` and `breaks` (lists of `{t, src}`; `src` holds source ids), optional `figures` (one quantity on both worlds), `helps`, `prior`, the matrix `d`, and coordinates with `coordSrc` or `coordNote`. Source ids are defined once under `sources` with a title, a link and how much was read. The pages never show a hypothesis as a finding: a `hypothesis` label draws a dashed box at the top of the pair page, and matrix cells proposed by us use status `H`.

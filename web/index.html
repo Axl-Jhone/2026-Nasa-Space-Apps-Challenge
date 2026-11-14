@@ -3,7 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Earth Analog Atlas</title>
+<title>ATLAS: Earth Analog Atlas</title>
+<meta name="description" content="Earth sites that stand in for places on the Moon and Mars: where each analogy holds, and where it breaks.">
+<meta name="generator" content="Built with an AI assistant (Claude, by Anthropic), directed by the team. See the Method and sources tab.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,600&family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="icon" href="data:,">
@@ -12,11 +14,13 @@
 <body>
 <div class="app">
   <header class="mast">
-    <div class="brand"><b>Earth Analog Atlas</b><span>WHERE EARTH STANDS IN, AND WHERE IT STOPS</span></div>
+    <a class="brand" href="#worlds"><b>ATLAS</b><span>WHERE EARTH STANDS IN, AND WHERE IT STOPS</span></a>
     <nav class="tabs" aria-label="Main">
       <button data-tab="worlds" aria-pressed="true">Three worlds</button>
+      <button data-tab="explore" aria-pressed="false">All pairs</button>
       <button data-tab="planets" aria-pressed="false">Planets</button>
       <button data-tab="side-by-side" aria-pressed="false">Side by side</button>
+      <button data-tab="method" aria-pressed="false">Method and sources</button>
     </nav>
   </header>
 
@@ -66,7 +70,7 @@
         </div>
         <div class="pnav">
           <nav aria-label="Choose a world" id="pnav"></nav>
-          <p class="mono fineprint">Figures are from our notes and are to be checked against the NASA Planetary Fact Sheet before submission.</p>
+          <p class="mono fineprint" id="pnote"></p>
         </div>
       </div>
     </section>
@@ -100,6 +104,11 @@
       </div>
       <aside class="meas" id="meas" aria-label="Terrain measurements"></aside>
     </section>
+
+    <!-- 4. ALL PAIRS, 5. ONE PAIR, 6. METHOD AND SOURCES: filled by js/pages.js from data/sites.json -->
+    <section class="view doc" id="view-explore" hidden></section>
+    <section class="view doc" id="view-pair" hidden></section>
+    <section class="view doc" id="view-method" hidden></section>
   </main>
   <footer class="credit" id="credit"></footer>
 </div>

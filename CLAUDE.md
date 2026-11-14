@@ -28,6 +28,18 @@ We are learning as we build. For every step:
 
 Keep code comments short.
 
+## Skills in this repo (`.claude/skills/`)
+
+| Skill | Use it when | Who mostly |
+| --- | --- | --- |
+| `test-driven-development` | Writing any function with a checkable answer. Write the expected value from physics or a hand calculation first, watch the test fail, then write the code | Mico (C3), Leander, Prince's `build.py` |
+| `systematic-debugging` | Anything breaks. Find the root cause and explain it before changing code | Everyone |
+| `verification-before-completion` | Before saying a step is done. Run the check and show its output | Everyone |
+| `requesting-code-review` | Before pushing a finished piece of a module | Everyone |
+| `architecture-decision-records` | The team picks between real alternatives. The records in `docs/adr/` double as the AI-use log for the submission | Everyone |
+
+The "How to work with us" rules come first: explain, wait for an OK, one small step. These skills add discipline on top. They do not replace the explanation.
+
 ## Honesty rules
 
 - Never invent a source, citation, number or coordinate. If it is unknown, use `not_assessed` or ask.

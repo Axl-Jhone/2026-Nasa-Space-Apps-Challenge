@@ -1,0 +1,124 @@
+/* ATLAS theme: ASCII square space.
+   One monospace face, square corners, 1px rules, a black ground with a character starfield.
+   Loaded after style.css. Remove its <link> in index.html to return to the previous look.
+   Written with an AI assistant (Claude), directed by the team. */
+:root{
+  --bg:#04060b; --panel:#090d16; --aside:#070a12; --line:#222b42; --line-2:#3d4a6b;
+  --ink:#ecebe4; --ink-2:#c5cbd8; --ink-3:#8f9ab0;
+  --display:"IBM Plex Mono",ui-monospace,Consolas,monospace;
+  --body:"IBM Plex Mono",ui-monospace,Consolas,monospace;
+}
+*,*::before,*::after{border-radius:0!important}
+.globe,.globe canvas,.pglobe,.pglobe canvas{border-radius:50%!important}   /* a globe stays round; its characters are square */
+*{scrollbar-width:thin;scrollbar-color:var(--line-2) transparent}
+::selection{background:var(--accent);color:var(--bg)}
+body{font-size:14px;line-height:1.55;background:var(--bg)}
+:focus-visible{outline:1px solid var(--accent);outline-offset:2px}
+
+/* starfield behind everything */
+#stars{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none}
+.app{position:relative;z-index:1}
+.planets{background:transparent}
+.view.doc{background:rgba(4,6,11,.88)}
+aside.side,aside.meas{background:rgba(7,10,18,.94)}
+
+/* masthead: a ruled strip of cells */
+header.mast{gap:0;padding:0;align-items:stretch;border-bottom:1px solid var(--line-2);background:rgba(4,6,11,.9)}
+.brand{align-items:center;gap:16px;padding:12px 22px 12px 32px;border-right:1px solid var(--line-2)}
+.brand b{font-size:20px;font-weight:600;letter-spacing:.34em}
+.brand span{font-size:11px;letter-spacing:.14em}
+nav.tabs{align-items:center;gap:2px;padding:6px 14px}
+nav.tabs button{padding:8px 4px;min-height:38px;border:0;font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-2)}
+nav.tabs button::before,.pill::before{content:"[ ";color:var(--ink-3)}
+nav.tabs button::after,.pill::after{content:" ]";color:var(--ink-3)}
+nav.tabs button:hover{color:var(--accent)}
+nav.tabs button[aria-pressed="true"],.pill[aria-pressed="true"]{border:0;background:var(--accent);color:var(--bg)}
+nav.tabs button[aria-pressed="true"]::before,nav.tabs button[aria-pressed="true"]::after,.pill[aria-pressed="true"]::before,.pill[aria-pressed="true"]::after{color:var(--bg)}
+.viewmode{display:flex;align-items:center;gap:10px;padding:0 20px;border-left:1px solid var(--line-2);font-size:11px;letter-spacing:.12em;color:var(--ink-3)}
+.viewmode .seg{margin-left:0}
+.viewmode .seg button{min-height:30px;padding:4px 10px;font-size:12px}
+footer.credit{font-size:12px;border-top:1px solid var(--line-2);background:rgba(4,6,11,.9)}
+
+/* controls */
+.pill{min-height:30px;padding:4px 3px;border:0;font-family:var(--mono);font-size:13px;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-2)}
+.pill:hover{color:var(--accent)}
+.seg{border:1px solid var(--line-2)}
+.seg button{text-transform:uppercase;letter-spacing:.06em;font-size:13px}
+.seg button+button{border-left:1px solid var(--line-2)}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--bg)}
+.btn{border:1px solid var(--accent);text-transform:uppercase;letter-spacing:.06em;font-size:13px}
+.btn::before{content:"> "}
+.btn:hover{background:var(--bg);color:var(--accent)}
+.btn.alt:hover{background:var(--accent);color:var(--bg)}
+.back{text-transform:uppercase;letter-spacing:.06em}
+.ctl input[type=range]{height:2px}
+.chips span{border-color:var(--line-2);font-size:12px}
+.lab{font-size:11px;letter-spacing:.1em}
+a{text-underline-offset:3px}
+
+/* headings: uppercase, with a rule that runs to the edge */
+h1,h2,h3{font-weight:600}
+.docin h1,.sbs h1{font-size:25px;line-height:1.25;text-transform:uppercase;letter-spacing:.04em}
+.docin h1 .ar{font-weight:400}
+.docin h2{display:flex;align-items:center;gap:12px;font-size:13px;letter-spacing:.16em;text-transform:uppercase;color:var(--accent)}
+.docin h2::before{content:"■";font-size:10px}
+.docin h2::after{content:"";flex:1;border-top:1px solid var(--line-2)}
+.breaks h2{color:var(--signal)}
+.breaks h2::after{border-color:#6a3a26}
+.lede{font-size:17px;font-weight:400;line-height:1.5}
+.verdict{font-size:16px;line-height:1.5}
+aside.side h2,aside.meas h2{font-size:14px;letter-spacing:.16em;text-transform:uppercase;color:var(--accent)}
+.sdetail h3{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent)}
+.pcard h2{font-size:28px;font-weight:400;letter-spacing:.42em}
+.globes figcaption{font-size:13px;letter-spacing:.2em;text-transform:uppercase}
+.pop h3{font-size:16px;text-transform:uppercase;letter-spacing:.04em}
+.pnav button{font-size:13px;text-transform:uppercase;letter-spacing:.14em}
+
+/* boxes: 1px frames with a + on two corners, like a drawn ASCII box */
+.place,.box,.breaks,.pcard,.hypo,.panel .cv,.intro{position:relative}
+.place::before,.box::before,.breaks::before,.pcard::before,.hypo::before,.panel .cv::before,.intro::before,
+.place::after,.box::after,.breaks::after,.pcard::after,.hypo::after,.panel .cv::after,.intro::after{
+  content:"+";position:absolute;z-index:2;font:12px/12px var(--mono);color:var(--ink-3);pointer-events:none}
+.place::before,.box::before,.breaks::before,.pcard::before,.hypo::before,.panel .cv::before,.intro::before{top:-7px;left:-4px}
+.place::after,.box::after,.breaks::after,.pcard::after,.hypo::after,.panel .cv::after,.intro::after{bottom:-6px;right:-4px}
+.breaks::before{left:-7px;color:var(--signal)}.breaks::after{color:var(--signal)}
+.panel .cv{overflow:visible}
+.place.cand{background:rgba(232,194,122,.06)}
+.site{border-color:var(--line)}
+.site[aria-pressed="true"]{border-color:var(--accent);background:rgba(232,194,122,.08)}
+.site .r1{font-size:14px}.site .r2{font-size:13px}
+.site .r1 em{font-size:11px;letter-spacing:.08em;text-transform:uppercase}
+.printed{font-size:12px;border-color:var(--line-2)}
+.matrix b{font-size:13px}.matrix small{font-size:12px}
+.pin{border-width:1px}
+.pin span{font-size:12px;border-color:var(--accent)}
+.legend,.cap{font-size:12px}
+.pstats b{font-size:15px}.pstats span{font-size:12px}
+table{font-size:13px}
+th{font-size:12px;text-transform:uppercase;letter-spacing:.08em}
+td small{font-size:12px}
+.figs td b{font-size:18px}
+.xt tbody th{font-size:14px}
+ul.claims li::before{top:.55em;width:6px;height:6px}
+.src,.own{font-size:11px}
+
+/* landing line on Three worlds */
+.intro{display:flex;flex-wrap:wrap;align-items:center;gap:10px 22px;padding:12px 16px;border:1px solid var(--line-2);background:rgba(9,13,22,.8)}
+.intro .k{flex-basis:100%;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-3)}
+.intro .l{flex:1 1 320px;font-size:16px;line-height:1.4}
+.intro .l em{font-style:normal;color:var(--accent)}
+.intro .l em.brk{color:var(--signal)}
+/* the two globes always sit side by side and shrink to fit, so opening the site panel never stacks them or pushes the top out of view */
+.main-col{justify-content:safe center;overflow-y:auto}
+.globes{flex-wrap:nowrap;justify-content:center;gap:20px}
+.globes figure{flex:1 1 0;min-width:0;max-width:520px}
+.globe{width:min(100%,clamp(150px,calc(100vh - 440px),500px))}
+.globe.earth,.globe.moon,.globe.mars,.pglobe{box-shadow:none}
+/* a dark disc per body sits behind the characters, so each globe keeps a body */
+.globe.earth,#pglobe-earth{background:radial-gradient(circle at 35% 30%,#1b2b49,#080d19)}
+.globe.moon,#pglobe-moon{background:radial-gradient(circle at 35% 30%,#262a33,#0a0c11)}
+.globe.mars,#pglobe-mars{background:radial-gradient(circle at 35% 30%,#3a211b,#120908)}
+
+@media (max-width:1460px){.brand span{display:none}}
+@media (max-width:1000px){.brand{padding-left:16px}.viewmode{border-left:0;padding:6px 16px}.main-col{overflow:visible;padding:16px}.globe{width:min(100%,420px)}}
+@media (max-width:560px){.globes{flex-wrap:wrap}.globes figure{flex:1 1 100%}.globe{width:min(86vw,360px)}.intro .l{font-size:15px}}

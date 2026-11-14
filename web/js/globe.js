@@ -15,7 +15,8 @@ export async function loadTextures() {
   return { earth, moon, mars };
 }
 
-let globes = [], raf = 0;
+let globes = [], raf = 0, post = null;   // post: optional pass run after a globe draws (the ASCII view)
+export const setPost = fn => { post = fn; refreshAll(); };
 export const kick = () => { if (!raf) raf = requestAnimationFrame(tick); };
 function tick() { raf = 0; let more = false; for (const g of globes) { if (!g.visible()) continue; if (g.step()) more = true; if (g.dirty) { g.render(); g.dirty = false; } if (g.spin && !reduced) { g.lon += 0.12; g.dirty = true; more = true; } } if (more) kick(); }
 
@@ -54,7 +55,7 @@ export class Globe {
       let u = (lon / TAU + 0.5) % 1; if (u < 0) u += 1; let tx = (u * tw) | 0; if (tx >= tw) tx = tw - 1; let ty = ((0.5 - lat / Math.PI) * th) | 0; if (ty >= th) ty = th - 1;
       const t = (ty * tw + tx) * 4, k = sh[i]; d[o] = tex[t] * k; d[o + 1] = tex[t + 1] * k; d[o + 2] = tex[t + 2] * k; d[o + 3] = a;
     }
-    this.ctx.putImageData(this.out, 0, 0); this.place();
+    this.ctx.putImageData(this.out, 0, 0); if (post) post(this); this.place();
   }
   place() {
     const c = Math.cos(this.lat * DEG), s = Math.sin(this.lat * DEG);

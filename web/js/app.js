@@ -3,7 +3,8 @@
 import { $, $$, esc, reduced, fmtLL } from './util.js';
 import { loadField, drawTerrain, drawHillshade } from './terrain.js';
 import { Globe, loadTextures, refreshAll, kick } from './globe.js';
-import { renderPair, renderExplore, renderMethod, labelChip, legendHtml, measTableHtml, srcLinks } from './pages.js';
+import { renderPair, renderExplore, renderMethod, labelChip, legendHtml, measTableHtml, srcLinks, matrixHtml } from './pages.js';
+import { initAscii } from './ascii.js';
 
 const TABS = ['worlds', 'explore', 'planets', 'side-by-side', 'method'];
 const VIEWS = [...TABS, 'pair'];   // 'pair' is reached as #pair/<site id>, not from the tab bar
@@ -23,7 +24,7 @@ async function boot() {
   for (const p of D.pairs.filter(x => x.hideIfSample)) if ((await getField(p.other, 'moon')).sample) D.pairs = D.pairs.filter(x => x !== p);
   $('#credit').textContent = D.imagery;
   $('#pnote').textContent = D.planetsNote || '';
-  buildGlobes(); buildFilters(); buildSiteList(); buildPlanets(); buildPairs(); bindSbs();
+  initAscii(); buildIntro(); buildGlobes(); buildFilters(); buildSiteList(); buildPlanets(); buildPairs(); bindSbs();
   $$('nav.tabs button').forEach(b => b.addEventListener('click', () => { location.hash = '#' + b.dataset.tab; }));
   addEventListener('hashchange', route);
   try { const s = localStorage.getItem('atlas-site'); if (s && byId(s)) S.site = s; } catch (e) { /* storage may be blocked */ }
@@ -49,6 +50,15 @@ function route() {
 }
 
 /* ---------- 1. three worlds ---------- */
+// One line above the globes that says what the site argues, and where to start. Counts come from the data.
+function buildIntro() {
+  const I = D.intro, el = $('#intro'); if (!I || !el) return;
+  const n = b => D.sites.filter(s => s.body === b).length, start = byId(I.start);
+  el.innerHTML = `<span class="k">${D.sites.length} Earth sites · ${n('moon')} for the Moon · ${n('mars')} for Mars</span>
+    <span class="l">${esc(I.before)} <em>${esc(I.hold)}</em>${esc(I.mid)} <em class="brk">${esc(I.brk)}</em>${esc(I.after)}</span>
+    ${start ? `<a class="btn" href="#pair/${start.id}">${esc(I.cta)}</a>` : ''}`;
+}
+
 // Pin lists for each world. Used by the Three worlds globes and the Planets globes, so both show the same pins.
 function makePins() {
   const pinFor = body => { const m = new Map(); for (const s of D.sites) if (s.body === body && s.tlat != null) { const k = s.tlat + ',' + s.tlon; if (!m.has(k)) m.set(k, { lat: s.tlat, lon: s.tlon, label: s.target, ids: [] }); m.get(k).ids.push(s.id); } return [...m.values()]; };
@@ -149,8 +159,8 @@ function showSideDetail(s) {
     <p><span class="muted">How it helps exploration: </span>${esc(s.helps)}</p>
     <div class="mhead"><h3>Are they similar? Parameter by parameter</h3></div>
     <div class="mhead">${legend}</div>
-    <table class="cmp2"><thead><tr><th></th><th>Anchor<small>${esc(s.target)}</small></th><th>Earth analog<small>${esc(s.short)}</small></th></tr></thead><tbody>${rows}</tbody></table>
-    ${s.cmp ? `<p class="fineprint">${esc(s.cmpNote || '')}</p>` : '<p class="fineprint">Anchor values are not in our data for this site yet. Each row still shows how well the Earth site matches (status and note).</p>'}
+    ${s.cmp ? `<table class="cmp2"><thead><tr><th></th><th>Anchor<small>${esc(s.target)}</small></th><th>Earth analog<small>${esc(s.short)}</small></th></tr></thead><tbody>${rows}</tbody></table>
+    <p class="fineprint">${esc(s.cmpNote || '')}</p>` : matrixHtml(D, s, 'one')}
     <p class="fineprint">Data: ${esc(s.data)}</p>
     ${pair ? `<button class="btn alt" id="goside">Compare terrain side by side</button>` : ''}
     <p class="fineprint">Every site, always: Earth cannot reproduce the reduced gravity, the lunar vacuum, the thin Martian air or their radiation.</p>`;

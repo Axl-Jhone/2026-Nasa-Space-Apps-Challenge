@@ -71,7 +71,7 @@ No image, video or audio in the project is AI-generated: the globes are NASA ima
 
 - Copernicus DEM GLO-30 (European Union and ESA Copernicus programme), read through Microsoft Planetary Computer. The Earth side of every terrain measure. https://doi.org/10.5270/ESA-c5d3d65
 - ISRO results cited as evidence: the Chandrayaan-3 soil analysis and the LSS-ISAC-1 lunar soil simulant.
-- Typefaces: Fraunces, IBM Plex Mono and Inter (SIL Open Font License), served by Google Fonts.
+- Typeface: IBM Plex Mono (SIL Open Font License), served by Google Fonts.
 - No third-party JavaScript library is used.
 - Full source list: the Method and sources tab of the app, and the list at the end of this file.
 
@@ -81,8 +81,8 @@ The video must be **30 seconds or less**. Aim for 28. Record at 1366 by 768 or l
 
 | Time | On screen | Voice-over |
 | --- | --- | --- |
-| 0:00 to 0:04 | Three worlds tab. Title text over it: team name, the challenge name, "ATLAS". Click **Mars** | "ATLAS asks of every Earth analog: where does it hold, and where does it break?" |
-| 0:04 to 0:09 | Click **Galena Creek** in the list, then **Open the full case** | "Galena Creek, Wyoming, stands in for the buried ice of Deuteronilus Mensae on Mars." |
+| 0:00 to 0:04 | Three worlds tab, globes in ASCII view. Title text over it: team name, the challenge name, "ATLAS". Click **Mars** so the Mars globe shows | "ATLAS asks of every Earth analog: where does it hold, and where does it break?" |
+| 0:04 to 0:09 | Click **Start with Galena Creek** above the globes | "Galena Creek, Wyoming, stands in for the buried ice of Deuteronilus Mensae on Mars." |
 | 0:09 to 0:17 | The pair page. Scroll to the two-column figures table and hover a source link | "Both are ice under rock debris: eighty to ninety-five percent pure here, over eighty percent there." Caption: every number links to its source |
 | 0:17 to 0:27 | Scroll to the orange **Where it breaks** block and hold | "Here it breaks. The Earth figure comes from flow speed, not cores. Debris thickness on Mars is unverified. And no Earth site has Mars's gravity, air or radiation." |
 | 0:27 to 0:29 | End card: "ATLAS. Where Earth stands in, and where it stops." and the URL | (silence) |

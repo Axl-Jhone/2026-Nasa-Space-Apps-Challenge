@@ -25,8 +25,8 @@ const claimLi = (D, c) => `<li><span>${esc(c.t)}</span>${c.src && c.src.length ?
 
 export const legendHtml = D => Object.entries(D.status).map(([k, l]) => `<span class="lg" title="${esc((D.statusHelp || {})[k] || '')}"><i class="sw st-${k}"></i>${esc(l)}</span>`).join('');
 
-export function matrixHtml(D, s) {
-  return `<ul class="matrix">${D.dims.map(([k, name]) => {
+export function matrixHtml(D, s, cls = '') {
+  return `<ul class="matrix ${cls}">${D.dims.map(([k, name]) => {
     const [c, note] = s.d[k], v = (s.cmp || {})[k];
     return `<li class="st-${c}"><b>${esc(name)}</b><i>${esc(D.status[c])}</i><small>${esc(note)}</small>${v ? `<small class="cmpv">${World(s.body)}: ${esc(v[0] || 'no data')} · Earth: ${esc(v[1] || 'no data')}</small>` : ''}</li>`;
   }).join('')}</ul>`;

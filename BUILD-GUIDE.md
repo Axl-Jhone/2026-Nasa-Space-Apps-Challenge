@@ -156,6 +156,7 @@ Built with the AI assistant while the team slept. Nothing here is checked by a p
 - **Controls** are run. Two lunar craters measure alike; a flat lake bed is clearly different; a dune field is **not** separated from Kamestastin. The site reports that as a finding.
 - **Coordinates** now carry a source or a note saying they are approximate.
 - `pipeline/run_notebook.py` reruns a notebook's own cells for another site. `SUBMISSION.md` holds drafts for the form and the demo script.
+- **Theme (3 am).** An ASCII square space look: one monospace face, square corners, a character starfield, and globes drawn as ASCII characters from the NASA imagery, with an ASCII / Image switch in the masthead. It lives in `web/css/theme-ascii.css` and `web/js/ascii.js`; removing the stylesheet link in `index.html` returns the previous look. A line above the globes now says what the site argues and links to Galena Creek.
 
 **Who checks what before the 5 pm freeze**
 

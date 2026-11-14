@@ -27,11 +27,13 @@ To deploy, upload the `web/` folder to GitHub Pages, Netlify or Vercel as it is.
 
 ```
 index.html          page shell
-css/style.css       all styling (dark theme)
+css/style.css       layout and base styling
+css/theme-ascii.css the ASCII square space theme, loaded after style.css (remove its <link> for the previous look)
 js/app.js           tabs, routing, lists, globes, side-by-side logic
 js/pages.js         pair page, All pairs table, Method and sources (all text from sites.json)
 js/terrain.js       loads exports, sample fallback, shading, 3D drawing, hillshade
 js/globe.js         textured globes and tile stitching
+js/ascii.js         the theme's starfield, the ASCII view of the globes, and the ASCII / Image switch
 js/util.js          small helpers
 data/sites.json     sites, matrix, planets, pairs, text boxes (edit this, not the code)
 data/terrain/       one JSON per window, written by pipeline/export_terrain.py
@@ -98,3 +100,9 @@ Both windows are first area-averaged onto one 80 m grid, then measured. Slope is
 ## Site records in `data/sites.json`
 
 Each site has: `label` (`benchmark`, `established` or `hypothesis`), `labelNote`, `confidence`, `claim` (one sentence), `matches` and `breaks` (lists of `{t, src}`; `src` holds source ids), optional `figures` (one quantity on both worlds), `helps`, `prior`, the matrix `d`, and coordinates with `coordSrc` or `coordNote`. Source ids are defined once under `sources` with a title, a link and how much was read. The pages never show a hypothesis as a finding: a `hypothesis` label draws a dashed box at the top of the pair page, and matrix cells proposed by us use status `H`.
+
+## Theme: ASCII square space
+
+One monospace face (IBM Plex Mono), square corners, 1px rules, a black ground with a character starfield, and bracketed controls. It follows two references looked at on 15 November: The Monospace Web (one face, no rounded corners, uppercase headings on a grid) and NASA's Eyes on the Solar System (black ground, the scene owns the screen, thin uppercase chrome at the edges).
+
+The globes have two views, switched in the masthead and remembered per browser. **ASCII** draws each globe as characters in square cells: the brightness of the NASA imagery picks the character and the imagery gives its colour. **Image** shows the imagery itself. The ASCII view is computed in memory from the globe's pixel buffer (about 1 ms per frame); nothing in it is AI-generated. The 3D terrain pictures are evidence and are not restyled.

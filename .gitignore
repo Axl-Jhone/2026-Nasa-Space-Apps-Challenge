@@ -218,3 +218,6 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Large raw datasets (DEM tiles etc.)
+data/raw/

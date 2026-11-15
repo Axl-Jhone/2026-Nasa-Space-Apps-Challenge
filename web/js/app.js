@@ -257,6 +257,32 @@ async function quickClimate(lat, lon, ac) {
   } catch (e) { if (!ac.signal.aborted) gone(); }   // the climate rows are extra; the test stands without them
 }
 
+// Logistics for the tested place: straight-line distance to the nearest town and airport listed in Natural Earth (data/logistics.json)
+let logi = null;
+const getLogi = () => (logi = logi || fetch('data/logistics.json').then(r => r.json()).catch(() => { logi = null; return null; }));
+const kmTo = (a, b, c, d) => { const r = Math.PI / 180, x = Math.sin((c - a) * r / 2) ** 2 + Math.cos(a * r) * Math.cos(c * r) * Math.sin((d - b) * r / 2) ** 2; return 2 * 6371 * Math.asin(Math.sqrt(x)); };
+async function quickLogistics(lat, lon, ac) {
+  const slot = $('#qtlog'); if (!slot) return;
+  const L = await getLogi(); if (ac.signal.aborted || !slot.isConnected) return;
+  const put = (id, t) => { const td = slot.querySelector('#' + id); if (td) td.textContent = t; };
+  if (!L) { put('qtl-t', 'no reading'); put('qtl-a', 'no reading'); return; }
+  const n = nearestPlaces(L, lat, lon); put('qtl-t', n.town); put('qtl-a', n.air);
+}
+// Nearest listed town and airport to a point, as display text
+function nearestPlaces(L, lat, lon) {
+  const near = list => list.reduce((b, q) => { const k = kmTo(lat, lon, q[2], q[3]); return k < b.k ? { q, k } : b; }, { q: null, k: Infinity });
+  const t = near(L.towns), a = near(L.airports), km = k => Math.round(k).toLocaleString() + ' km';
+  return { town: `${km(t.k)} · ${t.q[0]}${t.q[1] ? ', ' + t.q[1] : ''}`, air: `${km(a.k)} · ${a.q[0]}${a.q[1] ? ' (' + a.q[1] + ')' : ''}` };
+}
+// Site panel: the same two distances, from the Earth site's own coordinates
+async function fillSiteLogistics(s) {
+  const slot = $('#slog'); if (!slot) return;
+  const L = await getLogi(); if (!slot.isConnected) return;
+  if (!L) { slot.querySelector('p').textContent = 'No reading.'; return; }
+  const n = nearestPlaces(L, s.lat, s.lon);
+  slot.querySelector('p').innerHTML = `<span class="lg"><span class="role">Nearest town</span>${esc(n.town)}</span><span class="lg"><span class="role">Nearest airport</span>${esc(n.air)}</span>`;
+}
+
 // Scan: the eight windows that touch the tested one, each measured the same way, to see if a neighbour matches better.
 // Windows are read one after another so tiles shared between neighbours come from the cache.
 async function scanAround(lat, lon, km, cell, o, centreScore, ac) {
@@ -315,11 +341,15 @@ async function quickTest(lat, lon, check = false) {
       </tbody><tbody id="qtclim">
         <tr class="qtsec"><th colspan="${pm ? 4 : 3}">Climate <small>NASA POWER, long-term, about 50 km grid cell</small></th></tr>
         ${[['Mean air temperature', 't'], ['Coldest to warmest', 'x'], ['Mean wind', 'w'], ['Rain and snow', 'r']].map(([n, k]) => `<tr><th scope="row">${n}</th><td class="n qtc" id="qtc-${k}">…</td>${pm ? '<td class="n qtna">–</td>' : ''}<td class="n qtna">–</td></tr>`).join('')}
+      </tbody><tbody id="qtlog">
+        <tr class="qtsec"><th colspan="${pm ? 4 : 3}">Logistics <small>straight-line distance to the nearest place listed in Natural Earth</small></th></tr>
+        <tr><th scope="row">Nearest town</th><td class="n qtc qtl" id="qtl-t">…</td>${pm ? '<td class="n qtna">–</td>' : ''}<td class="n qtna">–</td></tr>
+        <tr><th scope="row">Nearest airport</th><td class="n qtc qtl" id="qtl-a">…</td>${pm ? '<td class="n qtna">–</td>' : ''}<td class="n qtna">–</td></tr>
       </tbody></table></div>
       <div class="qtbtns">${check ? '' : `<button class="zoomgo" id="qtscan">Scan the eight windows around it</button>`}</div>
       <div id="qtscanout"></div>`;
     const sc = $('#qtscan'); if (sc) sc.addEventListener('click', () => scanAround(lat, lon, km, cell, o, sim.score, ac));
-    quickClimate(lat, lon, ac);
+    quickClimate(lat, lon, ac); quickLogistics(lat, lon, ac);
   } catch (e) {
     if (ac.signal.aborted) return;
     box.innerHTML = `<p class="err">The quick test could not run: ${esc(e.message || String(e))}</p>`;
@@ -395,6 +425,7 @@ function showSideDetail(s) {
     </div>
     <div class="chips">${labelChip(D, s)}<span>${esc(s.kind)}</span></div>
     <p class="confbadge band-${esc(band)}"><span>Evidence confidence</span> ${s.conf ? `<b>${s.conf.score}%</b> · ${esc(s.conf.band)}` : 'not scored'}</p>
+    <section class="slog" id="slog"><h3>Logistics</h3><p>…</p><small>Straight-line distance to the nearest place listed in Natural Earth</small></section>
     <div class="mhead"><h3>Are they similar? Parameter by parameter</h3></div>
     <div class="mhead">${legend}</div>
     <ul class="dims">${rows}</ul>
@@ -407,7 +438,7 @@ function showSideDetail(s) {
   $('#sback').addEventListener('click', showSideList);
   const b = $('#goside'); if (b) b.addEventListener('click', () => ctx.openSbs(pair.id));
   $('#gozoom').addEventListener('click', () => zoomTo(s));
-  fillTerrainMetrics(pair);
+  fillTerrainMetrics(pair); fillSiteLogistics(s);
 }
 
 /* Terrain rows: real numbers for both places, shown only when both windows have an export */

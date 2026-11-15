@@ -445,7 +445,10 @@ footer.credit{background:transparent}
 .intro span{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3)}
 
 /* review fixes (15 November): one sentence on the home view says what the site is */
-#view-worlds .lede{align-self:stretch;margin:14px 16px 2px;font-size:16px;font-weight:500;line-height:1.4;color:var(--ink);text-align:center;text-wrap:balance}
+/* the sentence sits close under the masthead, and the globes give up its height, so the view never needs scrolling */
+#view-worlds .main-col{padding-top:8px;gap:8px}
+#view-worlds .globe{width:min(100%,clamp(150px,calc(100vh - 376px),560px))}
+#view-worlds .lede{align-self:stretch;margin:0 16px;font-size:16px;font-weight:500;line-height:1.4;color:var(--ink);text-align:center;text-wrap:balance}
 body[data-zoom="on"] #view-worlds .lede{display:none}
 .qt .err{color:var(--break)}
 @media (max-width:560px){#view-worlds .lede{font-size:14px}}

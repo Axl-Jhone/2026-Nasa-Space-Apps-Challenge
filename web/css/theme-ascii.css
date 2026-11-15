@@ -641,8 +641,7 @@ aside.meas table.dt tr{display:grid;grid-template-columns:1fr auto;gap:2px 12px;
 aside.meas table.dt tr:first-child{border-top:0}
 aside.meas table.dt th,aside.meas table.dt td{display:block;padding:0;border:0;width:auto;text-align:left}
 aside.meas table.dt td:last-child{grid-column:1/-1;font-size:13px;line-height:1.45;color:var(--ink-2)}
-/* pins: round; a Moon pair is cool on both globes, a Mars pair warm, at one lightness (OKLCH L 0.78, C 0.11) */
-:root{--pin-moon:#64c4f0;--pin-mars:#eea471}
-.pin{border-radius:50%!important}
-.pin.moon,.pin.earth.to-moon{background:var(--pin-moon)}
+/* pins: square; a Moon pair is grey on both globes, a Mars pair a muted warm tone at the same lightness */
+:root{--pin-mars:#f0bda1}
+.pin.moon,.pin.earth.to-moon{background:var(--moon)}
 .pin.mars,.pin.earth.to-mars{background:var(--pin-mars)}

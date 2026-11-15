@@ -262,9 +262,7 @@ export function renderExplore(D, F, rerender, ctx) {
   const n = b => D.sites.filter(s => s.body === b).length;
   el.innerHTML = `<div class="docin">
     <header class="phead">
-      <h1>All pairs, dimension by dimension</h1>
-      <p class="lede">${D.sites.length} Earth sites, each set against a place or process on the Moon or Mars. One row says where a pair holds and where it breaks.</p>
-    </header>
+      <h1>All pairs, dimension by dimension</h1>    </header>
     ${needHtml(D, F, pill)}
     <h2>Every pair, every dimension</h2>
     <div class="xbar">

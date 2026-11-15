@@ -19,8 +19,6 @@
     <nav class="tabs" aria-label="Main">
       <button data-tab="worlds" aria-pressed="true">Three worlds</button>
       <button data-tab="explore" aria-pressed="false">All pairs</button>
-      <button data-tab="planets" aria-pressed="false">Planets</button>
-      <button data-tab="side-by-side" aria-pressed="false">Side by side</button>
       <button data-tab="method" aria-pressed="false">Method</button>
     </nav>
   </header>
@@ -34,12 +32,28 @@
           <figure id="fig-moon"><figcaption><span class="dot moon"></span>Moon</figcaption><div class="globe moon" id="globe-moon" role="img" aria-label="Globe of the Moon with counterpart pins"><canvas></canvas></div><p class="cap" id="cap-moon"></p></figure>
           <figure id="fig-mars" hidden><figcaption><span class="dot mars"></span>Mars</figcaption><div class="globe mars" id="globe-mars" role="img" aria-label="Globe of Mars with counterpart pins"><canvas></canvas></div><p class="cap" id="cap-mars"></p></figure>
         </div>
+        <!-- zoom view: two maps at one scale, live pictures over saved copies (js/zoom.js) -->
+        <div class="zoomwrap" id="zoomwrap" hidden>
+          <div class="zmaps" id="zmaps"></div>
+          <div class="zfoot"><span class="zscale" id="zscale"></span><button class="btn alt" id="zterrain" hidden>See the measured terrain in 3D →</button></div>
+          <form class="qtform" id="qtform">
+            <label for="qtll">Test any place on Earth</label>
+            <input id="qtll" name="ll" inputmode="decimal" autocomplete="off" placeholder="latitude, longitude  e.g. 64.07, -16.20" aria-describedby="qthelp">
+            <button class="zoomgo" type="submit">Test</button>
+            <span class="fineprint" id="qthelp">or click the Earth map</span>
+          </form>
+          <div class="qt" id="ztest" aria-live="polite" hidden></div>
+          <p class="fineprint" id="zoommsg"></p>
+        </div>
+        <p class="tourcap" id="tourcap" aria-live="polite" hidden></p>
         <div class="otherbar">
           <span class="mono">Compare Earth with</span>
           <div class="seg" id="other-toggle" role="group" aria-label="Second world">
             <button data-b="moon" aria-pressed="true">Moon</button>
             <button data-b="mars" aria-pressed="false">Mars</button>
           </div>
+          <button class="zoomgo" id="zoom-go" aria-pressed="false">Zoom in to both places</button>
+          <button class="zoomgo" id="tour-go" aria-pressed="false">Play the 30-second tour</button>
         </div>
       </div>
       <aside class="side dock" id="sites-dock" aria-label="Analog sites">
@@ -54,30 +68,11 @@
       </aside>
     </section>
 
-    <!-- 2. PLANETS -->
-    <section class="view" id="view-planets" hidden>
-      <div class="planets">
-        <div class="pgrid">
-          <ul class="pstats" id="pstats" aria-label="Key figures"></ul>
-          <div class="pstage">
-            <div class="pglobe" id="pglobe-earth" role="img" aria-label="Earth"><canvas></canvas></div>
-            <div class="pglobe" id="pglobe-moon" role="img" aria-label="Moon" hidden><canvas></canvas></div>
-            <div class="pglobe" id="pglobe-mars" role="img" aria-label="Mars" hidden><canvas></canvas></div>
-            <div class="pop" id="pop" role="dialog" aria-label="Site details" hidden></div>
-          </div>
-          <div class="pcard" id="pcard"></div>
-        </div>
-        <div class="pnav">
-          <nav aria-label="Choose a world" id="pnav"></nav>
-          <p class="mono fineprint" id="pnote"></p>
-        </div>
-      </div>
-    </section>
-
     <!-- 3. SIDE BY SIDE -->
     <section class="view" id="view-side-by-side" hidden>
       <div class="sbs">
         <div class="row">
+          <a class="back" id="sbs-back" href="#explore">← Back to the pair</a>
           <h1>Side by side</h1>
           <div class="pills" id="pairs" style="margin:0" role="group" aria-label="Pair"></div>
           <div class="seg" role="group" aria-label="Display"><button id="mode-3d" aria-pressed="true">3D terrain</button><button id="mode-slide" aria-pressed="false">Slide</button></div>
@@ -85,9 +80,10 @@
         <div class="ctl">
           <label>View <input type="range" id="ctl-view" min="0" max="359" value="35"><output id="out-view"></output></label>
           <label>Sun from <input type="range" id="ctl-az" min="0" max="359" value="300"><output id="out-az"></output></label>
-          <label>Sun height <input type="range" id="ctl-el" min="3" max="60" value="14"><output id="out-el"></output></label>
+          <label>Sun height <input type="range" id="ctl-el" min="1" max="60" step="0.5" value="14"><output id="out-el"></output></label>
           <label>Vertical exaggeration <input type="range" id="ctl-ve" min="1" max="4" step="0.5" value="2"><output id="out-ve"></output></label>
           <button class="pill" id="sweep">Sweep the sun</button>
+          <button class="pill" id="polar-light" title="Puts the Sun 1.5° above the horizon, as at the lunar poles">Light it like the lunar pole</button>
         </div>
         <div class="panels" id="panels"></div>
         <div class="slider" id="slider" hidden>

@@ -5,7 +5,7 @@
     "C": "Cited",
     "P": "Partial match",
     "H": "Hypothesis",
-    "B": "Breaks here",
+    "B": "Does not match",
     "N": "Not assessed"
   },
   "statusHelp": {
@@ -13,7 +13,7 @@
     "C": "A published source says so",
     "P": "Alike in kind only",
     "H": "Proposed by us. Not published, not tested",
-    "B": "Known not to match",
+    "B": "The Earth site is known to differ from its counterpart on this dimension",
     "N": "Nobody on the team has checked"
   },
   "labels": { "benchmark": ["Benchmark", "A well-studied pair, shown for comparison. Not new."], "established": ["Established", "Published as an analog, or used by a space agency. Not new."], "hypothesis": ["Hypothesis", "Proposed by us. Not published as this analog, and not tested."] },
@@ -989,8 +989,8 @@
       "labelNote": "Well covered since fieldwork in 2019.",
       "role": "The benchmark the other pairs are held against.",
       "claim": "A well-studied pair: a living carbonate lake set against the ancient lake of Jezero.",
-      "scale": "A 7 km lake",
-      "scored": false,
+      "scale": "A 7 km lake, 60 km window",
+      "scored": true,
       "figures": [
         {
           "q": "Carbonate minerals",
@@ -1025,16 +1025,16 @@
       "helpsSrc": ["S10", "S11"],
       "prior": "Well known. Shown as a benchmark, not as a find.",
       "priorSrc": ["S11"],
-      "data": "Field literature",
+      "data": "Copernicus DEM GLO-30, MGS MOLA; field literature",
       "d": {
         "geo": ["C", "Magnesium carbonates, as found at Jezero"],
-        "terrain": ["N", "Not looked at"],
+        "terrain": ["M", "Measured on one 500 m grid: similar relief, steeper and rougher at Lake Salda"],
         "temp": ["B", "Temperate"],
         "ice": ["B", "A living lake"],
         "dust": ["N", "Not looked at"],
         "bio": ["P", "Living lake: tests biosignature strategy, not ancient Mars"],
         "sub": ["N", "Not looked at"],
-        "ops": ["P", "Sampling strategy"]
+        "ops": ["M", "Share of ground under the 8° landing tilt limit, measured on both at 500 m"]
       },
       "tcoordSrc": ["G1"],
       "tcoordNote": "Centre of Jezero crater",
@@ -1042,9 +1042,9 @@
       "dsrc": { "geo": ["P7", "P8"], "bio": ["S10"], "ops": ["S10"] },
       "planRating": "High, low novelty",
       "conf": {
-        "score": 70,
-        "band": "Medium",
-        "note": "Medium: 55 and above.",
+        "score": 75,
+        "band": "High",
+        "note": "High: 75 and above.",
         "parts": [
           {
             "k": "published",
@@ -1073,10 +1073,10 @@
           {
             "k": "quantity",
             "label": "Same property on both worlds",
-            "pts": 15,
+            "pts": 20,
             "max": 20,
-            "why": "A published value for the same property on both sides: carbonate minerals.",
-            "src": ["P7", "P8"]
+            "why": "Terrain is measured by us on both worlds, on one 500 m grid.",
+            "src": []
           },
           {
             "k": "limits",
@@ -1088,7 +1088,9 @@
           }
         ]
       },
-      "tempOther": { "v": "about 214 K (−59 °C)", "k": 214, "note": "Mean surface temperature of Mars as a whole, not of this place", "src": ["F1"] }
+      "tempOther": { "v": "about 214 K (−59 °C)", "k": 214, "note": "Mean surface temperature of Mars as a whole, not of this place", "src": ["F1"] },
+      "terrainVerdict": "Measured, and closer than the Moon pair, on a much coarser grid. Both windows are basins with similar relief; Lake Salda's ground is steeper and rougher.",
+      "terrainReading": "Read this with care. Mars's open global elevation grid is about 463 m, so both windows are 60 km squares measured on one 500 m grid. Roughness at 500 m is not the same quantity as roughness at 80 m, and the number cannot be compared with the Moon pair's. The controls show these measures capture ruggedness, not shape."
     },
     {
       "id": "riotinto",
@@ -1286,57 +1288,6 @@
   ],
   "limitsNote": "Each site stands in only for the characteristics listed on its page.",
   "negative": { "head": "The negative result", "text": "No natural Earth site was found that reproduces the cold, the lighting or the volatiles of the lunar south pole. At the LCROSS impact site in Cabeus crater, one of the coldest of those regions, subsurface temperatures are estimated at 38 K. The Moon candidates here match rock and caves only.", "src": ["Q11"] },
-  "planets": {
-    "earth": {
-      "name": "Earth",
-      "caps": "EARTH",
-      "glow": "rgba(80,140,220,0.3)",
-      "desc": "Our test bench. Each site here matches the Moon or Mars in some measured or documented ways and differs in others.",
-      "stats": [
-        ["12,742 km", "Mean diameter"],
-        ["9.82 m/s² (1 g)", "Surface gravity"],
-        ["101.4 kPa", "Surface pressure"],
-        ["about 15 °C", "Mean surface temperature"],
-        ["24 h", "Length of day"],
-        ["Water, weather, life", "What analogs must look past"]
-      ],
-      "sitesHead": "Earth sites and processes in this atlas",
-      "limit": "Liquid water, weather and life act on every Earth site and alter it in ways the Moon and Mars do not."
-    },
-    "moon": {
-      "name": "Moon",
-      "caps": "MOON",
-      "glow": "rgba(200,200,210,0.2)",
-      "desc": "Airless and grey, with highlands of pale anorthosite and craters that have barely eroded in billions of years. The south pole is where Artemis plans to land.",
-      "stats": [
-        ["3,475 km", "Mean diameter"],
-        ["1.62 m/s² (0.17 g)", "Surface gravity"],
-        ["Essentially none", "Atmosphere"],
-        ["about −178 to 117 °C", "Temperature range at the equator"],
-        ["about 29.5 Earth days", "Length of day"],
-        ["Low sun, permanent shadow", "At the south pole"]
-      ],
-      "sitesHead": "Earth analogs for the Moon",
-      "limit": "One sixth of Earth gravity, a vacuum, unshielded radiation, and the cold and lighting of polar craters. No Earth site matches these."
-    },
-    "mars": {
-      "name": "Mars",
-      "caps": "MARS",
-      "glow": "rgba(224,98,63,0.3)",
-      "desc": "A cold desert with a thin carbon dioxide atmosphere, buried ice, dune fields and old lake beds that record a wetter past.",
-      "stats": [
-        ["6,779 km", "Mean diameter"],
-        ["3.73 m/s² (0.38 g)", "Surface gravity"],
-        ["about 0.6 kPa", "Surface pressure"],
-        ["about −59 °C", "Mean surface temperature"],
-        ["about 24 h 40 min", "Length of day (sol)"],
-        ["Global dust storms", "Surface process"]
-      ],
-      "sitesHead": "Earth analogs for Mars",
-      "limit": "About a third of Earth gravity, air under 1% as dense, high radiation and no liquid water at the surface today."
-    }
-  },
-  "planetsNote": "Figures: NASA Planetary Fact Sheets, read 15 November 2026.",
   "pairs": [
     {
       "id": "degerlache",
@@ -1374,6 +1325,25 @@
           { "k": "roughness", "label": "Roughness", "pct": 64, "why": "3.5 m against 5.5 m." }
         ]
       }
+    },
+    {
+      "id": "jezero",
+      "label": "Lake Salda ↔ Jezero",
+      "site": "salda",
+      "body": "mars",
+      "earth": "salda",
+      "other": "jezero",
+      "earthTitle": "Lake Salda, Turkey",
+      "otherTitle": "Jezero crater, Mars",
+      "otherCentre": { "lat": 18.41, "lon": 77.69, "provisional": false },
+      "sim": {
+        "score": 73,
+        "parts": [
+          { "k": "slopes", "label": "Slopes", "pct": 74, "why": "Overlap of the two slope histograms." },
+          { "k": "relief", "label": "Relief", "pct": 96, "why": "840 m against 872 m." },
+          { "k": "roughness", "label": "Roughness", "pct": 49, "why": "19.7 m against 40.5 m." }
+        ]
+      }
     }
   ],
   "controls": [
@@ -1387,9 +1357,11 @@
     "sections": [
       { "h": "The argument", "p": ["Every page argues one thing: this place on Earth is like that place on the Moon or Mars in these ways, and unlike it in these.", "Terrain and temperature are measured by us: terrain on both worlds, temperature on Earth and set against published figures. Every other dimension is shown as cited evidence, with a link to its source.", "Three numbers appear, and they mean different things. Terrain similarity says how alike two terrains are. Confidence says how well a page's statements are supported. Neither is an overall score for a pair, and each is shown with its parts."] },
       { "h": "Labels for a pair", "ul": ["Benchmark: a well-studied pair, shown for comparison. Not new.", "Established: published as an analog, or used by a space agency. Not new.", "Hypothesis: proposed by us. Not published as this analog and not tested. A hypothesis is never shown as a finding."] },
-      { "h": "Evidence codes for a dimension", "ul": ["Measured: the same quantity, from data, on both worlds. Today that is terrain only.", "Cited: a published source says so. The link is on the page.", "Partial match: alike in kind only.", "Hypothesis: our proposal, not published and not tested.", "Breaks here: known not to match.", "Not assessed: nobody on the team has checked. This is an allowed answer, and an empty cell is never filled by a guess."] },
-      { "h": "How terrain is measured", "p": ["Both windows are 40 km squares. Each is area-averaged onto one 80 m grid before anything is measured, because slope depends on the distance between samples: two terrains are only comparable at one resolution. Slope is computed from height differences in metres."], "ul": ["Relief: 95th minus 5th percentile height of the unmasked cells.", "Median slope and 95th percentile slope, in degrees.", "Roughness: the spread of height left after removing a 5 by 5 cell (400 m) moving average.", "Gentle ground: the share of unmasked cells with a slope under 8°. That is the tilt NASA's Human Landing System must tolerate for surface operations (Chavers et al. 2020; NASA Inspector General report IG-26-004). The requirement gives no baseline and site studies apply it at about 5 m, so at 80 m this is a coarse screen, not a landing-safety assessment.", "Slope histogram: 2 degree bins from 0 to 40, the same bins on both sides."], "p2": ["Earth: Copernicus DEM GLO-30, read from Microsoft Planetary Computer and reprojected to UTM zone 20N at 30 m, with the lake masked. Moon: LRO LOLA polar gridded elevation LDEM_80S_80M at 80 m, with every scale factor and offset read from the product label.", "The measures are computed in Python and written to a file. The browser draws what is in the file and never invents or recomputes a measurement. The script checks itself on made-up terrain first: a flat plane must give zero slope, and a uniform 20 degree ramp must read as 20 degrees."] },
+      { "h": "Evidence codes for a dimension", "ul": ["Measured: the same quantity, from data, on both worlds. Today that is terrain only.", "Cited: a published source says so. The link is on the page.", "Partial match: alike in kind only.", "Hypothesis: our proposal, not published and not tested.", "Does not match: the Earth site is known to differ from its counterpart here.", "Not assessed: nobody on the team has checked. This is an allowed answer, and an empty cell is never filled by a guess."] },
+      { "h": "How terrain is measured", "p": ["Both windows are 40 km squares. Each is area-averaged onto one 80 m grid before anything is measured, because slope depends on the distance between samples: two terrains are only comparable at one resolution. Slope is computed from height differences in metres."], "ul": ["Relief: 95th minus 5th percentile height of the unmasked cells.", "Median slope and 95th percentile slope, in degrees.", "Roughness: the spread of height left after removing a 5 by 5 cell (400 m) moving average.", "Gentle ground: the share of unmasked cells with a slope under 8°. That is the tilt NASA's Human Landing System must tolerate for surface operations (Chavers et al. 2020; NASA Inspector General report IG-26-004). The requirement gives no baseline and site studies apply it at about 5 m, so at 80 m this is a coarse screen, not a landing-safety assessment.", "Slope histogram: 2 degree bins from 0 to 40, the same bins on both sides."], "p2": ["Earth: Copernicus DEM GLO-30, read from Microsoft Planetary Computer and reprojected to UTM zone 20N at 30 m, with the lake masked. Moon: LRO LOLA polar gridded elevation LDEM_80S_80M at 80 m, with every scale factor and offset read from the product label.", "The Mars pair, Lake Salda and Jezero, uses NASA's MOLA grid, which is about 463 m. That is too coarse for 80 m, so both of its windows are 60 km squares on one 500 m grid. The two pairs' numbers cannot be compared with each other.", "The measures are computed in Python and written to a file. The browser draws what is in the file and never invents or recomputes a measurement. The script checks itself on made-up terrain first: a flat plane must give zero slope, and a uniform 20 degree ramp must read as 20 degrees.", "The side-by-side view has a button that lights both terrains with the Sun 1.5° above the horizon. The Moon's axis is tilted about 1.5° (NASA Moon Fact Sheet: obliquity to orbit 6.68°, orbit inclined 5.145° to the ecliptic), so at its poles the Sun stays about that low. Each slope is shaded by how it faces the Sun; shadows that one hill casts on another are not drawn."] },
       { "h": "How temperature, wind and rain are measured", "p": ["For each Earth site we read one year of NASA MODIS land surface temperature (the MOD11A2 product from the Terra satellite: 8-day clear-sky composites at 1 km) at the one pixel that contains the site's coordinates. The page gives the average by day and by night, and the coldest and warmest 8-day averages.", "The Moon or Mars side is a published figure, not our measurement, and the page says which. So this is a second measured dataset on the Earth side only. It turns \"the cold does not match\" into a number: how many kelvin separate the coldest night at the site from the figure for its counterpart.", "Air temperature, wind and rainfall come from NASA POWER, a 25-year climatology from the MERRA-2 reanalysis on a grid of about 50 km. A reanalysis is a reconstruction constrained by observations, not a reading taken at the site, and one grid cell is far larger than most of our sites.", "Limits: one pixel is 1 km across and some site coordinates are approximate; composites with cloud are skipped; a lake pixel reads the water surface."] },
+      { "h": "The zoom view: two maps, one scale", "p": ["On the Three worlds tab, the globes can zoom in to two maps: the Earth site beside its counterpart. Both maps are drawn on a flat grid in metres centred on the place, so a kilometre covers the same number of pixels on each. The two maps are tied to one zoom level and the scale under them is printed only while they share it.", "The pictures are requested live from NASA GIBS (Blue Marble, and the Landsat composite for the year 2000) and from USGS Astrogeology (the LRO wide angle camera mosaics of the Moon and the THEMIS daytime infrared mosaic of Mars). Under the live pictures sits a saved copy of the same pictures, fetched by pipeline/prerender_maps.py, so the view works with no network. A label on each map says which one is showing.", "The maps are pictures for orientation. No number on this site is read from them. Near the lunar south pole the map is polar: up is toward 0° longitude, not north. The dashed square, where there is one, is the window whose terrain we measured.", "The 30-second tour plays one pair through this view. Every line it shows is a claim from this site's data file with its source, ending on where the analogy stops."] },
+      { "h": "Quick test: any place on Earth", "p": ["In the zoom view you can click the Earth map, or type a latitude and longitude, and the site measures that place's terrain in your browser and sets it beside our measured Moon window (de Gerlache) or Mars window (Jezero). It is there so anyone can propose a site we did not think of.", "It is a quick test, not our pipeline, and every number from it is labelled that way. The measures are the pipeline's own, ported line for line: relief, slope, roughness, the share of ground under 8°, and the same three-part similarity. The elevation is different: open Terrain Tiles (Mapzen, hosted on AWS Open Data, built from sources that include NASA SRTM), sampled on the target's grid, where the pipeline area-averages Copernicus DEM.", "We checked it where we have pipeline values. At Lake Salda it gives 841 m of relief against the pipeline's 840 m, and a median slope of 4.0° against 4.1°. At Kamestastin it gives 226 m against 216 m, and 3.3° against 3.7°. On the Sua Pan lake bed it fails: the tiles are too coarse for ground that flat, and it reads 3.2 m of roughness where the pipeline reads 0.25 m. The result card offers the same check live.", "Still water is stored perfectly flat in the tiles, so flat cells are left out, as the pipeline leaves out its lake mask. The sea floor is not masked. Beyond 80° of latitude the tiles are not used. A quick-test score is a first look at terrain only; it is never added to the atlas or to a pair's confidence."] },
       { "h": "What the measures cannot see", "p": ["The elevation model stores the lake surface, not the lake bed, and the top of the forest, not the ground under it. The lake is masked out of every measure.", "Shape says nothing about gravity, vacuum, temperature, lighting, or what the ground is made of."] },
       {
         "h": "Does the method work? Controls",
@@ -1404,13 +1376,15 @@
     "datasets": [
       ["Copernicus DEM GLO-30", "Earth elevation, 30 m. Read through Microsoft Planetary Computer. https://doi.org/10.5270/ESA-c5d3d65", "https://dataspace.copernicus.eu/explore-data/data-collections/copernicus-contributing-missions/collections-description/COP-DEM"],
       ["LRO LOLA gridded elevation, LDEM_80S_80M", "Moon south-polar elevation, 80 m. NASA Planetary Data System, data set LRO-L-LOLA-4-GDR-V1.0.", "https://pds-geosciences.wustl.edu/missions/lro/lola.htm"],
+      ["MGS MOLA gridded elevation, MEGDR 128 pixels per degree", "Mars elevation, about 463 m. NASA Planetary Data System, data set MGS-M-MOLA-5-MEGDR-L3-V1.0.", "https://pds-geosciences.wustl.edu/missions/mgs/megdr.html"],
       ["MODIS/Terra land surface temperature, MOD11A2", "Earth surface temperature, 8-day, 1 km. Read through Microsoft Planetary Computer.", "https://www.earthdata.nasa.gov/data/catalog/lpcloud-mod11a2-061"],
       ["NASA POWER", "Air temperature, wind and rainfall climatology at each Earth site.", "https://power.larc.nasa.gov/"],
       ["NASA GIBS, Blue Marble", "Earth globe imagery.", "https://nasa-gibs.github.io/gibs-api-docs/"],
       ["LRO WAC global mosaic, through NASA Trek", "Moon globe imagery.", "https://trek.nasa.gov/"],
-      ["Mars Viking Colorized Global Mosaic (MDIM 2.1), through NASA Trek", "Mars globe imagery. The colour is added, not natural.", "https://astrogeology.usgs.gov/search/map/mars_viking_colorized_global_mosaic_232m"]
+      ["Mars Viking Colorized Global Mosaic (MDIM 2.1), through NASA Trek", "Mars globe imagery. The colour is added, not natural.", "https://astrogeology.usgs.gov/search/map/mars_viking_colorized_global_mosaic_232m"],
+      ["Terrain Tiles (Mapzen, on AWS Open Data)", "Open global elevation tiles, used only by the quick test. Attribution: https://github.com/tilezen/joerd/blob/master/docs/attribution.md", "https://registry.opendata.aws/terrain-tiles/"]
     ],
-    "credits": ["NASA is acknowledged as the source of the Moon and Mars data and imagery and of the Blue Marble imagery. NASA does not endorse this project. The NASA insignia is not used.", "Earth terrain: produced using Copernicus WorldDEM-30 © DLR e.V. 2010-2014 and © Airbus Defence and Space GmbH 2014-2018 provided under COPERNICUS by the European Union and ESA; all rights reserved.", "Moon terrain: Neumann, G.A., 2009 Lunar Orbiter Laser Altimeter Raw Data Set, LRO-L-LOLA-4-GDR-V1.0, NASA Planetary Data System, 2010. Instrument: Smith, D.E., et al. (2010), The Lunar Orbiter Laser Altimeter Investigation on the Lunar Reconnaissance Orbiter Mission, Space Science Reviews 150, 209–241.", "We acknowledge the use of imagery provided by services from NASA's Global Imagery Browse Services (GIBS), part of NASA's Earth Science Data and Information System (ESDIS).", "Moon imagery: NASA/GSFC/Arizona State University. Mars imagery: Mars Viking Colorized Global Mosaic, USGS Astrogeology Science Center and NASA Ames; public domain.", "Earth data were read through the Microsoft Planetary Computer (Microsoft Open Source et al. 2022, doi 10.5281/zenodo.7261897).", "Typeface: IBM Plex Mono, under the SIL Open Font License.", "The globes can be shown as ASCII characters. Those characters are drawn from the same NASA imagery: brightness picks the character and the image gives its colour. Nothing in the ASCII view is generated by AI."]
+    "credits": ["NASA is acknowledged as the source of the Moon and Mars data and imagery and of the Blue Marble imagery. NASA does not endorse this project. The NASA insignia is not used.", "Earth terrain: produced using Copernicus WorldDEM-30 © DLR e.V. 2010-2014 and © Airbus Defence and Space GmbH 2014-2018 provided under COPERNICUS by the European Union and ESA; all rights reserved.", "Moon terrain: Neumann, G.A., 2009 Lunar Orbiter Laser Altimeter Raw Data Set, LRO-L-LOLA-4-GDR-V1.0, NASA Planetary Data System, 2010. Instrument: Smith, D.E., et al. (2010), The Lunar Orbiter Laser Altimeter Investigation on the Lunar Reconnaissance Orbiter Mission, Space Science Reviews 150, 209–241.", "Mars terrain: Smith, D.E., et al., Mars Global Surveyor Laser Altimeter Mission Experiment Gridded Data Record, MGS-M-MOLA-5-MEGDR-L3-V1.0, NASA Planetary Data System, 2003.", "We acknowledge the use of imagery provided by services from NASA's Global Imagery Browse Services (GIBS), part of NASA's Earth Science Data and Information System (ESDIS).", "Moon imagery: NASA/GSFC/Arizona State University. Mars imagery: Mars Viking Colorized Global Mosaic, USGS Astrogeology Science Center and NASA Ames; public domain.", "Zoom-view pictures: Landsat WELD (NASA and USGS) through NASA GIBS; LROC WAC mosaics, NASA/GSFC/Arizona State University; THEMIS daytime infrared mosaic, NASA/JPL-Caltech/Arizona State University; Moon and Mars mosaics served by the USGS Astrogeology Science Center.", "Earth data were read through the Microsoft Planetary Computer (Microsoft Open Source et al. 2022, doi 10.5281/zenodo.7261897).", "Typeface: IBM Plex Mono, under the SIL Open Font License.", "Maps are drawn with Leaflet 1.9.4 (BSD 2-Clause licence), kept in web/vendor so the site needs no outside script.", "Quick test elevation: Terrain Tiles by Mapzen, hosted on AWS Open Data. Its sources include NASA SRTM, USGS NED and 3DEP, GMTED2010 and ETOPO1; full attribution at github.com/tilezen/joerd/blob/master/docs/attribution.md.", "The globes can be shown as ASCII characters. Those characters are drawn from the same NASA imagery: brightness picks the character and the image gives its colour. Nothing in the ASCII view is generated by AI.", "The opening figure is the Farnese Atlas (National Archaeological Museum of Naples), from a photograph by Giacomo Brogi reproduced in W. T. Olcott, Star Lore of All Ages (1911), public domain, from Wikimedia Commons. It is turned into characters by brightness (pipeline/atlas_art.py); only the characters are on this site. The star background is drawn by code. Both are decoration, not data."]
   },
   "sources": {
     "S8": {
@@ -1872,6 +1846,7 @@
     "p": ["No number on this site is generated, simulated or seeded. The code that once drew placeholder terrain has been removed: if an export is missing the page shows a message, never a picture.", "Measured numbers come from two elevation datasets. Everything else is a published figure with a link to its source."],
     "rows": [
       ["Every Moon terrain measure and picture", "LRO LOLA gridded elevation, product LDEM_80S_80M, from the NASA Planetary Data System", "Yes: NASA Lunar Reconnaissance Orbiter, and the Planetary Data System", "https://pds-geosciences.wustl.edu/missions/lro/lola.htm"],
+      ["The Mars terrain measures and picture (Jezero)", "MGS MOLA gridded elevation, MEGDR 128 pixels per degree, from the NASA Planetary Data System", "Yes: the NASA Planetary Data System", "https://pds-geosciences.wustl.edu/missions/mgs/megdr.html"],
       ["Every Earth terrain measure and picture", "Copernicus DEM GLO-30", "Yes, as a Copernicus product. The list names ESA's Copernicus Data Space Ecosystem; we read the same product from Microsoft Planetary Computer's open copy, which needs no account", "https://dataspace.copernicus.eu/explore-data/data-collections/copernicus-contributing-missions/collections-description/COP-DEM"],
       ["Every Earth temperature", "MODIS/Terra land surface temperature, MOD11A2 v061, 2023", "Yes: a NASA Earthdata product (the list names NASA Earthdata Search). We read it from Microsoft Planetary Computer's open copy", "https://www.earthdata.nasa.gov/data/catalog/lpcloud-mod11a2-061"],
       ["Air temperature, wind and rain at each Earth site", "NASA POWER climatology (MERRA-2 reanalysis), 2001 to 2025", "No. A NASA service, open and without an account", "https://power.larc.nasa.gov/"],
@@ -1881,7 +1856,10 @@
       ["Lunar cold figure (38 K)", "LRO Diviner, as published in Paige et al. 2010", "Yes: LRO Diviner. We cite the published figure; we did not process Diviner data", "https://pds-geosciences.wustl.edu/missions/lro/diviner.htm"],
       ["Gravity, pressure and temperature of each world", "NASA Planetary Fact Sheets", "No. A NASA reference page", "https://nssdc.gsfc.nasa.gov/planetary/factsheet/"],
       ["Moon and Mars coordinates", "IAU and USGS Gazetteer of Planetary Nomenclature; LROC pits list", "No. Reference databases", "https://planetarynames.wr.usgs.gov/"],
-      ["Every claim about a site", "Papers, theses and agency pages, listed under Sources with their kind and how much was read", "Not datasets. Each claim links to its source", null]
+      ["Every claim about a site", "Papers, theses and agency pages, listed under Sources with their kind and how much was read", "Not datasets. Each claim links to its source", null],
+      ["The map pictures in the zoom view (Earth)", "NASA Blue Marble and the Landsat WELD annual composite for 2000, from NASA GIBS", "A NASA service, open and without an account", "https://www.earthdata.nasa.gov/engage/open-data-services-software/earthdata-developer-portal/gibs-api"],
+      ["The map pictures in the zoom view (Moon and Mars)", "LROC wide angle camera mosaics and the Mars Odyssey THEMIS daytime infrared mosaic, served by USGS Astrogeology", "NASA mission data, served by the U.S. Geological Survey", "https://planetarymaps.usgs.gov/"],
+      ["Quick-test numbers for a place you choose", "Terrain Tiles (Mapzen), hosted on AWS Open Data, measured in your browser with the pipeline's formulas", "No. Open data built from sources that include NASA SRTM; labelled as a quick test", "https://registry.opendata.aws/terrain-tiles/"]
     ],
     "p2": ["To reproduce the measures: pipeline/moon_dem.ipynb and pipeline/earth_dem.ipynb cut the windows, and pipeline/export_terrain.py measures them. Both notebooks were rerun on 15 November and gave the same numbers as the files on this site."]
   },
@@ -1956,5 +1934,6 @@
     ],
     "p2": ["A hypothesis is capped at 40, whatever its parts add up to, because nobody has tested the pairing.", "Bands: 75 and above is High, 55 to 74 is Medium, 35 to 54 is Low, under 35 is Very low.", "The rubric rewards reading better sources. A score rises when someone opens the primary paper and records it, and falls if a claim turns out to rest on news alone.", "The scores are computed by pipeline/score_confidence.py and stored in the data file. The page shows the stored numbers and their parts."]
   },
-  "terrainSim": { "h": "How terrain similarity is worked out", "p": ["Where both worlds have a terrain window, the page gives a terrain similarity percentage. It is the plain average of three parts, each from 0 to 100, and it is always shown with them."], "ul": ["Slopes: how much the two slope histograms overlap. For each 2 degree bin take the smaller of the two shares, then add them up.", "Relief: the smaller relief divided by the larger.", "Roughness: the smaller roughness divided by the larger."], "p2": ["It is a plain average because we have no reason to weight one part above another. It describes terrain only. It says nothing about rock, temperature, ice or anything else, and it does not feed the confidence score.", "The controls test it: the table below gives every window's similarity to de Gerlache."] }
+  "terrainSim": { "h": "How terrain similarity is worked out", "p": ["Where both worlds have a terrain window, the page gives a terrain similarity percentage. It is the plain average of three parts, each from 0 to 100, and it is always shown with them."], "ul": ["Slopes: how much the two slope histograms overlap. For each 2 degree bin take the smaller of the two shares, then add them up.", "Relief: the smaller relief divided by the larger.", "Roughness: the smaller roughness divided by the larger."], "p2": ["It is a plain average because we have no reason to weight one part above another. It describes terrain only. It says nothing about rock, temperature, ice or anything else, and it does not feed the confidence score.", "The controls test it: the table below gives every window's similarity to de Gerlache."] },
+  "tourSite": "galena"
 }

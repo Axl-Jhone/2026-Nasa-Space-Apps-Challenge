@@ -11,17 +11,22 @@ The site argues: this place on Earth is like that place on the Moon or Mars in t
 | `pipeline/earth_dem.ipynb` | Leander | Copernicus GLO-30 window from Planetary Computer, reprojected to UTM |
 | `pipeline/moon_dem.ipynb` | Leander | LOLA `LDEM_80S_80M` window, every number read from the label |
 | `pipeline/export_terrain.py` | Leander, Mico (metric definitions) | Shared 80 m grid, metrics, writes `web/data/terrain/<id>.json`. `--selftest` checks the maths |
+| `pipeline/mars_dem.py` | Leander | MOLA MEGDR window for Mars (Jezero), read from the NASA Planetary Data System. Run with `ATLAS_ANALYSIS_CELL_M=500` |
 | `pipeline/run_notebook.py` | Leander | Reruns a notebook's own cells for another site (Shackleton, the control windows) |
 | `pipeline/score_confidence.py` | Mico, Prince | Counts each pair's confidence score from `sites.json` and writes it back. `--check` says if the stored scores are stale |
 | `pipeline/score_terrain.py` | Mico | Terrain similarity (slopes, relief, roughness, plain average) for each pair and control window |
 | `pipeline/earth_temperature.py` | Leander | One year of MODIS land surface temperature at each Earth site, written to `web/data/temperature.json` |
 | `pipeline/earth_climate.py` | Leander | NASA POWER air temperature, wind and rainfall at each Earth site, written to `web/data/climate.json` |
+| `pipeline/prerender_maps.py` | Leander | Saved copies of the zoom-view map pictures (`web/data/maps/`), from the services listed in `web/data/maplayers.json`. Rerun after changing a site's coordinates |
 | `pipeline/sitesjson.py` | | Reads and writes `sites.json` in its hand-editable layout |
 | `data/raw/` | | Downloads. Only `.LBL` labels are committed |
 | `data/processed/` | | Notebook outputs (GeoTIFF). Not committed, regenerate from the notebooks |
 | `web/` | Axl | Static site, no build step. Formats are in `web/README.md` |
 | `web/data/sites.json` | Prince | All page text: sites, labels, claims with source ids, matrix, planets, pairs, controls, method text, source list |
 | `SUBMISSION.md` | Everyone | Drafts for the Space Apps form and the demo script |
+| `web/js/zoom.js`, `web/vendor/leaflet/` | Axl | Zoom view: two maps at one scale, live pictures over the saved copies. Leaflet 1.9.4 is vendored, do not load it from a CDN |
+| `web/js/quicktest.js` | Mico (formulas), Axl | Quick test of any Earth place against the Moon or Mars window. Tiles are fetched four at a time, cached, and cancelled when a newer test starts |
+| `web/js/intro.js`, `web/js/atlas-art.js` | Axl | Star background and the opening figure. Decoration only. The figure's characters are written by `pipeline/atlas_art.py` from a public-domain photograph; do not hand-edit |
 | `web/data/terrain/` | written by `export_terrain.py` | Do not hand-edit |
 
 Edit only what the person you are working with owns. If the work needs a change elsewhere, say what and why, and let its owner make it.
@@ -56,6 +61,8 @@ The "How to work with us" rules come first. These skills add discipline on top; 
 - Confidence is a number out of 100 with its five parts shown. It is counted by `pipeline/score_confidence.py` from the sources recorded in `sites.json`; never type a score by hand. After changing a claim or a source, rerun the script.
 - A claim in `sites.json` with no source id is shown on the page as "our reading". A pairing we propose ourselves is labelled `hypothesis` and is never shown as a finding.
 - Every number on the page comes from a file. The browser never invents or recomputes a measurement.
+- One exception, agreed 15 November: the quick test (`web/js/quicktest.js`) measures a place the visitor picks, in the browser, from open elevation tiles. Its formulas must stay identical to `export_terrain.py` and `score_terrain.py`. Every number from it is labelled "Quick test, not our pipeline" and never enters `sites.json`.
+- The star background and the opening ASCII figure (`web/js/intro.js`) are decoration, not data. The Credits say so.
 - Do not change a test's expected value to make it pass. Explain the failure instead.
 
 ## Word lists used in `web/data/sites.json`
@@ -75,5 +82,5 @@ The "How to work with us" rules come first. These skills add discipline on top; 
 
 - `.gitignore` started as GitHub's Python template; its `lib/`, `build/`, `dist/` rules are anchored to the repo root. Check with `git check-ignore -v <path>` if a file will not show up in `git status`.
 - Never commit `.IMG` or `.tif` elevation files. They are ignored in both upper and lower case.
-- Both windows must be 40 km and measured on the same 80 m grid. The page warns if they differ.
+- The two windows of a pair must be the same size and measured on the same grid: 40 km and 80 m for the Moon pairs, 60 km and 500 m for Lake Salda and Jezero (the Mars grid is about 463 m). The page warns if they differ. Numbers from the two grids cannot be compared with each other.
 - The de Gerlache and Shackleton centres are provisional (the Gazetteer lists several). The page shows the centre each export was cut at.

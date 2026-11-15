@@ -5,30 +5,32 @@ import { loadField, drawTerrain, drawHillshade } from './terrain.js';
 import { Globe, loadTextures, refreshAll, kick } from './globe.js';
 import { renderPair, renderExplore, renderMethod, labelChip, legendHtml, measTableHtml, srcLinks, matrixHtml, confText, simHtml } from './pages.js';
 import { initAscii } from './ascii.js';
+import { openZoom, closeZoom, zoomOpen } from './zoom.js';
+import { readWindow, measure, similarity } from './quicktest.js';
+import { initSky, playIntro } from './intro.js';
 
-const TABS = ['worlds', 'explore', 'planets', 'side-by-side', 'method'];
+const TABS = ['worlds', 'explore', 'side-by-side', 'method'];   // side-by-side has no tab of its own: it opens from a pair page
 const VIEWS = [...TABS, 'pair'];   // 'pair' is reached as #pair/<site id>, not from the tab bar
-const S = { tab: 'worlds', site: 'kamestastin', other: 'moon', side: 'list', filter: 'moon', planet: 'moon', pair: 'degerlache', mode: '3d', T: { view: 35, az: 300, el: 14, ve: 2 }, ex: { world: 'all', label: 'all' } };
-let D, G = {}, PG = {}, TEX = null;
+const S = { tab: 'worlds', site: 'kamestastin', other: 'moon', side: 'list', filter: 'moon', pair: 'degerlache', mode: '3d', T: { view: 35, az: 300, el: 14, ve: 2 }, ex: { world: 'all', label: 'all' } };
+let D, G = {}, TEX = null;
 const fields = new Map();           // terrain id -> field (a real export, or a 'missing' marker)
 const byId = id => D.sites.find(s => s.id === id);
 const pairById = id => D.pairs.find(p => p.id === id);
-const bodyName = b => ({ earth: 'Earth', moon: 'the Moon', mars: 'Mars' }[b]);
 const count = (s, code) => D.dims.filter(d => s.d[d[0]][0] === code).length;
 
 /* ---------- boot ---------- */
 async function boot() {
+  initSky(); playIntro();   // decoration; the data loads behind it
   try { D = await (await fetch('data/sites.json', { cache: 'no-cache' })).json(); }
   catch (e) { $('main').innerHTML = `<p class="err" style="margin:24px">Could not load data/sites.json. Serve the web folder over http (for example: python -m http.server) instead of opening the file directly.</p>`; return; }
   // A pair marked hideIfMissing is listed only once its terrain export exists
-  for (const p of D.pairs.filter(x => x.hideIfMissing)) if ((await getField(p.other, 'moon')).missing) D.pairs = D.pairs.filter(x => x !== p);
-  $('#pnote').textContent = D.planetsNote || '';
-  initAscii(); buildGlobes(); bindDock(); buildFilters(); buildSiteList(); buildPlanets(); buildPairs(); bindSbs();
+  for (const p of D.pairs.filter(x => x.hideIfMissing)) if ((await getField(p.other, p.body || 'moon')).missing) D.pairs = D.pairs.filter(x => x !== p);
+  initAscii(); buildGlobes(); bindDock(); bindZoom(); buildFilters(); buildSiteList(); buildPairs(); bindSbs();
   $$('nav.tabs button').forEach(b => b.addEventListener('click', () => { location.hash = '#' + b.dataset.tab; }));
   addEventListener('hashchange', route);
   try { const s = localStorage.getItem('atlas-site'); if (s && byId(s)) S.site = s; } catch (e) { /* storage may be blocked */ }
-  selectSite(S.site); route(); renderPlanet();
-  try { TEX = await loadTextures(); for (const k of ['earth', 'moon', 'mars']) { G[k].setTexture(TEX[k]); PG[k].setTexture(TEX[k]); } }
+  selectSite(S.site); route();
+  try { TEX = await loadTextures(); for (const k of ['earth', 'moon', 'mars']) { G[k].setTexture(TEX[k]); } }
   catch (e) { console.warn('globe textures missing; showing plain discs', e); }
 }
 
@@ -43,7 +45,7 @@ function route() {
   const t = ps ? 'pair' : TABS.includes(h) ? h : 'worlds';
   S.tab = t; document.body.dataset.tab = t;   // the stylesheet shows the globe switch only where there are globes
   for (const id of VIEWS) $('#view-' + id).hidden = id !== t;
-  $$('nav.tabs button').forEach(b => b.setAttribute('aria-pressed', b.dataset.tab === (t === 'pair' ? 'explore' : t)));
+  $$('nav.tabs button').forEach(b => b.setAttribute('aria-pressed', b.dataset.tab === (t === 'pair' || t === 'side-by-side' ? 'explore' : t)));
   if (t === 'side-by-side') loadPair();
   else if (t === 'pair') { selectSite(ps.id); renderPair(D, ps, ctx); }
   else if (t === 'explore') renderExplore(D, S.ex, route, ctx);
@@ -53,7 +55,7 @@ function route() {
 }
 
 /* ---------- 1. three worlds ---------- */
-// Pin lists for each world. Used by the Three worlds globes and the Planets globes, so both show the same pins.
+// Pin lists for each world.
 function makePins() {
   const pinFor = body => { const m = new Map(); for (const s of D.sites) if (s.body === body && s.tlat != null) { const k = s.tlat + ',' + s.tlon; if (!m.has(k)) m.set(k, { lat: s.tlat, lon: s.tlon, label: s.target, ids: [] }); m.get(k).ids.push(s.id); } return [...m.values()]; };
   const earth = D.sites.map(s => ({ lat: s.lat, lon: s.lon, label: s.short, ids: [s.id] }));
@@ -134,8 +136,97 @@ function selectSite(id, open = false) {
   $('#cap-earth').textContent = `${s.name}, ${s.where}`;
   $('#cap-moon').textContent = s.body === 'moon' ? s.target : 'No counterpart selected';
   $('#cap-mars').textContent = s.body === 'mars' ? s.target : 'No counterpart selected';
+  if (zoomOpen()) zoomTo(s);                                       // already zoomed in: the maps move to the new pair
   if (open) setDock(true);
   if (open || S.side === 'detail') showSideDetail(s);   // pressing a site opens its details; the toggle only updates them if already open
+}
+
+/* Zoom view: the globes give way to two maps at one scale. The measured windows are outlined where a pair has them. */
+async function zoomTo(s) {
+  const pair = D.pairs.find(p => p.site === s.id), windows = {};
+  if (pair) {
+    const [e, o] = await Promise.all([getField(pair.earth, 'earth'), getField(pair.other, pair.body || 'moon')]);
+    if (!e.missing && !o.missing) { windows.earth = { ...e.meta.centre, km: e.windowKm }; windows.other = { ...o.meta.centre, km: o.windowKm }; }
+  }
+  $('#zoom-go').textContent = '← Back to the globes'; $('#zoom-go').setAttribute('aria-pressed', 'true');
+  $('#ztest').hidden = true;
+  openZoom(s, { pair: pair && windows.earth ? pair.id : null, windows, onTerrain: id => ctx.openSbs(id), onPick: (lat, lon) => quickTest(lat, lon), pickName: testTarget().name });
+}
+
+/* Quick test: any place on Earth against the measured Moon or Mars window. Labelled everywhere as a quick test, because it
+   reads open elevation tiles in the browser and is not the pipeline. The measures are the pipeline's own (js/quicktest.js). */
+const testTarget = () => (S.other === 'mars' ? { pair: pairById('jezero'), name: 'Jezero crater, Mars', world: 'Mars', check: 'Lake Salda' } : { pair: pairById('degerlache'), name: 'de Gerlache crater, Moon', world: 'Moon', check: 'Kamestastin' });
+let qtAbort = null;
+async function quickTest(lat, lon, check = false) {
+  const T = testTarget(), box = $('#ztest'); if (!T.pair) return;
+  if (qtAbort) qtAbort.abort(); const ac = qtAbort = new AbortController();     // a newer click cancels the older requests
+  const [o, pe] = await Promise.all([getField(T.pair.other, T.pair.body || 'moon'), getField(T.pair.earth, 'earth')]);
+  if (o.missing) return;
+  if (check) { lat = pe.meta.centre.lat; lon = pe.meta.centre.lon; }
+  const km = o.windowKm, cell = o.meta.analysis_cell_m, oc = o.meta.centre, ts = byId(T.pair.site);
+  stopTour();
+  $('#zoom-go').textContent = '← Back to the globes'; $('#zoom-go').setAttribute('aria-pressed', 'true');
+  openZoom({ id: '_test', body: T.pair.body || 'moon', name: check ? pe.meta.name : 'Your place', lat, lon, target: ts.target, tlat: oc.lat, tlon: oc.lon },
+    { noFly: zoomOpen(), savedFrom: ts.id, windows: { earth: { lat, lon, km }, other: { lat: oc.lat, lon: oc.lon, km } }, onPick: (a, b) => quickTest(a, b), pickName: T.name });
+  box.hidden = false; box.innerHTML = `<p class="qtwait">Reading open elevation for ${fmtLL(lat, lon)} …</p>`;
+  const t0 = performance.now();
+  try {
+    const w = await readWindow(lat, lon, km, cell, { signal: ac.signal, onStep: (d, n) => { if (!ac.signal.aborted) box.firstChild.textContent = `Reading open elevation for ${fmtLL(lat, lon)} … ${d} of ${n} tiles`; } });
+    if (ac.signal.aborted) return;
+    const q = measure(w), sim = similarity(q, o.meta), ms = Math.round(performance.now() - t0), pm = check ? pe.meta.metrics : null;
+    const f = (v, d) => v.toFixed(d), row = (name, k, d, unit, pct) => `<tr><th scope="row">${name}</th><td class="n">${pct ? f(q.metrics[k] * 100, 0) : f(q.metrics[k], d)}${unit}</td>${pm ? `<td class="n">${pct ? f(pm[k] * 100, 0) : f(pm[k], d)}${unit}</td>` : ''}<td class="n">${pct ? f(o.meta.metrics[k] * 100, 0) : f(o.meta.metrics[k], d)}${unit}</td></tr>`;
+    box.innerHTML = `<div class="qthead"><span class="tag">Quick test · not our pipeline</span>
+        <b>${check ? esc(pe.meta.name) : 'Your place'}</b> <span class="mono">${fmtLL(lat, lon)}</span> against <b>${esc(T.name)}</b></div>
+      <p class="qtscore"><b>${sim.score}%</b> terrain similarity <span>slopes ${f(sim.parts.slopes, 0)}% · relief ${f(sim.parts.relief, 0)}% · roughness ${f(sim.parts.roughness, 0)}%</span></p>
+      <div class="xwrap"><table class="st2"><thead><tr><th>Measure</th><th>${check ? 'Quick test' : 'Your place'}</th>${pm ? '<th>Our pipeline, same place</th>' : ''}<th>${esc(T.world)} window</th></tr></thead><tbody>
+        ${row('Relief', 'relief_p5_p95_m', 0, ' m')}${row('Median slope', 'median_slope_deg', 1, '°')}${row('Steep-end slope', 'p95_slope_deg', 1, '°')}${row('Roughness', 'roughness_m', 1, ' m')}${row('Ground flatter than 8°', 'gentle_share', 0, '%', true)}
+      </tbody></table></div>
+      <p class="fineprint">Measured in your browser just now: a ${km} km window on ${String(cell).startsWith('8') ? 'an' : 'a'} ${cell} m grid, from ${w.tiles} open elevation tiles (Mapzen Terrain Tiles on AWS Open Data, about ${f(w.tilePixelM, 0)} m here) in ${ms} ms. ${q.metrics.masked_share > 0.005 ? `Flat water left out: ${f(q.metrics.masked_share * 100, 0)}% of the window. ` : ''}The measures are the same ones our pipeline uses, but the elevation source is different and coarser, so treat this as a first look. On very flat ground the tiles are too coarse to trust. Terrain only: it says nothing about rock, temperature or ice.${T.pair.sim ? ` For scale, ${esc(T.check)} scores ${T.pair.sim.score}% in our pipeline.` : ''}</p>
+      ${check ? '' : `<button class="zoomgo" id="qtcheck">Check this tool: run it at ${esc(T.check)} and compare with our pipeline</button>`}`;
+    const b = $('#qtcheck'); if (b) b.addEventListener('click', () => quickTest(0, 0, true));
+  } catch (e) {
+    if (ac.signal.aborted) return;
+    box.innerHTML = `<p class="err">The quick test could not run: ${esc(e.message || String(e))}</p>`;
+  }
+}
+function zoomOut() {
+  if (qtAbort) qtAbort.abort(); $('#ztest').hidden = true;
+  closeZoom(); $('#zoom-go').textContent = 'Zoom in to both places'; $('#zoom-go').setAttribute('aria-pressed', 'false'); refreshAll(); kick();
+}
+function bindZoom() {
+  $('#zoom-go').addEventListener('click', () => { stopTour(); zoomOpen() ? zoomOut() : zoomTo(byId(S.site)); });
+  $('#qtform').addEventListener('submit', e => {
+    e.preventDefault();
+    const m = $('#qtll').value.trim().match(/^(-?\d+(?:\.\d+)?)\s*[,\s]\s*(-?\d+(?:\.\d+)?)$/), lat = m && +m[1], lon = m && +m[2];
+    const bad = !m || Math.abs(lat) > 80 || Math.abs(lon) > 180;
+    $('#qthelp').textContent = bad ? 'Type latitude, then longitude, in degrees: for example 64.07, -16.20 (latitude within ±80)' : 'or click the Earth map';
+    $('#qthelp').classList.toggle('err', bad); $('#qtll').setAttribute('aria-invalid', bad);
+    if (!bad) quickTest(lat, lon);
+  });
+  $('#tour-go').addEventListener('click', () => (tourT.length ? stopTour() : playTour(byId(D.tourSite) || byId(S.site))));
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') stopTour(); });
+}
+
+/* The 30-second tour: one pair, from the globes down to the two places, ending on where the analogy stops.
+   Every line it shows is a claim from sites.json with its source ids; nothing is written here. */
+let tourT = [];
+function stopTour(keep) {
+  tourT.forEach(clearTimeout); tourT = [];
+  $('#tour-go').textContent = 'Play the 30-second tour'; $('#tour-go').setAttribute('aria-pressed', 'false');
+  if (!keep) $('#tourcap').hidden = true;
+}
+function playTour(s) {
+  stopTour(); if (zoomOpen()) zoomOut();
+  const cap = $('#tourcap'), world = s.body === 'mars' ? 'Mars' : 'the Moon';
+  const say = (kind, label, text, src) => { cap.hidden = false; cap.className = 'tourcap ' + kind; cap.innerHTML = `<span class="k">${esc(label)}</span><span class="t">${esc(text)}${srcLinks(D, src)}</span>`; };
+  const steps = [[0, () => { selectSite(s.id); say('', `${s.short} → ${world}`, `${s.name}, ${s.where}, stands in for ${s.target}.`); }],
+    [4500, () => { zoomTo(s); say('', 'The claim', s.claim || ''); }]];
+  let t = 10500;
+  for (const m of (s.matches || []).slice(0, 2)) { steps.push([t, () => say('ok', 'Alike', m.t, m.src)]); t += 5000; }
+  for (const b of (s.breaks || []).slice(0, 2)) { steps.push([t, () => say('brk', 'Where it stops', b.t, b.src)]); t += 5000; }
+  steps.push([t, () => { stopTour(true); cap.innerHTML += ` <a href="#pair/${s.id}">Open the full case →</a>`; }]);
+  $('#tour-go').textContent = 'Stop the tour'; $('#tour-go').setAttribute('aria-pressed', 'true');
+  tourT = steps.map(([ms, fn]) => setTimeout(fn, ms));
 }
 
 /* Right-hand panel: the site list, or one site's details once a site is pressed */
@@ -171,12 +262,14 @@ function showSideDetail(s) {
     ${s.cmp ? `<table class="cmp2"><thead><tr><th></th><th>Anchor<small>${esc(s.target)}</small></th><th>Earth analog<small>${esc(s.short)}</small></th></tr></thead><tbody>${rows}</tbody></table>
     <p class="fineprint">${esc(s.cmpNote || '')}</p>` : matrixHtml(D, s, 'one')}
     <p class="fineprint">Data: ${esc(s.data)}</p>
+    <button class="btn alt" id="gozoom">Zoom in to both places on the map</button>
     ${pair ? `<button class="btn alt" id="goside">Compare terrain side by side</button>` : ''}
     <p class="fineprint">Every site, always: Earth cannot reproduce the reduced gravity, the lunar vacuum, the thin Martian air or their radiation.</p>`;
   S.side = 'detail'; $('#slist').hidden = true; el.hidden = false; el.scrollTop = 0;
   $('aside.side').classList.add('wide');   // two value columns need more width than the site list
   $('#sback').addEventListener('click', showSideList);
   const b = $('#goside'); if (b) b.addEventListener('click', () => ctx.openSbs(pair.id));
+  $('#gozoom').addEventListener('click', () => zoomTo(s));
   fillTerrainMetrics(pair);
 }
 
@@ -185,78 +278,12 @@ async function fillTerrainMetrics(pair) {
   const slot = $('#tmslot'); if (!slot) return;
   const say = t => { slot.outerHTML = `<tr class="n end"><td colspan="3"><em>${t}</em></td></tr>`; };
   if (!pair) return say('No terrain window for this site yet.');
-  const [e, o] = await Promise.all([getField(pair.earth, 'earth'), getField(pair.other, 'moon')]);
+  const [e, o] = await Promise.all([getField(pair.earth, 'earth'), getField(pair.other, pair.body || 'moon')]);
   if (!slot.isConnected) return;   // the panel was replaced while loading
   if (e.missing || o.missing) return say('Waiting for terrain exports of both windows.');
   const M = [['relief_p5_p95_m', 'Relief (5th to 95th percentile)', 'm'], ['median_slope_deg', 'Median slope', '°'], ['p95_slope_deg', '95th percentile slope', '°'], ['roughness_m', 'Roughness', 'm']];
   slot.outerHTML = M.map(([k, l, u]) => `<tr class="m"><th scope="row">${l}</th><td>${o.meta.metrics[k].toFixed(1)} ${u}</td><td>${e.meta.metrics[k].toFixed(1)} ${u}</td></tr>`).join('')
-    + `<tr class="n end"><td colspan="3"><em>Both windows are 40 km, measured on one 80 m grid (${esc((o.meta.source || {}).dataset || '')}; ${esc((e.meta.source || {}).dataset || '')}).</em></td></tr>`;
-}
-
-/* ---------- 2. planets ---------- */
-function buildPlanets() {
-  const order = ['earth', 'moon', 'mars'];
-  $('#pnav').innerHTML = order.map(k => `<button data-p="${k}" aria-pressed="${S.planet === k}"><span class="pd"></span>${D.planets[k].name}</button>`).join('');
-  $$('#pnav button').forEach(b => b.addEventListener('click', () => { S.planet = b.dataset.p; renderPlanet(); }));
-  const gain = { earth: 1.2, moon: 1.35, mars: 1.15 };
-  const pins = makePins();
-  for (const k of order) {
-    PG[k] = new Globe({ root: $('#pglobe-' + k), body: k, pins: pins[k], gain: gain[k], S: 480, spin: true, onPin: ids => showPop(k, ids) });
-    PG[k].lat = 15; PG[k].lon = { earth: -60, moon: 20, mars: 40 }[k];
-    // The globe turns on its own, which makes pins hard to click: pause the spin while the mouse is over it
-    PG[k].root.addEventListener('pointerenter', () => { PG[k].spin = false; });
-    PG[k].root.addEventListener('pointerleave', () => { if (popFor !== k) { PG[k].spin = true; kick(); } });
-  }
-  document.addEventListener('keydown', e => { if (e.key === 'Escape') closePop(); });
-}
-
-/* Pin card on the Planets tab: click a pin to see the site; the globe stays still while the card is open */
-let popFor = null;
-function closePop() {
-  const pop = $('#pop'); if (pop) pop.hidden = true;
-  if (popFor) { PG[popFor].markOn(null); PG[popFor].spin = true; kick(); }
-  popFor = null;
-}
-function showPop(k, ids) {
-  const sites = ids.map(id => D.sites.find(s => s.id === id)).filter(Boolean); if (!sites.length) return;
-  if (popFor && popFor !== k) closePop();
-  popFor = k; PG[k].spin = false; PG[k].markOn(ids);
-  const pair = D.pairs.find(p => ids.includes(p.site));
-  const chips = s => `<div class="chips">${labelChip(D, s)}<span>${esc(s.kind)}</span><span>Scale: ${esc(s.scale)}</span></div>`;
-  const body = k === 'earth'
-    ? `<h3>${esc(sites[0].name)}</h3><div class="pw">${esc(sites[0].where)}</div>
-       <p>Stands in for <strong>${esc(sites[0].target)}</strong> on ${bodyName(sites[0].body)}</p>${chips(sites[0])}
-       <p>${esc(sites[0].helps)}</p><p><a href="#pair/${sites[0].id}">Open the full case →</a></p>`
-    : `<h3>${esc(sites[0].target)}</h3><div class="pw">${bodyName(k)}</div>
-       <p>Earth sites that stand in for this place:</p>
-       <ul>${sites.map(s => `<li><a href="#pair/${s.id}"><strong>${esc(s.name)}</strong></a>, ${esc(s.where)}. ${esc(s.helps)}</li>`).join('')}</ul>`;
-  const pop = $('#pop');
-  pop.innerHTML = `<button class="x" aria-label="Close">×</button>${body}<canvas class="thumb" hidden></canvas><div class="thumbnote fineprint"></div>${pair ? `<button class="btn" data-pair="${pair.id}">Compare terrain side by side</button>` : ''}`;
-  pop.hidden = false;
-  // Small terrain picture, drawn only from an export
-  const thumb = $('.thumb', pop), note = $('.thumbnote', pop), tid = pair && (k === 'earth' ? pair.earth : pair.other);
-  if (!tid) note.textContent = 'No terrain window for this place yet.';
-  else getField(tid, k === 'earth' ? 'earth' : 'moon').then(f => {
-    if (!pop.contains(thumb)) return;            // the card was closed or replaced while loading
-    if (f.missing) { note.textContent = 'No terrain export for this window yet.'; return; }
-    drawHillshade(thumb, f, { view: 35, az: 300, el: 30, ve: 2 }); thumb.hidden = false;
-    const src = f.meta.source || {};
-    note.textContent = `Shaded relief of the ${f.windowKm} km window${src.dataset ? ', ' + src.dataset : ''}. Light from the north-west.`;
-  });
-  $('.x', pop).addEventListener('click', closePop);
-  const b = $('[data-pair]', pop); if (b) b.addEventListener('click', () => { S.pair = b.dataset.pair; syncPairs(); location.hash = '#side-by-side'; });
-}
-function renderPlanet() {
-  closePop();
-  const k = S.planet, P = D.planets[k];
-  $$('#pnav button').forEach(b => { b.setAttribute('aria-pressed', b.dataset.p === k); b.style.color = b.dataset.p === k ? '#fff' : ''; });
-  for (const id of ['earth', 'moon', 'mars']) $('#pglobe-' + id).hidden = id !== k;
-  const sites = (k === 'earth' ? D.sites : D.sites.filter(s => s.body === k)).map(s => k === 'earth' ? `${s.short}, ${s.where}` : `${s.short} → ${s.target}`);
-  $('#pstats').innerHTML = P.stats.map(([v, l]) => `<li><span><b>${esc(v)}</b><span>${esc(l)}</span></span><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#a3acbd" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg></li>`).join('');
-  $('#pcard').innerHTML = `<h2>${esc(P.caps)}</h2><p class="desc">${esc(P.desc)}</p>
-    <div class="sl"><div>${esc(P.sitesHead)}</div><ul>${sites.map(x => `<li>${esc(x)}</li>`).join('')}</ul></div>
-    <div class="limit"><b>What Earth cannot reproduce</b><span>${esc(P.limit)}</span></div>`;
-  refreshAll();
+    + `<tr class="n end"><td colspan="3"><em>Both windows are ${e.windowKm} km, measured on one ${e.meta.analysis_cell_m} m grid (${esc((o.meta.source || {}).dataset || '')}; ${esc((e.meta.source || {}).dataset || '')}).</em></td></tr>`;
 }
 
 /* ---------- 3. side by side ---------- */
@@ -269,8 +296,9 @@ const syncPairs = () => $$('#pairs .pill').forEach(b => b.setAttribute('aria-pre
 async function getField(id, kind) { if (!fields.has(id)) fields.set(id, await loadField(id, kind)); return fields.get(id); }
 async function loadPair() {
   const p = pairById(S.pair), token = (loadPair.t = (loadPair.t || 0) + 1);
-  const [e, o] = await Promise.all([getField(p.earth, 'earth'), getField(p.other, 'moon')]);
+  const [e, o] = await Promise.all([getField(p.earth, 'earth'), getField(p.other, p.body || 'moon')]);
   if (token !== loadPair.t) return;
+  $('#sbs-back').href = '#pair/' + p.site;
   renderPanels(p, e, o); renderMeasurements(p, e, o); drawSbs();
 }
 
@@ -287,7 +315,7 @@ function renderPanels(p, e, o) {
   const ec = (!e.missing && e.meta.centre) || { lat: site.lat, lon: site.lon };
   const occ = (!o.missing && o.meta.centre) || oc;
   $('#panels').innerHTML = panelHtml(e, p.earthTitle, fmtLL(ec.lat, ec.lon), 'earth', 'terr-earth') +
-    panelHtml(o, p.otherTitle, fmtLL(occ.lat, occ.lon) + (oc.provisional ? ' (provisional)' : ''), 'moon', 'terr-other');
+    panelHtml(o, p.otherTitle, fmtLL(occ.lat, occ.lon) + (oc.provisional ? ' (provisional)' : ''), p.body || 'moon', 'terr-other');
   // drag to turn, on either canvas, shared camera
   for (const id of ['terr-earth', 'terr-other']) {
     const cv = $('#' + id); if (!cv) continue; let on = false, lx = 0;
@@ -295,7 +323,7 @@ function renderPanels(p, e, o) {
     cv.addEventListener('pointermove', ev => { if (!on) return; S.T.view = Math.round((S.T.view - (ev.clientX - lx) * 0.5 + 360) % 360); lx = ev.clientX; $('#ctl-view').value = S.T.view; drawSbs(); });
     const end = () => { on = false; cv.style.cursor = ''; }; cv.addEventListener('pointerup', end); cv.addEventListener('pointercancel', end);
   }
-  $('#lab-earth').textContent = 'Earth'; $('#lab-other').textContent = 'Moon';
+  $('#lab-earth').textContent = 'Earth'; $('#lab-other').textContent = p.body === 'mars' ? 'Mars' : 'Moon';
   applyMode();
 }
 
@@ -318,6 +346,7 @@ function printLine(e, o) {
   const g = [e, o].map(f => f.meta && f.meta.analysis_cell_m).filter(Boolean); if (g.length === 2) parts.push(g[0] === g[1] ? `analysis grid ${g[0]} m` : `GRIDS DIFFER: ${g[0]} m and ${g[1]} m`);
   const mesh = Math.round(e.windowKm * 1000 / (e.n - 1)); parts.push(`display mesh ${mesh} m`);
   parts.push(`vertical exaggeration ${S.T.ve.toFixed(1)}×`, `sun ${S.T.el}° above the horizon, from ${S.T.az}°`);
+  if (S.T.el <= 2) parts.push(`lunar-pole light: the Moon's axis is tilted about 1.5°, so at its poles the Sun stays about this low (NASA Moon Fact Sheet, nssdc.gsfc.nasa.gov/planetary/factsheet/moonfact.html). Each slope is shaded by how it faces the Sun; shadows cast by one hill on another are not drawn. No place on Earth is lit like this`);
   // measured share from the 80 m grid, so it matches the table
   const m = e.meta && e.meta.metrics;
   const share = m && m.masked_share != null ? m.masked_share : e.water.reduce((a, b) => a + b, 0) / e.water.length;
@@ -335,6 +364,8 @@ function bindSbs() {
   $('#ctl-slide').addEventListener('input', e => $('#stage').style.setProperty('--p', e.target.value + '%'));
   $('#mode-3d').addEventListener('click', () => { S.mode = '3d'; applyMode(); drawSbs(); });
   $('#mode-slide').addEventListener('click', () => { S.mode = 'slide'; applyMode(); drawSbs(); });
+  // The Moon's axis is tilted about 1.5 degrees (NASA Moon Fact Sheet), so at its poles the Sun never climbs much higher than that
+  $('#polar-light').addEventListener('click', () => { S.T.el = 1.5; $('#ctl-el').value = 1.5; drawSbs(); });
   let sweeping = 0; const btn = $('#sweep');
   const stop = () => { cancelAnimationFrame(sweeping); sweeping = 0; btn.textContent = 'Sweep the sun'; };
   btn.addEventListener('click', () => {
@@ -355,6 +386,7 @@ function renderMeasurements(p, e, o) {
     ${measTableHtml(e, o)}
     <p class="fineprint">The last column is a plain ratio, not a verdict. We report each measure separately and do not combine them into one score.</p>
     ${histHtml(e, o)}
+    ${profileHtml(e, o)}
     <div class="box"><b>Does the method work? Controls</b><ul>${D.controls.map(c => `<li>${esc(c.text)}: ${esc(c.state)}</li>`).join('')}</ul></div>
     ${simHtml(p)}
     <div class="box"><b>What it means for operations</b><div>${esc(D.operations)}${srcLinks(D, D.operationsSrc)}</div></div>
@@ -367,11 +399,35 @@ function histHtml(e, o) {
   const W = 300, H = 140, x0 = 30, x1 = 290, y0 = 112, y1 = 8, nb = ha.frac.length, top = Math.max(...ha.frac, ...hb.frac) || 1;
   const pts = f => f.map((v, i) => `${(x0 + (i + 0.5) / nb * (x1 - x0)).toFixed(1)},${(y0 - v / top * (y0 - y1)).toFixed(1)}`).join(' ');
   const maxDeg = ha.edges_deg[ha.edges_deg.length - 1];
-  return `<figure class="hist">${head}<svg role="img" aria-label="Slope histograms for Earth and Moon" viewBox="0 0 ${W} ${H}" style="width:100%;height:auto">
+  return `<figure class="hist">${head}<svg role="img" aria-label="Slope histograms for the two windows" viewBox="0 0 ${W} ${H}" style="width:100%;height:auto">
     <line x1="${x0}" y1="${y0}" x2="${x1}" y2="${y0}" stroke="#3a4560"/><line x1="${x0}" y1="${y1}" x2="${x0}" y2="${y0}" stroke="#3a4560"/>
     <polyline fill="none" stroke="#e0a03a" stroke-width="2" points="${pts(ha.frac)}"/><polyline fill="none" stroke="#a9b4c8" stroke-width="2" stroke-dasharray="5 3" points="${pts(hb.frac)}"/>
     <text x="160" y="132" fill="#a3acbd" font-size="12" text-anchor="middle">slope (degrees, 0 to ${maxDeg})</text>
-    <text x="${x1 - 40}" y="22" fill="#e0a03a" font-size="12">Earth</text><text x="${x1 - 40}" y="36" fill="#a9b4c8" font-size="12">Moon</text></svg></figure>`;
+    <text x="${x1 - 40}" y="22" fill="#e0a03a" font-size="12">Earth</text><text x="${x1 - 40}" y="36" fill="#a9b4c8" font-size="12">${o.kind === 'mars' ? 'Mars' : 'Moon'}</text></svg></figure>`;
+}
+
+// One line across each window, drawn from the exported heights on one pair of axes. Nothing is recomputed: these are the
+// stored heights of the middle row, each relative to its own window's median, so shape and depth can be compared by eye.
+function profileHtml(e, o) {
+  if (e.missing || o.missing || e.windowKm !== o.windowKm) return '';
+  const row = f => { const r = f.n >> 1; return Array.from({ length: f.n }, (_, i) => f.h[r * f.n + i]); };
+  const a = row(e), b = row(o), lo = Math.min(...a, ...b), hi = Math.max(...a, ...b);
+  const W = 300, H = 150, x0 = 38, x1 = 292, y0 = 118, y1 = 10, km = e.windowKm;
+  const pts = v => v.map((z, i) => `${(x0 + i / (v.length - 1) * (x1 - x0)).toFixed(1)},${(y0 - (z - lo) / (hi - lo || 1) * (y0 - y1)).toFixed(1)}`).join(' ');
+  const yz = y0 - (0 - lo) / (hi - lo || 1) * (y0 - y1);
+  const ve = ((y0 - y1) / (hi - lo || 1)) / ((x1 - x0) / (km * 1000));
+  const wet = e.water && Array.from({ length: e.n }, (_, i) => e.water[(e.n >> 1) * e.n + i]).some(Boolean);
+  const other = o.kind === 'mars' ? 'Mars' : 'Moon';
+  return `<figure class="hist"><figcaption>One line across each window, same axes</figcaption>
+    <svg role="img" aria-label="Height along the middle of each window" viewBox="0 0 ${W} ${H}" style="width:100%;height:auto">
+    <line x1="${x0}" y1="${y0}" x2="${x1}" y2="${y0}" stroke="#3a4560"/><line x1="${x0}" y1="${y1}" x2="${x0}" y2="${y0}" stroke="#3a4560"/>
+    <line x1="${x0}" y1="${yz.toFixed(1)}" x2="${x1}" y2="${yz.toFixed(1)}" stroke="#3a4560" stroke-dasharray="2 4"/>
+    <polyline fill="none" stroke="#e0a03a" stroke-width="2" points="${pts(a)}"/><polyline fill="none" stroke="#a9b4c8" stroke-width="2" stroke-dasharray="5 3" points="${pts(b)}"/>
+    <text x="${x0 - 4}" y="${y1 + 4}" fill="#a3acbd" font-size="11" text-anchor="end">${Math.round(hi)}</text><text x="${x0 - 4}" y="${y0}" fill="#a3acbd" font-size="11" text-anchor="end">${Math.round(lo)}</text>
+    <text x="${x0}" y="${y0 + 13}" fill="#a3acbd" font-size="11">0</text><text x="${x1}" y="${y0 + 13}" fill="#a3acbd" font-size="11" text-anchor="end">${km} km</text>
+    <text x="165" y="${H - 4}" fill="#a3acbd" font-size="12" text-anchor="middle">left to right through the centre</text>
+    <text x="${x1 - 40}" y="22" fill="#e0a03a" font-size="12">Earth</text><text x="${x1 - 40}" y="36" fill="#a9b4c8" font-size="12">${other}</text></svg>
+    <p class="fineprint">Heights in metres from each window's own median, read from the middle row of the two exports. The vertical scale is stretched ${ve.toFixed(0)} times.${wet ? ' The flat stretch on the Earth line is the lake surface.' : ''} One line is one line: the table above uses the whole window.</p></figure>`;
 }
 
 boot();

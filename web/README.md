@@ -1,6 +1,6 @@
 # ATLAS (Earth Analog Atlas): web app
 
-A static site. No build step, no framework. Five tabs: **Three worlds**, **All pairs**, **Planets**, **Side by side**, **Method and sources**. Each site also has a pair page at `#pair/<site id>`, opened from the site list, the globes or the All pairs table.
+A static site. No build step, no framework. Three tabs: **Three worlds**, **All pairs**, **Method**. The Side by side terrain view has no tab; it opens from the Kamestastin pair page. The Planets view was removed: its figures are in the limits strip on every pair page. Each site also has a pair page at `#pair/<site id>`, opened from the site list, the globes or the All pairs table.
 
 ## Run it
 

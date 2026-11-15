@@ -25,7 +25,7 @@ const claimLi = (D, c) => `<li><span>${esc(c.t)}</span>${c.src && c.src.length ?
 
 export const confText = s => (s.conf ? `Confidence ${s.conf.score}% · ${s.conf.band}` : 'Confidence not scored');
 
-export const legendHtml = D => Object.entries(D.status).map(([k, l]) => `<span class="lg" title="${esc((D.statusHelp || {})[k] || '')}"><i class="sw st-${k}">${k}</i>${esc(l)}</span>`).join('');
+export const legendHtml = D => Object.entries(D.status).map(([k, l]) => `<span class="lg" title="${esc((D.statusHelp || {})[k] || '')}"><i class="sw st-${k}">${esc(l[0])}</i>${esc(l)}</span>`).join('');
 
 export function matrixHtml(D, s, cls = '') {
   return `<ul class="matrix ${cls}">${D.dims.map(([k, name]) => {
@@ -62,7 +62,8 @@ export function measTableHtml(e, o) {
     const d = def || `share of ground flatter than ${gs != null ? gs + '°' : 'the slope limit'}${(me && me.gentle_slope_source) ? ' (' + esc(me.gentle_slope_source) + ')' : ''}`;
     return `<tr><td>${name}<small>${d}</small></td><td class="n">${Number.isFinite(a) ? fmt(a) : '—'}</td><td class="n">${Number.isFinite(b) ? fmt(b) : '—'}</td><td class="n">${ratio}</td></tr>`;
   }).join('');
-  return `<table><thead><tr><th>Measure</th><th>Earth</th><th>Moon</th><th>Moon ÷ Earth</th></tr></thead><tbody>${rows}</tbody></table>`;
+  const W = o.kind === 'mars' ? 'Mars' : 'Moon';
+  return `<table><thead><tr><th>Measure</th><th>Earth</th><th>${W}</th><th>${W} ÷ Earth</th></tr></thead><tbody>${rows}</tbody></table>`;
 }
 
 /* ---------- pair page ---------- */
@@ -192,7 +193,7 @@ async function fillPairTemp(D, s, ctx) {
 
 // The measured block: real numbers for both windows, or a plain statement that there are none
 async function fillPairTerrain(D, s, pair, ctx) {
-  const [e, o] = await Promise.all([ctx.getField(pair.earth, 'earth'), ctx.getField(pair.other, 'moon')]);
+  const [e, o] = await Promise.all([ctx.getField(pair.earth, 'earth'), ctx.getField(pair.other, pair.body || 'moon')]);
   const slot = $('#pterr'); if (!slot || !slot.isConnected || !$('#view-pair .pair')) return;
   if (e.missing || o.missing || !e.meta.metrics || !o.meta.metrics) { slot.innerHTML = '<h2>Measured terrain</h2><p>Waiting for terrain exports of both windows. No number is shown until then.</p>'; return; }
   const me = e.meta.metrics, mo = o.meta.metrics, other = pair.otherTitle.split(',')[0];
@@ -218,7 +219,7 @@ export function renderExplore(D, F, rerender, ctx) {
       <th scope="row"><a href="#pair/${s.id}"><b>${esc(s.short)}</b><span><i class="dot ${s.body}"></i>${esc(s.target)}</span></a></th>
       <td class="lb">${labelChip(D, s)}</td>
       <td class="n">${s.conf ? s.conf.score + '%' : '—'}</td>
-      ${D.dims.map(([k, name]) => { const [c, note] = s.d[k]; return `<td class="cell" title="${esc(name + '. ' + D.status[c] + ': ' + note)}"><span class="st-${c}"><i>${c}</i></span></td>`; }).join('')}</tr>`).join('');
+      ${D.dims.map(([k, name]) => { const [c, note] = s.d[k]; return `<td class="cell" title="${esc(name + '. ' + D.status[c] + ': ' + note)}"><span class="st-${c}"><i>${esc(D.status[c][0])}</i></span></td>`; }).join('')}</tr>`).join('');
   const n = b => D.sites.filter(s => s.body === b).length;
   el.innerHTML = `<div class="docin">
     <header class="phead">

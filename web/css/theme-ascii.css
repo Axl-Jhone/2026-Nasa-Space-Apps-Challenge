@@ -356,3 +356,90 @@ aside.side.dock .back{background:var(--bg)}
   .rail .chev{transform:rotate(-45deg);margin-top:4px}        /* points up: hide */
   .shut .rail .chev{transform:rotate(135deg);margin-top:-4px}  /* points down: show */
 }
+
+/* ---------- three-tab masthead (15 November) ---------- */
+/* Narrow screens: brand and tabs on one row that wraps if it must; no rule above the tabs, nothing clipped. */
+@media (max-width:1000px){
+  header.mast{display:flex;flex-wrap:wrap;align-items:center}
+  .brand{flex:none;padding:10px 16px}
+  nav.tabs{flex:1 1 auto;min-width:0;margin:0;padding:4px 12px;border-top:0;overflow-x:auto;justify-content:flex-end}
+}
+body[data-tab="side-by-side"] footer.credit{display:none}
+.sbs .back{align-self:center;padding:4px 0}
+
+/* ---------- zoom view (15 November) ---------- */
+/* The globes dive toward the place, then two maps take over: Earth and its counterpart, one scale. */
+.globes figure{transition:transform .65s cubic-bezier(.5,0,.9,.5),opacity .65s ease-in}
+.globes.diving figure{transform:scale(2.4);opacity:0}
+.zoomwrap{align-self:stretch;flex:1;min-height:0;display:flex;flex-direction:column;gap:8px;padding:0 16px;animation:zin .5s ease-out}
+.zoomwrap[hidden]{display:none}
+@keyframes zin{from{opacity:0}to{opacity:1}}
+.zmaps{flex:1;min-height:0;display:flex;gap:12px}
+.zmap{flex:1 1 0;min-width:0;margin:0;display:flex;flex-direction:column;gap:6px}
+.zmap figcaption{display:flex;flex-wrap:wrap;justify-content:space-between;gap:2px 12px;font-size:14px;color:var(--ink)}
+.zmap figcaption .mono{font-size:12px;color:var(--ink-3)}
+.zbox{position:relative;flex:1;min-height:220px;border:1px solid var(--line-2);background:#000}
+.zbox.none{display:flex;align-items:center;justify-content:center;padding:24px;background:none;color:var(--ink-3);font-size:14px;text-align:center}
+.zleaf{position:absolute;inset:0;background:#000;font-family:var(--mono)}
+.zbadge,.znote{position:absolute;left:8px;z-index:500;padding:2px 6px;background:rgba(0,0,0,.72);color:#cfd5e2;font-size:12px;pointer-events:none}
+.zbadge{top:8px}.zbadge.live{color:#fff}.zbadge.live::before{content:"";display:inline-block;width:6px;height:6px;margin-right:6px;background:#5fd38a;vertical-align:1px}
+.znote{bottom:8px}
+.zfoot{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 16px}
+.zscale{display:flex;align-items:center;gap:10px;font-size:12px;color:var(--ink-2)}
+.zscale i{display:block;height:6px;border:1px solid var(--ink-2);border-top:0}
+.zfoot .btn{align-self:auto;min-height:32px;padding:4px 12px;border-radius:0}
+#zoommsg{margin:0}
+.zoomgo{min-height:34px;padding:6px 14px;border:1px solid var(--accent);background:none;color:var(--accent);font-family:var(--mono);font-size:13px;cursor:pointer}
+.zoomgo[aria-pressed="true"]{border-color:var(--line-2);color:var(--ink-2)}
+.otherbar{flex-wrap:wrap}
+body[data-zoom="on"] .viewmode{visibility:hidden}
+.leaflet-container{background:#000}
+.leaflet-bar,.leaflet-bar a{border-radius:0!important}
+.leaflet-bar a{background:#0b0d12;color:#e6e9f0;border-color:#2a2f3a}
+.leaflet-bar a:hover{background:#1a1e27;color:#fff}
+@media (max-width:760px){.zmaps{flex-direction:column}.zbox{min-height:240px}}
+@media (prefers-reduced-motion:reduce){.globes figure{transition:none}.zoomwrap{animation:none}}
+
+/* 30-second tour: one caption at a time, the claim as written in sites.json */
+.tourcap{align-self:stretch;display:flex;gap:14px;align-items:baseline;margin:0 16px;padding:10px 14px;border:1px solid var(--line-2);border-left:3px solid var(--ink-3);font-size:16px;line-height:1.45;color:var(--ink);animation:zin .35s ease-out}
+.tourcap[hidden]{display:none}
+.tourcap .k{flex:none;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)}
+.tourcap.ok{border-left-color:var(--accent)}.tourcap.ok .k{color:var(--accent)}
+.tourcap.brk{border-left-color:var(--break)}.tourcap.brk .k{color:var(--break)}
+.tourcap a{white-space:nowrap}
+@media (max-width:760px){.tourcap{flex-direction:column;gap:4px;font-size:14px}}
+
+/* quick test: any place on Earth against the measured window */
+.qtform{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;font-size:13px;color:var(--ink-2)}
+.qtform input{flex:1 1 260px;max-width:380px;min-height:34px;padding:6px 10px;border:1px solid var(--line-2);border-radius:0;background:var(--bg);color:var(--ink);font-family:var(--mono);font-size:13px}
+.qtform input:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.qtform input[aria-invalid="true"]{border-color:var(--break)}
+.qtform .err{color:var(--break)}
+.qt{border:1px solid var(--line-2);border-left:3px solid var(--accent);padding:10px 14px;display:flex;flex-direction:column;gap:8px}
+.qt[hidden]{display:none}
+.qthead{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 10px;font-size:14px}
+.qthead .tag{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--accent);border:1px solid var(--accent);padding:1px 6px}
+.qtscore{margin:0;font-size:14px;color:var(--ink-2)}.qtscore b{font-size:25px;font-weight:600;color:var(--accent)}.qtscore span{margin-left:10px;font-size:12px;color:var(--ink-3)}
+.qt p{margin:0}.qt .zoomgo{align-self:flex-start}.qtwait{color:var(--ink-2);font-size:14px}
+.zleaf.pick{cursor:crosshair}
+/* the zoom view can be taller than the screen once a test result is shown */
+body[data-zoom="on"] #view-worlds .main-col{overflow-y:auto;justify-content:flex-start}
+body[data-zoom="on"] #view-worlds .main-col>*{flex-shrink:0}
+body[data-zoom="on"] .zoomwrap{flex:none;padding-top:12px}
+body[data-zoom="on"] .zmaps{flex:none;height:clamp(300px,52vh,600px)}
+body[data-zoom="on"] .otherbar{margin:10px 0 14px}
+@media (max-width:760px){body[data-zoom="on"] .zmaps{height:auto}}
+
+/* ---------- space ground and opening (15 November) ---------- */
+/* A still field of small square stars behind the page. Text panels stay near-opaque so nothing is read over stars. */
+#sky{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none;background:radial-gradient(120% 90% at 70% 0%,#0a1024 0%,#04060b 55%,#020308 100%)}
+body{background:#020308}
+.view.doc{background:rgba(4,6,11,.93)}
+aside.side,aside.meas{background:rgba(7,10,18,.96)}
+footer.credit{background:transparent}
+/* Opening: Atlas holding the sky; its characters rearrange into the name. Under three seconds, skippable, once per visit. */
+.intro{position:fixed;inset:0;z-index:2000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;background:#020308;cursor:pointer;transition:opacity .35s ease-out}
+.intro.out{opacity:0;pointer-events:none}
+.intro pre{margin:0;font-family:var(--mono);font-size:min(2.5vw,1.75vh,16px);line-height:1.02;color:var(--ink-2);white-space:pre;transition:color .4s}
+.intro.named pre{color:var(--accent)}
+.intro span{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3)}

@@ -9,6 +9,7 @@ It is NOT a similarity score. The rubric is the team's own and is printed on the
 Nothing is judged here. Every part is counted from the file: which sources back which claims, what kind each
 source is (sources.<id>.kind), how much of it was read (sources.<id>.depth), and whether terrain exports exist.
 """
+import json
 import sys
 from pathlib import Path
 
@@ -151,7 +152,8 @@ def score_site(site, sources, pairs):
     measured = bool(site.get("scored") and pair and (TERRAIN / f"{pair['earth']}.json").exists() and (TERRAIN / f"{pair['other']}.json").exists())
     same = [f for f in site.get("figures", []) if f.get("same") and f.get("earthSrc") and f.get("otherSrc")]
     if measured:
-        pts, why, ids = 20, "Terrain is measured by us on both worlds, on one 80 m grid.", []
+        cell = json.loads((TERRAIN / f"{pair['earth']}.json").read_text(encoding="utf-8")).get("analysis_cell_m", 80)
+        pts, why, ids = 20, f"Terrain is measured by us on both worlds, on one {cell} m grid.", []
     elif same:
         pts, why = 15, f"A published value for the same property on both sides: {same[0]['q'].lower()}."
         ids = [i for f in same[:1] for i in f["earthSrc"] + f["otherSrc"]]

@@ -44,11 +44,17 @@ Repository: https://github.com/Axl-Jhone/2026-Nasa-Space-Apps-Challenge
 
 **How it works.** A Python pipeline cuts a 40 km window from Copernicus DEM GLO-30 and from NASA's LRO LOLA polar elevation grid, brings both onto one 80 m grid, and computes relief, slope, roughness, and the share of ground under 8°, the tilt NASA's Human Landing System must tolerate. A terrain similarity percentage is the plain average of three parts (slope overlap, relief, roughness) and is always shown with them: Kamestastin against de Gerlache scores 36%. We tested it on controls. A second lunar crater scores 89% against de Gerlache and a flat lake bed 4%, but a dune field scores 37%, the same as Kamestastin. That showed us the measures capture how rugged the ground is, not its shape, and the site reports it.
 
+**The Mars measured pair** is Lake Salda in Turkey and Jezero crater, on NASA's MOLA elevation and Copernicus DEM. Mars's open global grid is about 463 m, so both windows are 60 km on one 500 m grid: 840 m of relief against 872 m, and a terrain similarity of 73%. The page says these numbers cannot be compared with the Moon pair's.
+
+**Zoom to both places.** From the globes, one button dives to two maps side by side, Earth and its counterpart, drawn at one scale so a kilometre is the same length on both. The pictures are live from NASA GIBS and USGS Astrogeology, with saved copies underneath so it runs with no network. A dashed square marks the window we measured, and one click opens that terrain in 3D with a height profile of both worlds on the same axes. A 30-second tour plays the Galena Creek pair through this view and ends on where it breaks.
+
+**Test any place on Earth.** In the zoom view, click the Earth map or type coordinates. ATLAS reads open elevation tiles for that spot, measures it in the browser with the pipeline's own formulas, and scores it against de Gerlache or Jezero in about two seconds. It is labelled a quick test, and a button runs it at Kamestastin or Lake Salda beside our pipeline's numbers so anyone can see how far it can be trusted (Lake Salda: 841 m of relief against 840 m). It lets a visitor look beyond the well-known sites. A second button lights both terrains with the Sun 1.5° above the horizon, as at the lunar poles.
+
 **The negative result.** We found no Earth site that reproduces the cold, the lighting or the volatiles of the lunar south pole. The Moon candidates match rock and caves only.
 
 **What is new and what is not.** Two pairings are our own hypotheses and are labelled as such: the Umm Jirsan lava tube for lunar pits, and the Bodélé Depression for dust lifting on Mars. The rest are established or benchmark analogs. A method page lists every source and how much of it was read.
 
-**Tools.** Static HTML, CSS and JavaScript with no framework and no build step; Python with NumPy, Rasterio and PyProj; Microsoft Planetary Computer for the Earth elevation; GitHub Pages for hosting.
+**Tools.** Static HTML, CSS and JavaScript with no framework and no build step; Python with NumPy, Rasterio and PyProj; Microsoft Planetary Computer for the Earth elevation and temperature (a Space Apps Global Offer); Leaflet (open source) for the maps; NASA GIBS and USGS Astrogeology map services; GitHub Pages for hosting.
 
 ## Use of Super Intelligence (SI)
 
@@ -79,6 +85,8 @@ No image, video or audio in the project is AI-generated: the globes are NASA ima
 - Full source list: the Method and sources tab of the app, and the list at the end of this file.
 
 ## 30-second demo script
+
+**Fastest way to record it:** open the Three worlds tab, press **Play the 30-second tour**, and record the screen. It selects Galena Creek, dives from the globes to the two maps, shows two "alike" claims and two "where it stops" claims with their sources, and ends at 30 seconds. Read the captions aloud or leave them as the on-screen text. The table below is the manual version.
 
 The video must be **30 seconds or less**. Aim for 28. Record at 1366 by 768 or larger, in a browser window with no bookmarks bar.
 

@@ -1,0 +1,25 @@
+{
+  "note": "Map pictures for the zoom view. Read by js/zoom.js (live) and pipeline/prerender_maps.py (saved copies), so both ask the services for the same thing.",
+  "m0": 16384,
+  "radius_m": { "earth": 6371008.8, "moon": 1737400, "mars": 3396190 },
+  "layers": {
+    "earth": [
+      { "id": "bluemarble", "label": "NASA Blue Marble", "credit": "NASA Blue Marble, from NASA GIBS", "srs": "deg", "service": "NASA GIBS",
+        "url": "https://gibs.earthdata.nasa.gov/wms/epsg4326/best/wms.cgi?SERVICE=WMS&REQUEST=GetMap&VERSION=1.1.1&STYLES=&SRS=EPSG:4326&LAYERS=BlueMarble_ShadedRelief_Bathymetry&FORMAT=image/jpeg" },
+      { "id": "weld", "label": "Landsat, year 2000 composite", "credit": "Landsat WELD annual composite for 2000 (NASA, USGS), from NASA GIBS", "srs": "deg", "maxMpp": 1024, "transparent": true, "service": "NASA GIBS",
+        "url": "https://gibs.earthdata.nasa.gov/wms/epsg4326/best/wms.cgi?SERVICE=WMS&REQUEST=GetMap&VERSION=1.1.1&STYLES=&SRS=EPSG:4326&LAYERS=Landsat_WELD_CorrectedReflectance_TrueColor_Global_Annual&TIME=2000-12-01" }
+    ],
+    "moon": [
+      { "id": "wac", "label": "LRO wide angle camera mosaic", "credit": "LROC WAC mosaic (NASA, GSFC, Arizona State University), from USGS Astrogeology", "srs": "deg", "service": "USGS Astrogeology",
+        "url": "https://planetarymaps.usgs.gov/cgi-bin/mapserv?map=/maps/earth/moon_simp_cyl.map&service=WMS&request=GetMap&version=1.1.1&styles=&srs=EPSG:4326&layers=LROC_WAC&format=image/jpeg" }
+    ],
+    "moonpolar": [
+      { "id": "wacsouth", "label": "LRO wide angle camera, south pole mosaic", "credit": "LROC WAC south pole mosaic (NASA, GSFC, Arizona State University), from USGS Astrogeology", "srs": "m", "service": "USGS Astrogeology",
+        "url": "https://planetarymaps.usgs.gov/cgi-bin/mapserv?map=/maps/earth/moon_spole.map&service=WMS&request=GetMap&version=1.1.1&styles=&srs=EPSG:32761&layers=LRO_WAC_south&format=image/jpeg" }
+    ],
+    "mars": [
+      { "id": "themis", "label": "THEMIS daytime infrared mosaic", "credit": "Mars Odyssey THEMIS daytime infrared mosaic (NASA, JPL, Arizona State University), from USGS Astrogeology", "srs": "deg", "service": "USGS Astrogeology",
+        "url": "https://planetarymaps.usgs.gov/cgi-bin/mapserv?map=/maps/mars/mars_simp_cyl.map&service=WMS&request=GetMap&version=1.1.1&styles=&srs=EPSG:4326&layers=THEMIS&format=image/jpeg" }
+    ]
+  }
+}

@@ -603,3 +603,14 @@ footer.credit .viewmode+.viewmode{padding-left:18px;border-left:1px solid var(--
 .sdetail .two{gap:0}
 .sdetail .two .place.anchor{padding-right:16px}
 .sdetail .two .place.cand{padding-left:16px;border-left:1px solid var(--line-2)}
+/* pair page: every section starts with a rule, a number and a larger heading, so the divisions are plain */
+#view-pair .docin{gap:0;counter-reset:psec}
+#view-pair .docin>section{counter-increment:psec;margin-top:56px;padding-top:28px;border-top:1px solid var(--line-2)}
+#view-pair .docin>section>h2{display:flex;align-items:baseline;gap:12px;margin:0 0 18px;font-size:20px;font-weight:600}
+#view-pair .docin>section>h2::before{content:counter(psec,decimal-leading-zero);font-family:var(--mono);font-size:12px;font-weight:400;letter-spacing:.08em;color:var(--ink-3)}
+#view-pair .docin>section.breaks{padding:28px 0 2px 22px}
+#view-pair .phead{margin-top:20px}
+@media (max-width:480px){#view-pair .docin>section{margin-top:40px;padding-top:22px}}
+/* a sub-heading inside a section carries no number */
+#view-pair .docin>section>h2.sub{margin-top:28px;font-size:16px}
+#view-pair .docin>section>h2.sub::before{content:none}

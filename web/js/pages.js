@@ -112,7 +112,7 @@ export function renderPair(D, s, ctx) {
     ? `<ul class="claims">${s.breaks.map(c => claimLi(D, c)).join('')}</ul>`
     : `<p>No differences specific to this pair have been assessed by us yet. The limits below still apply.</p>`;
   el.innerHTML = `<div class="docin pair">
-    <nav class="crumbs" aria-label="Pairs"><a href="#explore">← All pairs</a><span>Pair ${i + 1} of ${N}</span><span class="sp"></span><a href="#pair/${prev.id}">‹ ${esc(prev.short)}</a><a href="#pair/${next.id}">${esc(next.short)} ›</a></nav>
+    <nav class="crumbs" aria-label="Pairs"><a href="#worlds" id="pback">← Back to the globes</a><span>Pair ${i + 1} of ${N}</span><span class="sp"></span><a href="#pair/${prev.id}">‹ ${esc(prev.short)}</a><a href="#pair/${next.id}">${esc(next.short)} ›</a></nav>
     <header class="phead">
       <div class="chips">${labelChip(D, s)}<span>${confText(s)}</span><span>${esc(s.kind)}</span></div>
       <h1>${esc(s.name)} <span class="ar">↔</span> ${esc(s.target)}</h1>
@@ -123,6 +123,7 @@ export function renderPair(D, s, ctx) {
         <div class="place anchor"><span class="role">Stands in for · ${World(s.body)}</span><strong>${esc(s.target)}</strong><span class="mono muted">${s.tlat != null ? fmtLL(s.tlat, s.tlon) + srcLinks(D, s.tcoordSrc) : 'A process, with no single place'}</span>${s.tcoordNote ? `<span class="mono muted">${esc(s.tcoordNote)}</span>` : ''}</div>
       </div>
     </header>
+    ${confHtml(D, s)}
     <section>
       <h2>Alike in these ways</h2>
       ${figuresHtml(D, s)}
@@ -136,7 +137,6 @@ export function renderPair(D, s, ctx) {
       <h2>Measured temperature</h2>
       <p>Loading the temperature record…</p>
     </section>
-    ${confHtml(D, s)}
     <section>
       <h2>How it could help exploration</h2>
       <p>${esc(s.helps)}${srcLinks(D, s.helpsSrc)}</p>

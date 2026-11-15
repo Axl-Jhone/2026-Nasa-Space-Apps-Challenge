@@ -51,7 +51,11 @@ function route() {
   for (const id of VIEWS) $('#view-' + id).hidden = id !== t;
   $$('nav.tabs button').forEach(b => b.setAttribute('aria-pressed', b.dataset.tab === (t === 'pair' || t === 'side-by-side' ? 'explore' : t)));
   if (t === 'side-by-side') loadPair();
-  else if (t === 'pair') { selectSite(ps.id); renderPair(D, ps, ctx); }
+  else if (t === 'pair') {
+    selectSite(ps.id); renderPair(D, ps, ctx);
+    // back link: the globes, with this site still chosen and its details open
+    $('#pback').addEventListener('click', e => { e.preventDefault(); if (zoomOpen()) zoomOut(); selectSite(ps.id, true); location.hash = '#worlds'; scrollTo(0, 0); });
+  }
   else if (t === 'explore') renderExplore(D, S.ex, route, ctx);
   else if (t === 'method') renderMethod(D, ctx);
   else refreshAll();
@@ -378,8 +382,7 @@ function showSideDetail(s) {
     <div class="more"><h4>Data</h4><p>${esc(s.data)}</p></div>
     <button class="btn alt" id="gozoom">Zoom in to both places on the map</button>
     ${pair ? `<button class="btn alt" id="goside">Compare terrain side by side</button>` : ''}
-    <a class="btn go" href="#pair/${s.id}">Open the full case: alike, and where it breaks →</a>
-    <p class="fineprint">Every site, always: Earth cannot reproduce the reduced gravity, the lunar vacuum, the thin Martian air or their radiation.</p>`;
+    <a class="btn go" href="#pair/${s.id}">Open the full case: alike, and where it breaks →</a>`;
   S.side = 'detail'; $('#slist').hidden = true; el.hidden = false; el.scrollTop = 0;
   $('aside.side').classList.add('wide');   // two value columns need more width than the site list
   $('#sback').addEventListener('click', showSideList);

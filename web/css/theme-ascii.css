@@ -591,3 +591,15 @@ footer.credit .viewmode+.viewmode{padding-left:18px;border-left:1px solid var(--
 #view-explore .needcols li>[class^="st-"]{margin-left:6px;font-family:var(--mono);font-size:13px}
 #view-explore .needcols li .plab{margin-left:8px;white-space:nowrap}
 #view-explore .needcols li .plab .lab{margin:0;font-size:11px}
+/* All pairs legend: each status with its meaning printed, two columns, one on a phone */
+#view-explore .docin>.mhead.lgfull{display:grid;grid-template-columns:1fr 1fr;gap:8px 28px;margin:0 0 14px}
+.lgfull .lg{display:grid;grid-template-columns:auto 1fr;align-items:baseline;gap:2px 8px;font-size:13px}
+.lgfull .lgd{grid-column:2;line-height:1.4}
+.lgfull .lg .sw{font-size:13px;min-width:1ch}
+.lgfull .lg b{font-weight:600;color:var(--ink);white-space:nowrap}
+.lgfull .lgd{color:var(--ink-2);font-family:var(--body)}
+@media (max-width:700px){#view-explore .docin>.mhead.lgfull{grid-template-columns:1fr}}
+/* quick-details panel: a rule between the anchor and the Earth analog */
+.sdetail .two{gap:0}
+.sdetail .two .place.anchor{padding-right:16px}
+.sdetail .two .place.cand{padding-left:16px;border-left:1px solid var(--line-2)}

@@ -372,17 +372,14 @@ function showSideDetail(s) {
     </div>
     <div class="chips">${labelChip(D, s)}<span>${esc(s.kind)}</span></div>
     <p class="confbadge band-${esc(band)}"><span>Evidence confidence</span> ${s.conf ? `<b>${s.conf.score}%</b> · ${esc(s.conf.band)}` : 'not scored'}</p>
-    <p>${esc(s.claim || '')}</p>
-    <a class="btn go" href="#pair/${s.id}">Open the full case: alike, and where it breaks →</a>
-    <p class="fineprint">Every site, always: Earth cannot reproduce the reduced gravity, the lunar vacuum, the thin Martian air or their radiation.</p>
     <div class="mhead"><h3>Are they similar? Parameter by parameter</h3></div>
     <div class="mhead">${legend}</div>
     <ul class="dims">${rows}</ul>
-    ${s.cmpNote ? `<p class="fineprint">${esc(s.cmpNote)}</p>` : ''}
-    <div class="more"><h4>How it helps exploration</h4><p>${esc(s.helps)}</p></div>
     <div class="more"><h4>Data</h4><p>${esc(s.data)}</p></div>
     <button class="btn alt" id="gozoom">Zoom in to both places on the map</button>
-    ${pair ? `<button class="btn alt" id="goside">Compare terrain side by side</button>` : ''}`;
+    ${pair ? `<button class="btn alt" id="goside">Compare terrain side by side</button>` : ''}
+    <a class="btn go" href="#pair/${s.id}">Open the full case: alike, and where it breaks →</a>
+    <p class="fineprint">Every site, always: Earth cannot reproduce the reduced gravity, the lunar vacuum, the thin Martian air or their radiation.</p>`;
   S.side = 'detail'; $('#slist').hidden = true; el.hidden = false; el.scrollTop = 0;
   $('aside.side').classList.add('wide');   // two value columns need more width than the site list
   $('#sback').addEventListener('click', showSideList);

@@ -25,7 +25,12 @@ const claimLi = (D, c) => `<li><span>${esc(c.t)}</span>${c.src && c.src.length ?
 
 export const confText = s => (s.conf ? `Confidence ${s.conf.score}% · ${s.conf.band}` : 'Confidence not scored');
 
-export const legendHtml = D => Object.entries(D.status).map(([k, l]) => `<span class="lg" title="${esc((D.statusHelp || {})[k] || '')}"><i class="sw st-${k}">${esc(l[0])}</i>${esc(l)}</span>`).join('');
+// full: print each status's meaning next to its word instead of leaving it in the tooltip
+export const legendHtml = (D, full) => Object.entries(D.status).map(([k, l]) => {
+  const help = (D.statusHelp || {})[k] || '';
+  return full && help ? `<span class="lg"><i class="sw st-${k}">${esc(l[0])}</i><b>${esc(l)}</b><span class="lgd">${esc(help)}</span></span>`
+    : `<span class="lg" title="${esc(help)}"><i class="sw st-${k}">${esc(l[0])}</i>${esc(l)}</span>`;
+}).join('');
 
 export function matrixHtml(D, s, cls = '') {
   return `<ul class="matrix ${cls}">${D.dims.map(([k, name]) => {
@@ -266,7 +271,7 @@ export function renderExplore(D, F, rerender, ctx) {
       <div class="pills" role="group" aria-label="World">${pill('world', 'all', 'All')}${pill('world', 'moon', `Moon (${n('moon')})`)}${pill('world', 'mars', `Mars (${n('mars')})`)}</div>
       <div class="pills" role="group" aria-label="Label">${pill('label', 'all', 'Any label')}${Object.entries(D.labels).map(([k, v]) => pill('label', k, v[0])).join('')}</div>
     </div>
-    <div class="mhead">${legendHtml(D)}</div>
+    <div class="mhead lgfull">${legendHtml(D, true)}</div>
     <div class="xwrap"><table class="xt"><thead><tr><th scope="col">Earth site and what it stands in for</th><th scope="col">Label</th><th scope="col" aria-sort="${F.sort === 'desc' ? 'descending' : F.sort === 'asc' ? 'ascending' : 'none'}"><button class="sortbtn" id="xsort" aria-pressed="${!!F.sort}" title="Out of 100. How well the page's statements are supported by sources we opened. Click to order the rows: highest first, lowest first, then back to the written order. Now: ${sortSay}">Confidence <span aria-hidden="true">${F.sort === 'desc' ? '↓' : F.sort === 'asc' ? '↑' : '↕'}</span></button></th>${head}</tr></thead>
       <tbody>${rows || `<tr><td colspan="${D.dims.length + 3}">No pair matches these filters.</td></tr>`}</tbody></table></div>
     <p class="fineprint">Hover over a cell to read its note. Click a row to open the pair. Terrain is the only dimension measured on both worlds; everything else is cited evidence or marked as not assessed.</p>

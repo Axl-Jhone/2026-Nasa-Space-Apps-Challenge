@@ -159,11 +159,21 @@ export function renderPair(D, s, ctx) {
 }
 
 // Terrain similarity: one percentage, always with the three parts it is the average of
+// Radial form: a separate figure for shape, because the similarity above cannot tell a crater from a dune field
+const formWord = v => (v >= 0.5 ? 'a centred bowl or peak' : v >= 0.25 ? 'partly centred' : 'no centred shape');
+export function formHtml(pair) {
+  const f = pair && pair.form; if (!f) return '';
+  const w = pair.body === 'mars' ? 'Mars' : 'Moon', gap = Math.abs(f.earth - f.other);
+  return `<div class="xwrap dtw"><table class="dt"><tbody>
+      <tr><th scope="row">Radial form, Earth</th><td class="s n">${f.earth.toFixed(2)}</td><td>${formWord(f.earth)}</td></tr>
+      <tr><th scope="row">Radial form, ${w}</th><td class="s n">${f.other.toFixed(2)}</td><td>${formWord(f.other)}</td></tr></tbody></table></div>
+    <p class="fineprint">Radial form is the share of a window's height variation explained by distance from its centre: 1 for a perfect bowl, about 0 for dunes or a flat pan. ${gap <= 0.15 ? 'The two windows are alike in form.' : 'The two windows differ in form.'} It is shown beside the similarity and is not part of it. <a href="#method">How it is worked out</a></p>`;
+}
 export function simHtml(pair) {
   const m = pair && pair.sim; if (!m) return '';
   return `<p class="cfnum"><b>${m.score}%</b> terrain similarity</p>
     <div class="xwrap dtw"><table class="dt"><tbody>${m.parts.map(q => `<tr><th scope="row">${esc(q.label)}</th><td class="s n">${q.pct}%</td><td>${esc(q.why)}</td></tr>`).join('')}
-      <tr><th scope="row">Average</th><td class="s n">${m.score}%</td><td>The plain average of the three parts. Terrain only: it says nothing about rock, temperature or ice.</td></tr></tbody></table></div>`;
+      <tr><th scope="row">Average</th><td class="s n">${m.score}%</td><td>The plain average of the three parts. Terrain only: it says nothing about rock, temperature or ice.</td></tr></tbody></table></div>${formHtml(pair)}`;
 }
 
 // Measured temperature: MODIS at the Earth site, set against the published figure for the counterpart
@@ -210,6 +220,25 @@ async function fillPairTerrain(D, s, pair, ctx) {
 }
 
 /* ---------- all pairs ---------- */
+// Pick what a mission needs to test: which sites to use for it, and which not to. Built only from the matrix and its notes.
+function needHtml(D, F, pill) {
+  if (!D.needs) return '';
+  const k = F.need || D.needs[0][0], dim = D.dims.find(d => d[0] === k);
+  const item = s => `<li><a href="#pair/${s.id}"><b>${esc(s.short)}</b></a> <span class="muted">for ${esc(s.target)}</span> ${labelChip(D, s)} <span class="st-${s.d[k][0]}">${esc(D.status[s.d[k][0]])}</span><br>${esc(s.d[k][1])}${srcLinks(D, (s.dsrc || {})[k])}</li>`;
+  const use = D.sites.filter(s => 'MCP'.includes(s.d[k][0])).sort((a, b) => 'MCP'.indexOf(a.d[k][0]) - 'MCP'.indexOf(b.d[k][0]));
+  const hyp = D.sites.filter(s => s.d[k][0] === 'H'), no = D.sites.filter(s => s.d[k][0] === 'B'), na = D.sites.filter(s => s.d[k][0] === 'N');
+  return `<section class="need">
+    <h2>What do you need to test?</h2>
+    <div class="pills" role="group" aria-label="Mission need">${D.needs.map(([id, label]) => pill('need', id, label)).join('')}</div>
+    <p class="fineprint">${esc(dim[1])}. The lists come straight from the table below: each line is that pair's note for this dimension, with its sources. Measured means we measured it, not that it matched: read the note.</p>
+    <div class="needcols">
+      <div><h3>Sites with evidence on this (${use.length})</h3>${use.length ? `<ul>${use.map(item).join('')}</ul>` : '<p class="muted">No site in the atlas is measured or cited for this.</p>'}
+        ${hyp.length ? `<h3>Proposed by us, not tested (${hyp.length})</h3><ul>${hyp.map(item).join('')}</ul>` : ''}</div>
+      <div class="no"><h3>Sites that do not match on this (${no.length})</h3>${no.length ? `<ul>${no.map(item).join('')}</ul>` : '<p class="muted">No pair is marked as not matching here.</p>'}
+        ${na.length ? `<p class="fineprint">Not assessed for this: ${na.map(s => esc(s.short)).join(', ')}.</p>` : ''}</div>
+    </div></section>`;
+}
+
 export function renderExplore(D, F, rerender, ctx) {
   const el = $('#view-explore');
   const sites = D.sites.filter(s => (F.world === 'all' || s.body === F.world) && (F.label === 'all' || s.label === F.label));
@@ -226,6 +255,8 @@ export function renderExplore(D, F, rerender, ctx) {
       <h1>All pairs, dimension by dimension</h1>
       <p class="lede">${D.sites.length} Earth sites, each set against a place or process on the Moon or Mars. One row says where a pair holds and where it breaks.</p>
     </header>
+    ${needHtml(D, F, pill)}
+    <h2>Every pair, every dimension</h2>
     <div class="xbar">
       <div class="pills" role="group" aria-label="World">${pill('world', 'all', 'All')}${pill('world', 'moon', `Moon (${n('moon')})`)}${pill('world', 'mars', `Mars (${n('mars')})`)}</div>
       <div class="pills" role="group" aria-label="Label">${pill('label', 'all', 'Any label')}${Object.entries(D.labels).map(([k, v]) => pill('label', k, v[0])).join('')}</div>
@@ -243,7 +274,7 @@ export function renderExplore(D, F, rerender, ctx) {
         <p class="fineprint">${esc(D.limitsNote || '')}${srcLinks(D, D.limitsSrc)}</p></div>
     </section>
   </div>`;
-  $$('.xbar .pill', el).forEach(b => b.addEventListener('click', () => { F[b.dataset.g] = b.dataset.k; rerender(); }));
+  $$('.xbar .pill, .need .pill', el).forEach(b => b.addEventListener('click', () => { F[b.dataset.g] = b.dataset.k; rerender(); }));
   if (ctx) fillClimateTable(D, sites, ctx);
   $$('.xt tbody tr[data-id]', el).forEach(tr => tr.addEventListener('click', ev => { if (!ev.target.closest('a')) location.hash = '#pair/' + tr.dataset.id; }));
 }
@@ -278,6 +309,7 @@ export function renderMethod(D, ctx) {
     <header class="phead"><h1>Method and sources</h1><p class="lede">How each claim on this site can be traced, and what the numbers do and do not say.</p></header>
     ${M.sections.map(sec).join('')}
     ${D.terrainSim ? sec({ id: 'similarity', ...D.terrainSim }) : ''}
+    ${D.terrainForm ? sec({ id: 'form', ...D.terrainForm }) : ''}
     ${rubric}
     ${prov}
     <section><h2>Data</h2><ul>${M.datasets.map(([n, use, url]) => `<li><a href="${esc(url)}" target="_blank" rel="noopener">${esc(n)}</a>. ${esc(use)}</li>`).join('')}</ul></section>
@@ -297,7 +329,7 @@ async function fillControls(D, ctx) {
   if (!slot.isConnected) return;
   const cols = METRICS.filter(m => m[0] !== 'masked_share');
   const rows = W.map((w, i) => { const f = F[i], m = !f.missing && f.meta.metrics;
-    return `<tr><td>${esc(w.label)}<small>${esc(w.kind)}</small></td>${cols.map(([k, , , fmt]) => `<td class="n">${m && Number.isFinite(m[k]) ? fmt(m[k]) : '—'}</td>`).join('')}<td class="n">${w.sim != null ? w.sim + '%' : 'reference'}</td></tr>`; }).join('');
-  slot.innerHTML = `<div class="xwrap"><table class="st2"><thead><tr><th>Window (40 km, 80 m grid)</th>${cols.map(([, n]) => `<th>${n}</th>`).join('')}<th>Similarity to de Gerlache</th></tr></thead><tbody>${rows}</tbody></table></div>
-    <p class="fineprint">Relief and roughness in metres, slopes in degrees. A dash means that window has no export yet.</p>`;
+    return `<tr><td>${esc(w.label)}<small>${esc(w.kind)}</small></td>${cols.map(([k, , , fmt]) => `<td class="n">${m && Number.isFinite(m[k]) ? fmt(m[k]) : '—'}</td>`).join('')}<td class="n">${w.sim != null ? w.sim + '%' : 'reference'}</td><td class="n">${w.form != null ? w.form.toFixed(2) : '—'}</td></tr>`; }).join('');
+  slot.innerHTML = `<div class="xwrap"><table class="st2"><thead><tr><th>Window (40 km, 80 m grid)</th>${cols.map(([, n]) => `<th>${n}</th>`).join('')}<th>Similarity to de Gerlache</th><th>Radial form</th></tr></thead><tbody>${rows}</tbody></table></div>
+    <p class="fineprint">Relief and roughness in metres, slopes in degrees. Radial form runs from 0 (no centred shape) to 1 (a perfect bowl): it separates the dune field and the lake bed from the craters, which the similarity alone does not. A dash means that window has no export yet.</p>`;
 }

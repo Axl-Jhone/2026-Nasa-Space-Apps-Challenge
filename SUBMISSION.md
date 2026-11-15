@@ -50,6 +50,10 @@ Repository: https://github.com/Axl-Jhone/2026-Nasa-Space-Apps-Challenge
 
 **Test any place on Earth.** In the zoom view, click the Earth map or type coordinates. ATLAS reads open elevation tiles for that spot, measures it in the browser with the pipeline's own formulas, and scores it against de Gerlache or Jezero in about two seconds. It is labelled a quick test, and a button runs it at Kamestastin or Lake Salda beside our pipeline's numbers so anyone can see how far it can be trusted (Lake Salda: 841 m of relief against 840 m). It lets a visitor look beyond the well-known sites. A second button lights both terrains with the Sun 1.5° above the horizon, as at the lunar poles.
 
+**Shape, not just ruggedness.** Our controls showed the similarity percentage could not tell a crater from a dune field. We added radial form: the share of a window's height variation explained by distance from its centre. The two lunar craters and Kamestastin score 0.60 to 0.75, the dune field 0.05 and the flat lake bed 0.08. It also exposes a break the similarity hid: Jezero scores 0.66 and Lake Salda 0.15.
+
+**From a need to a site.** On the All pairs tab, pick what a mission must test (reaching water ice, cold and lighting, dust on hardware and so on) and the atlas lists the sites with evidence on it and the sites that do not match, each with its note and sources. The quick test can also scan the eight windows around a tested place, adds NASA POWER climate for the spot, and gives a link that reopens the same test.
+
 **The negative result.** We found no Earth site that reproduces the cold, the lighting or the volatiles of the lunar south pole. The Moon candidates match rock and caves only.
 
 **What is new and what is not.** Two pairings are our own hypotheses and are labelled as such: the Umm Jirsan lava tube for lunar pits, and the Bodélé Depression for dust lifting on Mars. The rest are established or benchmark analogs. A method page lists every source and how much of it was read.

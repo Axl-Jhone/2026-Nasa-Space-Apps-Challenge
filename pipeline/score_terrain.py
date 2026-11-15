@@ -55,18 +55,60 @@ def similarity(a, b):
     return {"score": round(sum(p["pct"] for p in parts) / len(parts)), "parts": parts}
 
 
+FORM_RINGS = 16
+FORM_TEXT = {"h": "Radial form: telling a crater from a dune field", "p": [
+    "Radial form: the share of a window's height variation that is explained by distance from its centre alone. A perfect bowl or cone gives 1. Ground with no centred shape, such as dunes or a flat pan, gives about 0.",
+    "The window's stored heights are grouped into 16 rings around the centre, inside the largest circle that fits. Each cell is replaced by its ring's mean height, and the figure is the share of variance that survives (R squared). It is read from the exported display mesh, the same heights the 3D picture is drawn from.",
+    "The similarity percentage could not tell a crater from a dune field. This can: the two lunar craters and Kamestastin score 0.60 to 0.75, the dune field 0.05 and the lake bed 0.08. It is shown beside the similarity and is not part of it.",
+    "It only means something when the window is centred on the feature, and it says nothing about size or depth. Two windows with the same figure can still be very different places.",
+]}
+
+
+def radial_form(j):
+    """R squared of height against distance from the window centre (0 to 1)."""
+    import numpy as np
+    n = j["n"]; h = np.array(j["heights_m"], float).reshape(n, n)
+    y, x = np.mgrid[:n, :n]
+    r = np.hypot(x - (n - 1) / 2, y - (n - 1) / 2) / ((n - 1) / 2)
+    inside = r < 1
+    ring = np.minimum((r * FORM_RINGS).astype(int), FORM_RINGS - 1)
+    prof = np.array([h[(ring == a) & inside].mean() for a in range(FORM_RINGS)])
+    v = h[inside]; total = ((v - v.mean()) ** 2).sum()
+    return 0.0 if total == 0 else round(float(max(0.0, 1 - ((v - prof[ring][inside]) ** 2).sum() / total)), 2)
+
+
+def _form_selftest():
+    import numpy as np
+    n = 64; y, x = np.mgrid[:n, :n]; r = np.hypot(x - (n - 1) / 2, y - (n - 1) / 2)
+    cone = {"n": n, "heights_m": (100 - r).ravel().tolist()}
+    noise = {"n": n, "heights_m": np.random.default_rng(1).normal(0, 1, n * n).tolist()}
+    ramp = {"n": n, "heights_m": (x * 1.0).ravel().tolist()}
+    assert radial_form(cone) > 0.98, radial_form(cone)          # a cone is all radial
+    assert radial_form(noise) < 0.05, radial_form(noise)        # noise has no centred shape
+    assert radial_form(ramp) < 0.05, radial_form(ramp)          # a tilted plane has no centred shape
+
+
 def main():
+    _form_selftest()
     D = sitesjson.load(SITES)
     for pair in D["pairs"]:
         if (TERRAIN / f"{pair['earth']}.json").exists() and (TERRAIN / f"{pair['other']}.json").exists():
             pair["sim"] = similarity(load(pair["earth"]), load(pair["other"]))
+            pair["form"] = {"earth": radial_form(load(pair["earth"])), "other": radial_form(load(pair["other"]))}
             print(f"{pair['id']:<12} {pair['sim']['score']:>3}%  " + "  ".join(f"{p['k']}={p['pct']}" for p in pair["sim"]["parts"]))
     ref = load("degerlache")
     for w in D.get("controlWindows", []):
+        if (TERRAIN / f"{w['id']}.json").exists():
+            w["form"] = radial_form(load(w["id"]))
         if w["id"] != "degerlache" and (TERRAIN / f"{w['id']}.json").exists():
             w["sim"] = similarity(load(w["id"]), ref)["score"]
             print(f"control {w['id']:<12} vs de Gerlache {w['sim']:>3}%")
     D["terrainSim"] = TEXT
+    D["terrainForm"] = FORM_TEXT
+    for pair in D["pairs"]:
+        if "form" in pair:
+            print(f"form {pair['id']:<12} earth {pair['form']['earth']:.2f}  other {pair['form']['other']:.2f}")
+    print('form controls', {w['id']: w.get('form') for w in D.get('controlWindows', [])})
     sitesjson.save(SITES, D)
 
 

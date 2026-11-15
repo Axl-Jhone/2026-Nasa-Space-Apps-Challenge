@@ -445,7 +445,19 @@ footer.credit{background:transparent}
 .intro span{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3)}
 
 /* review fixes (15 November): one sentence on the home view says what the site is */
-.lede{align-self:stretch;margin:14px 16px 2px;font-size:16px;font-weight:500;line-height:1.4;color:var(--ink);text-align:center;text-wrap:balance}
-body[data-zoom="on"] .lede{display:none}
+#view-worlds .lede{align-self:stretch;margin:14px 16px 2px;font-size:16px;font-weight:500;line-height:1.4;color:var(--ink);text-align:center;text-wrap:balance}
+body[data-zoom="on"] #view-worlds .lede{display:none}
 .qt .err{color:var(--break)}
-@media (max-width:560px){.lede{font-size:14px}}
+@media (max-width:560px){#view-worlds .lede{font-size:14px}}
+
+/* scan squares, quick-test buttons, mission need */
+.ztip{background:rgba(0,0,0,.7);border:0;border-radius:0;box-shadow:none;color:#fff;font-family:var(--mono);font-size:12px;padding:1px 4px}
+.ztip::before{display:none}.ztip.top{background:#f0c060;color:#000;font-weight:600}
+.qtbtns{display:flex;flex-wrap:wrap;gap:8px}
+.qt th small{display:block;font-weight:400;color:var(--ink-3)}
+.linkbtn{padding:0;border:0;background:none;color:var(--accent);font:inherit;text-decoration:underline;cursor:pointer}
+.need{margin:0 0 36px}.need .pills{flex-wrap:wrap}
+.needcols{display:grid;grid-template-columns:1fr 1fr;gap:28px;margin-top:10px}
+.needcols h3{margin:0 0 8px;font-size:14px;color:var(--accent)}.needcols .no h3{color:var(--break)}
+.needcols ul{margin:0 0 16px;padding:0;list-style:none}.needcols li{padding:8px 0;border-top:1px solid var(--line);font-size:14px;line-height:1.5}
+@media (max-width:760px){.needcols{grid-template-columns:1fr}}

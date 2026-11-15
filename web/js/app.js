@@ -5,8 +5,8 @@ import { loadField, drawTerrain, drawHillshade } from './terrain.js';
 import { Globe, loadTextures, refreshAll, kick } from './globe.js';
 import { renderPair, renderExplore, renderMethod, labelChip, legendHtml, measTableHtml, srcLinks, matrixHtml, confText, simHtml } from './pages.js';
 import { initAscii } from './ascii.js';
-import { openZoom, closeZoom, zoomOpen, pauseZoom } from './zoom.js';
-import { readWindow, measure, similarity } from './quicktest.js';
+import { openZoom, closeZoom, zoomOpen, pauseZoom, drawScan } from './zoom.js';
+import { readWindow, measure, similarity, radialForm } from './quicktest.js';
 import { initSky, playIntro } from './intro.js';
 
 const TABS = ['worlds', 'explore', 'side-by-side', 'method'];   // side-by-side has no tab of its own: it opens from a pair page
@@ -55,7 +55,12 @@ function route() {
   else if (t === 'method') renderMethod(D, ctx);
   else refreshAll();
   kick();
+  // links that open a view directly: #zoom/<site> and #test/<lat>,<lon>,<moon|mars>
+  if (h.startsWith('zoom/') && byId(h.slice(5))) { selectSite(h.slice(5)); zoomTo(byId(h.slice(5))); }
+  const tm = h.match(/^test\/(-?\d+(?:\.\d+)?),(-?\d+(?:\.\d+)?),(moon|mars)$/);
+  if (tm && Math.abs(+tm[1]) <= 80 && Math.abs(+tm[2]) <= 180) { setOther(tm[3]); quickTest(+tm[1], +tm[2]); }
 }
+const setHash = h => { try { history.replaceState(null, '', h); } catch (e) { /* not allowed in this frame */ } };
 
 /* ---------- 1. three worlds ---------- */
 // Pin lists for each world.
@@ -153,7 +158,7 @@ async function zoomTo(s) {
     if (!e.missing && !o.missing) { windows.earth = { ...e.meta.centre, km: e.windowKm }; windows.other = { ...o.meta.centre, km: o.windowKm }; }
   }
   $('#zoom-go').textContent = '← Back to the globes'; $('#zoom-go').setAttribute('aria-pressed', 'true');
-  $('#ztest').hidden = true;
+  $('#ztest').hidden = true; setHash('#zoom/' + s.id);
   openZoom(s, { pair: pair && windows.earth ? pair.id : null, windows, onTerrain: id => ctx.openSbs(id), onPick: (lat, lon) => quickTest(lat, lon), pickName: testTarget().name });
 }
 
@@ -161,6 +166,40 @@ async function zoomTo(s) {
    reads open elevation tiles in the browser and is not the pipeline. The measures are the pipeline's own (js/quicktest.js). */
 const testTarget = () => (S.other === 'mars' ? { pair: pairById('jezero'), name: 'Jezero crater, Mars', world: 'Mars', check: 'Lake Salda' } : { pair: pairById('degerlache'), name: 'de Gerlache crater, Moon', world: 'Moon', check: 'Kamestastin' });
 let qtAbort = null;
+// Climate for the tested place: one request to NASA POWER, the same service and fields as pipeline/earth_climate.py
+async function quickClimate(lat, lon, ac) {
+  const slot = $('#qtclim'); if (!slot) return;
+  try {
+    const r = await fetch(`https://power.larc.nasa.gov/api/temporal/climatology/point?parameters=T2M,T2M_MAX,T2M_MIN,WS10M,PRECTOTCORR&community=AG&longitude=${lon.toFixed(3)}&latitude=${lat.toFixed(3)}&format=JSON`, { signal: ac.signal });
+    const p = (await r.json()).properties.parameter, v = k => p[k].ANN;
+    if (ac.signal.aborted || !slot.isConnected || [v('T2M'), v('WS10M'), v('PRECTOTCORR')].some(x => x == null || x === -999)) return;
+    slot.innerHTML = `<p class="fineprint"><b>Climate here</b> (NASA POWER, a long-term value for a grid cell of about 50 km, not a reading at the spot): mean air temperature ${v('T2M').toFixed(1)} °C, extremes ${v('T2M_MIN').toFixed(0)} to ${v('T2M_MAX').toFixed(0)} °C; mean wind ${v('WS10M').toFixed(1)} m/s; rain and snow ${Math.round(v('PRECTOTCORR') * 365)} mm a year.</p>`;
+  } catch (e) { /* the climate line is extra; the test stands without it */ }
+}
+
+// Scan: the eight windows that touch the tested one, each measured the same way, to see if a neighbour matches better.
+// Windows are read one after another so tiles shared between neighbours come from the cache.
+async function scanAround(lat, lon, km, cell, o, centreScore, ac) {
+  const out = $('#qtscanout'), btn = $('#qtscan'); if (!out) return;
+  btn.disabled = true;
+  const R = 6371008.8, dLat = km * 1000 / R * 180 / Math.PI, cells = [{ lat, lon, score: centreScore, here: true }];
+  const names = { '-1,1': 'north-west', '0,1': 'north', '1,1': 'north-east', '-1,0': 'west', '1,0': 'east', '-1,-1': 'south-west', '0,-1': 'south', '1,-1': 'south-east' };
+  let done = 0;
+  for (const key of Object.keys(names)) {
+    const [i, j] = key.split(',').map(Number), la = lat + j * dLat, lo = lon + i * dLat / Math.cos(la * Math.PI / 180);
+    out.innerHTML = `<p class="qtwait">Scanning: window ${++done} of 8 …</p>`;
+    if (Math.abs(la) > 80) continue;
+    try { const w = await readWindow(la, lo, km, cell, { signal: ac.signal }); cells.push({ lat: la, lon: lo, score: similarity(measure(w), o.meta).score, where: names[key] }); }
+    catch (e) { if (ac.signal.aborted) return; }
+  }
+  if (ac.signal.aborted || !out.isConnected) return;
+  drawScan(cells, km, (a, b) => quickTest(a, b));
+  const best = cells.filter(c => !c.here).sort((a, b) => b.score - a.score)[0];
+  out.innerHTML = `<p class="fineprint"><b>Scan of the nine windows:</b> ${!best ? 'no neighbouring window could be read.' : best.score > centreScore
+    ? `the window to the ${best.where} scores higher, ${best.score}% against ${centreScore}% here. <button class="linkbtn" id="qtbest">Test that window</button>`
+    : `none of the eight neighbours scores higher than this one (best neighbour: ${best.score}%, to the ${best.where}).`} Each square on the map shows its score; click one to test it. Same quick-test limits apply.</p>`;
+  const bb = $('#qtbest'); if (bb) bb.addEventListener('click', () => quickTest(best.lat, best.lon));
+}
 const f0 = v => v.toFixed(0);
 async function quickTest(lat, lon, check = false) {
   const T = testTarget(), box = $('#ztest'); if (!T.pair) return;
@@ -173,6 +212,7 @@ async function quickTest(lat, lon, check = false) {
   $('#zoom-go').textContent = '← Back to the globes'; $('#zoom-go').setAttribute('aria-pressed', 'true');
   openZoom({ id: '_test', body: T.pair.body || 'moon', name: check ? pe.meta.name : 'Your place', lat, lon, target: ts.target, tlat: oc.lat, tlon: oc.lon },
     { noFly: zoomOpen(), savedFrom: ts.id, windows: { earth: { lat, lon, km }, other: { lat: oc.lat, lon: oc.lon, km } }, onPick: (a, b) => quickTest(a, b), pickName: T.name });
+  if (!check) setHash(`#test/${lat.toFixed(3)},${lon.toFixed(3)},${S.other}`);
   box.hidden = false; box.innerHTML = `<p class="qtwait">Reading open elevation for ${fmtLL(lat, lon)} …</p>`;
   const t0 = performance.now();
   try {
@@ -189,17 +229,25 @@ async function quickTest(lat, lon, check = false) {
       <p class="qtscore"><b>${sim.score}%</b> terrain similarity <span>slopes ${f(sim.parts.slopes, 0)}% · relief ${f(sim.parts.relief, 0)}% · roughness ${f(sim.parts.roughness, 0)}%</span></p>
       <div class="xwrap"><table class="st2"><thead><tr><th>Measure</th><th>${check ? 'Quick test' : 'Your place'}</th>${pm ? '<th>Our pipeline, same place</th>' : ''}<th>${esc(T.world)} window</th></tr></thead><tbody>
         ${row('Relief', 'relief_p5_p95_m', 0, ' m')}${row('Median slope', 'median_slope_deg', 1, '°')}${row('Steep-end slope', 'p95_slope_deg', 1, '°')}${row('Roughness', 'roughness_m', 1, ' m')}${row('Ground flatter than 8°', 'gentle_share', 0, '%', true)}
+        ${T.pair.form ? `<tr><th scope="row">Radial form <small>0 no centred shape, 1 a perfect bowl</small></th><td class="n">${f(radialForm(w), 2)}</td>${pm ? `<td class="n">${f(T.pair.form.earth, 2)}</td>` : ''}<td class="n">${f(T.pair.form.other, 2)}</td></tr>` : ''}
       </tbody></table></div>
+      <div id="qtclim"></div>
       <p class="fineprint">Measured in your browser just now: a ${km} km window on ${String(cell).startsWith('8') ? 'an' : 'a'} ${cell} m grid, from ${w.tiles} open elevation tiles (Mapzen Terrain Tiles on AWS Open Data, about ${f(w.tilePixelM, 0)} m here) in ${ms} ms. ${q.metrics.masked_share > 0.005 ? `Flat water left out: ${f(q.metrics.masked_share * 100, 0)}% of the window. ` : ''}The measures are the same ones our pipeline uses, but the elevation source is different and coarser, so treat this as a first look. On very flat ground the tiles are too coarse to trust. Terrain only: it says nothing about rock, temperature or ice.${T.pair.sim ? ` For scale, ${esc(T.check)} scores ${T.pair.sim.score}% in our pipeline.` : ''}</p>
-      ${check ? '' : `<button class="zoomgo" id="qtcheck">Check this tool: run it at ${esc(T.check)} and compare with our pipeline</button>`}`;
+      <div class="qtbtns">${check ? '' : `<button class="zoomgo" id="qtscan">Scan the eight windows around it</button>`}
+        ${check ? '' : `<button class="zoomgo" id="qtcheck">Check this tool at ${esc(T.check)}</button>`}
+        ${check ? '' : `<button class="zoomgo" id="qtshare">Copy a link to this test</button>`}</div>
+      <div id="qtscanout"></div>`;
     const b = $('#qtcheck'); if (b) b.addEventListener('click', () => quickTest(0, 0, true));
+    const sc = $('#qtscan'); if (sc) sc.addEventListener('click', () => scanAround(lat, lon, km, cell, o, sim.score, ac));
+    const sh = $('#qtshare'); if (sh) sh.addEventListener('click', async () => { try { await navigator.clipboard.writeText(location.href); sh.textContent = 'Link copied'; } catch (e) { sh.textContent = 'Copy it from the address bar'; } });
+    quickClimate(lat, lon, ac);
   } catch (e) {
     if (ac.signal.aborted) return;
     box.innerHTML = `<p class="err">The quick test could not run: ${esc(e.message || String(e))}</p>`;
   }
 }
 function zoomOut() {
-  if (qtAbort) qtAbort.abort(); $('#ztest').hidden = true;
+  if (qtAbort) qtAbort.abort(); $('#ztest').hidden = true; setHash('#worlds');
   closeZoom(); $('#zoom-go').textContent = 'Zoom in to both places'; $('#zoom-go').setAttribute('aria-pressed', 'false'); refreshAll(); kick();
 }
 function bindZoom() {

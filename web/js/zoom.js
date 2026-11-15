@@ -163,5 +163,22 @@ export function closeZoom() {
   $('#zoomwrap').hidden = true; $('.globes').hidden = false; delete document.body.dataset.zoom;
 }
 export const zoomOpen = () => !$('#zoomwrap').hidden;
+// Scan results: one square per window on the Earth map, labelled with its score. Clicking a square tests that window.
+export function drawScan(cells, km, onPick) {
+  const m = maps[0]; if (!m) return;
+  if (m.scan) m.scan.remove();
+  m.scan = L.layerGroup().addTo(m.map);
+  const best = Math.max(...cells.map(c => c.score));
+  for (const c of cells) {
+    const p = m.g.project(L.latLng(c.lat, c.lon)), h = km * 500;
+    const ring = [[-1, -1], [1, -1], [1, 1], [-1, 1]].map(([i, j]) => m.g.unproject(L.point(p.x + i * h, p.y + j * h)));
+    const top = c.score === best;
+    L.polygon(ring, { color: top ? '#f0c060' : '#ffffff', weight: top ? 2.5 : 1, fillColor: '#f0c060', fillOpacity: 0.08 + 0.4 * c.score / 100 })
+      .bindTooltip(c.score + '%', { permanent: true, direction: 'center', className: 'ztip' + (top ? ' top' : '') })
+      .on('click', e => { L.DomEvent.stopPropagation(e); onPick(c.lat, c.lon); }).addTo(m.scan);
+  }
+  const z = Math.max(m.map.getMinZoom(), m.map.getZoom() - 1);   // one step back so all nine fit
+  for (const o of maps) o.map.setZoom(z, { animate: false });
+}
 // Leaving the view: stop any flight in progress, so nothing animates on a hidden page
 export function pauseZoom() { for (const m of maps) m.map.stop(); }

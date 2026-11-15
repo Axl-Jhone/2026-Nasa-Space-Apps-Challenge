@@ -14,7 +14,7 @@ The site argues: this place on Earth is like that place on the Moon or Mars in t
 | `pipeline/mars_dem.py` | Leander | MOLA MEGDR window for Mars (Jezero), read from the NASA Planetary Data System. Run with `ATLAS_ANALYSIS_CELL_M=500` |
 | `pipeline/run_notebook.py` | Leander | Reruns a notebook's own cells for another site (Shackleton, the control windows) |
 | `pipeline/score_confidence.py` | Mico, Prince | Counts each pair's confidence score from `sites.json` and writes it back. `--check` says if the stored scores are stale |
-| `pipeline/score_terrain.py` | Mico | Terrain similarity (slopes, relief, roughness, plain average) for each pair and control window |
+| `pipeline/score_terrain.py` | Mico | Terrain similarity (slopes, relief, roughness, plain average) and radial form (shape, shown separately, never part of the similarity) for each pair and control window |
 | `pipeline/earth_temperature.py` | Leander | One year of MODIS land surface temperature at each Earth site, written to `web/data/temperature.json` |
 | `pipeline/earth_climate.py` | Leander | NASA POWER air temperature, wind and rainfall at each Earth site, written to `web/data/climate.json` |
 | `pipeline/prerender_maps.py` | Leander | Saved copies of the zoom-view map pictures (`web/data/maps/`), from the services listed in `web/data/maplayers.json`. Rerun after changing a site's coordinates |

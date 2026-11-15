@@ -10,7 +10,7 @@ const rad = d => d * Math.PI / 180, deg = r => r * 180 / Math.PI;
 
 /* ---- tiles: fetched at most four at a time, kept in a small cache, dropped if the user moves on ---- */
 const cache = new Map();            // "z/x/y" -> Promise<Float32Array 256*256 heights>
-const CACHE_MAX = 96, PARALLEL = 4;
+const CACHE_MAX = 220, PARALLEL = 4;   // room for a nine-window scan
 async function decode(blob) {
   const bmp = await createImageBitmap(blob, { colorSpaceConversion: 'none', premultiplyAlpha: 'none' });
   const c = new OffscreenCanvas(256, 256), g = c.getContext('2d', { willReadFrequently: true });
@@ -85,6 +85,16 @@ export function measure({ dem, n, cellM }) {
   return { metrics: { relief_p5_p95_m: percentile(h, 95) - percentile(h, 5), median_slope_deg: percentile(sl, 50), p95_slope_deg: percentile(sl, 95),
     roughness_m: Math.sqrt(v / ok.length), gentle_share: gentle / sl.length, masked_share: 1 - ok.length / N },
     slope_hist: { edges_deg: EDGES, frac: frac.map(x => x / sl.length) } };
+}
+
+// pipeline/score_terrain.py radial_form: share of height variance explained by distance from the centre (16 rings)
+export function radialForm({ dem, n }) {
+  const K = 16, c = (n - 1) / 2, sum = new Float64Array(K), cnt = new Float64Array(K); let tot = 0, m = 0, N = 0;
+  const ring = (i, j) => { const r = Math.hypot(i - c, j - c) / c; return r < 1 ? Math.min(K - 1, Math.floor(r * K)) : -1; };
+  for (let j = 0; j < n; j++) for (let i = 0; i < n; i++) { const k = ring(i, j); if (k < 0) continue; const z = dem[j * n + i]; sum[k] += z; cnt[k]++; m += z; N++; }
+  m /= N; let res = 0;
+  for (let j = 0; j < n; j++) for (let i = 0; i < n; i++) { const k = ring(i, j); if (k < 0) continue; const z = dem[j * n + i]; res += (z - sum[k] / cnt[k]) ** 2; tot += (z - m) ** 2; }
+  return tot === 0 ? 0 : Math.max(0, 1 - res / tot);
 }
 
 // pipeline/score_terrain.py: plain average of slope-histogram overlap, relief ratio and roughness ratio

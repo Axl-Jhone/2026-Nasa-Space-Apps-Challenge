@@ -1305,7 +1305,8 @@
           { "k": "relief", "label": "Relief", "pct": 7, "why": "216 m against 3088 m." },
           { "k": "roughness", "label": "Roughness", "pct": 58, "why": "3.2 m against 5.5 m." }
         ]
-      }
+      },
+      "form": { "earth": 0.6, "other": 0.6 }
     },
     {
       "id": "shackleton",
@@ -1324,7 +1325,8 @@
           { "k": "relief", "label": "Relief", "pct": 7, "why": "216 m against 3154 m." },
           { "k": "roughness", "label": "Roughness", "pct": 64, "why": "3.5 m against 5.5 m." }
         ]
-      }
+      },
+      "form": { "earth": 0.6, "other": 0.75 }
     },
     {
       "id": "jezero",
@@ -1343,7 +1345,8 @@
           { "k": "relief", "label": "Relief", "pct": 96, "why": "840 m against 872 m." },
           { "k": "roughness", "label": "Roughness", "pct": 49, "why": "19.7 m against 40.5 m." }
         ]
-      }
+      },
+      "form": { "earth": 0.15, "other": 0.66 }
     }
   ],
   "controls": [
@@ -1361,7 +1364,7 @@
       { "h": "How terrain is measured", "p": ["Both windows are 40 km squares. Each is area-averaged onto one 80 m grid before anything is measured, because slope depends on the distance between samples: two terrains are only comparable at one resolution. Slope is computed from height differences in metres."], "ul": ["Relief: 95th minus 5th percentile height of the unmasked cells.", "Median slope and 95th percentile slope, in degrees.", "Roughness: the spread of height left after removing a 5 by 5 cell (400 m) moving average.", "Gentle ground: the share of unmasked cells with a slope under 8°. That is the tilt NASA's Human Landing System must tolerate for surface operations (Chavers et al. 2020; NASA Inspector General report IG-26-004). The requirement gives no baseline and site studies apply it at about 5 m, so at 80 m this is a coarse screen, not a landing-safety assessment.", "Slope histogram: 2 degree bins from 0 to 40, the same bins on both sides."], "p2": ["Earth: Copernicus DEM GLO-30, read from Microsoft Planetary Computer and reprojected to UTM zone 20N at 30 m, with the lake masked. Moon: LRO LOLA polar gridded elevation LDEM_80S_80M at 80 m, with every scale factor and offset read from the product label.", "The Mars pair, Lake Salda and Jezero, uses NASA's MOLA grid, which is about 463 m. That is too coarse for 80 m, so both of its windows are 60 km squares on one 500 m grid. The two pairs' numbers cannot be compared with each other.", "The measures are computed in Python and written to a file. The browser draws what is in the file and never invents or recomputes a measurement. The script checks itself on made-up terrain first: a flat plane must give zero slope, and a uniform 20 degree ramp must read as 20 degrees.", "The side-by-side view has a button that lights both terrains with the Sun 1.5° above the horizon. The Moon's axis is tilted about 1.5° (NASA Moon Fact Sheet: obliquity to orbit 6.68°, orbit inclined 5.145° to the ecliptic), so at its poles the Sun stays about that low. Each slope is shaded by how it faces the Sun; shadows that one hill casts on another are not drawn."] },
       { "h": "How temperature, wind and rain are measured", "p": ["For each Earth site we read one year of NASA MODIS land surface temperature (the MOD11A2 product from the Terra satellite: 8-day clear-sky composites at 1 km) at the one pixel that contains the site's coordinates. The page gives the average by day and by night, and the coldest and warmest 8-day averages.", "The Moon or Mars side is a published figure, not our measurement, and the page says which. So this is a second measured dataset on the Earth side only. It turns \"the cold does not match\" into a number: how many kelvin separate the coldest night at the site from the figure for its counterpart.", "Air temperature, wind and rainfall come from NASA POWER, a 25-year climatology from the MERRA-2 reanalysis on a grid of about 50 km. A reanalysis is a reconstruction constrained by observations, not a reading taken at the site, and one grid cell is far larger than most of our sites.", "Limits: one pixel is 1 km across and some site coordinates are approximate; composites with cloud are skipped; a lake pixel reads the water surface."] },
       { "h": "The zoom view: two maps, one scale", "p": ["On the Three worlds tab, the globes can zoom in to two maps: the Earth site beside its counterpart. Both maps are drawn on a flat grid in metres centred on the place, so a kilometre covers the same number of pixels on each. The two maps are tied to one zoom level and the scale under them is printed only while they share it.", "The pictures are requested live from NASA GIBS (Blue Marble, and the Landsat composite for the year 2000) and from USGS Astrogeology (the LRO wide angle camera mosaics of the Moon and the THEMIS daytime infrared mosaic of Mars). Under the live pictures sits a saved copy of the same pictures, fetched by pipeline/prerender_maps.py, so the view works with no network. A label on each map says which one is showing.", "The maps are pictures for orientation. No number on this site is read from them. Near the lunar south pole the map is polar: up is toward 0° longitude, not north. The dashed square, where there is one, is the window whose terrain we measured.", "The 30-second tour plays one pair through this view. Every line it shows is a claim from this site's data file with its source, ending on where the analogy stops."] },
-      { "h": "Quick test: any place on Earth", "p": ["In the zoom view you can click the Earth map, or type a latitude and longitude, and the site measures that place's terrain in your browser and sets it beside our measured Moon window (de Gerlache) or Mars window (Jezero). It is there so anyone can propose a site we did not think of.", "It is a quick test, not our pipeline, and every number from it is labelled that way. The measures are the pipeline's own, ported line for line: relief, slope, roughness, the share of ground under 8°, and the same three-part similarity. The elevation is different: open Terrain Tiles (Mapzen, hosted on AWS Open Data, built from sources that include NASA SRTM), sampled on the target's grid, where the pipeline area-averages Copernicus DEM.", "We checked it where we have pipeline values. At Lake Salda it gives 841 m of relief against the pipeline's 840 m, and a median slope of 4.0° against 4.1°. At Kamestastin it gives 226 m against 216 m, and 3.3° against 3.7°. On the Sua Pan lake bed it fails: the tiles are too coarse for ground that flat, and it reads 3.2 m of roughness where the pipeline reads 0.25 m. The result card offers the same check live.", "Still water is stored perfectly flat in the tiles, so flat cells are left out, as the pipeline leaves out its lake mask. The sea floor is not masked. Beyond 80° of latitude the tiles are not used. A quick-test score is a first look at terrain only; it is never added to the atlas or to a pair's confidence."] },
+      { "h": "Quick test: any place on Earth", "p": ["In the zoom view you can click the Earth map, or type a latitude and longitude, and the site measures that place's terrain in your browser and sets it beside our measured Moon window (de Gerlache) or Mars window (Jezero). It is there so anyone can propose a site we did not think of.", "It is a quick test, not our pipeline, and every number from it is labelled that way. The measures are the pipeline's own, ported line for line: relief, slope, roughness, the share of ground under 8°, and the same three-part similarity. The elevation is different: open Terrain Tiles (Mapzen, hosted on AWS Open Data, built from sources that include NASA SRTM), sampled on the target's grid, where the pipeline area-averages Copernicus DEM.", "We checked it where we have pipeline values. At Lake Salda it gives 841 m of relief against the pipeline's 840 m, and a median slope of 4.0° against 4.1°. At Kamestastin it gives 226 m against 216 m, and 3.3° against 3.7°. On the Sua Pan lake bed it fails: the tiles are too coarse for ground that flat, and it reads 3.2 m of roughness where the pipeline reads 0.25 m. The result card offers the same check live.", "Still water is stored perfectly flat in the tiles, so flat cells are left out, as the pipeline leaves out its lake mask. The sea floor is not masked. Beyond 80° of latitude the tiles are not used. A quick-test score is a first look at terrain only; it is never added to the atlas or to a pair's confidence.", "Three extras sit on the result card. Scan measures the eight windows touching the tested one and marks each with its score, to show whether a neighbour matches better. A climate line asks NASA POWER for that spot's long-term air temperature, wind and rainfall, the same service and fields our pipeline uses. And the address bar holds a link that reopens the same test."] },
       { "h": "What the measures cannot see", "p": ["The elevation model stores the lake surface, not the lake bed, and the top of the forest, not the ground under it. The lake is masked out of every measure.", "Shape says nothing about gravity, vacuum, temperature, lighting, or what the ground is made of."] },
       {
         "h": "Does the method work? Controls",
@@ -1798,34 +1801,44 @@
   "operationsSrc": ["R10", "R11"],
   "_ai": "Text in this file was drafted with an AI assistant (Claude, by Anthropic) from the research plan and its source check. See method, \"Use of AI\".",
   "controlWindows": [
-    { "id": "degerlache", "body": "moon", "label": "de Gerlache", "kind": "Lunar crater" },
+    {
+      "id": "degerlache",
+      "body": "moon",
+      "label": "de Gerlache",
+      "kind": "Lunar crater",
+      "form": 0.6
+    },
     {
       "id": "shackleton",
       "body": "moon",
       "label": "Shackleton",
       "kind": "Lunar crater",
-      "sim": 89
+      "sim": 89,
+      "form": 0.75
     },
     {
       "id": "kamestastin",
       "body": "earth",
       "label": "Kamestastin",
       "kind": "Earth crater, 36 million years old, with a lake",
-      "sim": 36
+      "sim": 36,
+      "form": 0.6
     },
     {
       "id": "namib",
       "body": "earth",
       "label": "Namib Sand Sea",
       "kind": "Dune field (control)",
-      "sim": 37
+      "sim": 37,
+      "form": 0.05
     },
     {
       "id": "suapan",
       "body": "earth",
       "label": "Sua Pan, Makgadikgadi",
       "kind": "Flat lake bed (control)",
-      "sim": 4
+      "sim": 4,
+      "form": 0.08
     }
   ],
   "sourceKinds": {
@@ -1847,6 +1860,7 @@
     "rows": [
       ["Every Moon terrain measure and picture", "LRO LOLA gridded elevation, product LDEM_80S_80M, from the NASA Planetary Data System", "Yes: NASA Lunar Reconnaissance Orbiter, and the Planetary Data System", "https://pds-geosciences.wustl.edu/missions/lro/lola.htm"],
       ["The Mars terrain measures and picture (Jezero)", "MGS MOLA gridded elevation, MEGDR 128 pixels per degree, from the NASA Planetary Data System", "Yes: the NASA Planetary Data System", "https://pds-geosciences.wustl.edu/missions/mgs/megdr.html"],
+      ["Radial form of each measured window", "Worked out by pipeline/score_terrain.py from the exported heights", "From the same NASA and Copernicus elevation as the other terrain measures", "https://pds-geosciences.wustl.edu/missions/lro/lola.htm"],
       ["Every Earth terrain measure and picture", "Copernicus DEM GLO-30", "Yes, as a Copernicus product. The list names ESA's Copernicus Data Space Ecosystem; we read the same product from Microsoft Planetary Computer's open copy, which needs no account", "https://dataspace.copernicus.eu/explore-data/data-collections/copernicus-contributing-missions/collections-description/COP-DEM"],
       ["Every Earth temperature", "MODIS/Terra land surface temperature, MOD11A2 v061, 2023", "Yes: a NASA Earthdata product (the list names NASA Earthdata Search). We read it from Microsoft Planetary Computer's open copy", "https://www.earthdata.nasa.gov/data/catalog/lpcloud-mod11a2-061"],
       ["Air temperature, wind and rain at each Earth site", "NASA POWER climatology (MERRA-2 reanalysis), 2001 to 2025", "No. A NASA service, open and without an account", "https://power.larc.nasa.gov/"],
@@ -1935,5 +1949,16 @@
     "p2": ["A hypothesis is capped at 40, whatever its parts add up to, because nobody has tested the pairing.", "Bands: 75 and above is High, 55 to 74 is Medium, 35 to 54 is Low, under 35 is Very low.", "The rubric rewards reading better sources. A score rises when someone opens the primary paper and records it, and falls if a claim turns out to rest on news alone.", "The scores are computed by pipeline/score_confidence.py and stored in the data file. The page shows the stored numbers and their parts."]
   },
   "terrainSim": { "h": "How terrain similarity is worked out", "p": ["Where both worlds have a terrain window, the page gives a terrain similarity percentage. It is the plain average of three parts, each from 0 to 100, and it is always shown with them."], "ul": ["Slopes: how much the two slope histograms overlap. For each 2 degree bin take the smaller of the two shares, then add them up.", "Relief: the smaller relief divided by the larger.", "Roughness: the smaller roughness divided by the larger."], "p2": ["It is a plain average because we have no reason to weight one part above another. It describes terrain only. It says nothing about rock, temperature, ice or anything else, and it does not feed the confidence score.", "The controls test it: the table below gives every window's similarity to de Gerlache."] },
-  "tourSite": "galena"
+  "tourSite": "galena",
+  "terrainForm": { "h": "Radial form: telling a crater from a dune field", "p": ["Radial form: the share of a window's height variation that is explained by distance from its centre alone. A perfect bowl or cone gives 1. Ground with no centred shape, such as dunes or a flat pan, gives about 0.", "The window's stored heights are grouped into 16 rings around the centre, inside the largest circle that fits. Each cell is replaced by its ring's mean height, and the figure is the share of variance that survives (R squared). It is read from the exported display mesh, the same heights the 3D picture is drawn from.", "The similarity percentage could not tell a crater from a dune field. This can: the two lunar craters and Kamestastin score 0.60 to 0.75, the dune field 0.05 and the lake bed 0.08. It is shown beside the similarity and is not part of it.", "It only means something when the window is centred on the feature, and it says nothing about size or depth. Two windows with the same figure can still be very different places."] },
+  "needs": [
+    ["ice", "Reaching water ice"],
+    ["terrain", "Landing and driving terrain"],
+    ["temp", "Cold and lighting"],
+    ["dust", "Dust and wind on hardware"],
+    ["geo", "Rock and soil handling"],
+    ["sub", "Caves and the subsurface"],
+    ["bio", "Searching for life"],
+    ["ops", "Crew and mission operations"]
+  ]
 }

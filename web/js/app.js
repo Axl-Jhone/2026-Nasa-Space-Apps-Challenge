@@ -90,6 +90,8 @@ function buildGlobes() {
   G.moon = new Globe({ root: $('#globe-moon'), body: 'moon', pins: P.moon, gain: 1.35, S: 512, onPin, auto: true });
   G.mars = new Globe({ root: $('#globe-mars'), body: 'mars', pins: P.mars, gain: 1.15, S: 512, onPin, auto: true });
   G.moon.lat = -35; G.moon.lon = 20; G.mars.lat = 30; G.mars.lon = 40;
+  // an Earth pin takes the colour of the world its site stands in for
+  for (const p of G.earth.pins) { const st = byId(p.ids[0]); if (st) p.el.classList.add('to-' + st.body); }
   // Earth is always shown; the toggle picks the second world and selects nothing. A site of the other world is let go.
   $$('#other-toggle button').forEach(b => b.addEventListener('click', () => {
     setOther(b.dataset.b);

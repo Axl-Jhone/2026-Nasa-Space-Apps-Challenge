@@ -451,7 +451,7 @@ function drawSbs() {
   raf = requestAnimationFrame(() => {
     raf = 0; if (S.tab !== 'side-by-side') return;
     const p = pairById(S.pair), e = fields.get(p.earth), o = fields.get(p.other); if (!e || !o) return;
-    if (e.missing || o.missing) { $('#printed').textContent = 'A terrain export is missing, so nothing is compared.'; return; }
+    if (e.missing || o.missing) { $('#printed').textContent = 'A terrain export is missing, so nothing is compared.'; $('#printed').hidden = false; return; }
     if (S.mode === '3d') { const a = $('#terr-earth'), b = $('#terr-other'); if (a && b) { drawTerrain(a, e, S.T); drawTerrain(b, o, S.T); } }
     else { drawHillshade($('#hs-earth'), e, S.T); drawHillshade($('#hs-other'), o, S.T); }
     $('#out-view').textContent = S.T.view + '°'; $('#out-az').textContent = S.T.az + '°'; $('#out-el').textContent = S.T.el + '°'; $('#out-ve').textContent = S.T.ve.toFixed(1) + '×';
@@ -469,7 +469,11 @@ function printLine(e, o) {
   const m = e.meta && e.meta.metrics;
   const share = m && m.masked_share != null ? m.masked_share : e.water.reduce((a, b) => a + b, 0) / e.water.length;
   if (share > 0) parts.push(`Earth lake masked: ${(share * 100).toFixed(1)}% of window`);
-  $('#printed').textContent = parts.join(' · ');
+  // the settings line sits at the foot of the sidebar; only a warning stays under the pictures
+  S.printed = parts.join(' · ');
+  const foot = $('#printed-side'); if (foot) foot.textContent = S.printed;
+  const warn = parts.filter(t => /DIFFER/.test(t)).join(' · ');
+  $('#printed').textContent = warn; $('#printed').hidden = !warn;
 }
 function applyMode() {
   const d3 = S.mode === '3d';
@@ -498,17 +502,18 @@ function bindSbs() {
 function renderMeasurements(p, e, o) {
   const me = (e.meta && e.meta.metrics) || null, mo = (o.meta && o.meta.metrics) || null;
   const pending = e.missing || o.missing || !me || !mo;
-  $('#meas').innerHTML = `
-    <h2>Measured on one grid</h2>
-    ${pending ? `<p class="err">Measurements appear when both windows have a real export with metrics. Until then every number here is blank on purpose.</p>` : ''}
+  const sim = simHtml(p), sec = (h, body, cls = '') => `<section class="ms ${cls}">${h ? `<h2>${h}</h2>` : ''}${body}</section>`;
+  // the similarity leads, always with its three parts; the settings line closes the sidebar
+  $('#meas').innerHTML =
+    (sim ? sec('Terrain similarity', sim) : '') +
+    sec('Measured on one grid', `${pending ? `<p class="err">Measurements appear when both windows have a real export with metrics. Until then every number here is blank on purpose.</p>` : ''}
     ${measTableHtml(e, o)}
-    <p class="fineprint">The last column is a plain ratio, not a verdict. The terrain similarity further down averages three of these measures, and is always shown with its three parts.</p>
-    ${histHtml(e, o)}
-    ${profileHtml(e, o)}
-    <div class="box"><b>Does the method work? Controls</b><ul>${D.controls.map(c => `<li>${esc(c.text)}: ${esc(c.state)}</li>`).join('')}</ul></div>
-    ${simHtml(p)}
-    <div class="box"><b>What it means for operations</b><div>${esc(D.operations)}${srcLinks(D, D.operationsSrc)}</div></div>
-    <div class="box brk"><b>Where it breaks</b><div>${esc(D.breaks)}</div><a href="#pair/${p.site}">Read the full case for this pair →</a></div>`;
+    <p class="fineprint">The last column is a plain ratio, not a verdict. The terrain similarity ${sim ? 'above ' : ''}averages three of these measures, and is always shown with its three parts.</p>`) +
+    sec('', histHtml(e, o)) + sec('', profileHtml(e, o)) +
+    sec('Does the method work? Controls', `<ul>${D.controls.map(c => `<li>${esc(c.text)}: ${esc(c.state)}</li>`).join('')}</ul>`) +
+    sec('What it means for operations', `<div>${esc(D.operations)}${srcLinks(D, D.operationsSrc)}</div>`) +
+    sec('Where it breaks', `<div>${esc(D.breaks)}</div><a href="#pair/${p.site}">Read the full case for this pair →</a>`, 'brk') +
+    sec('Window and display settings', `<p class="printed" id="printed-side">${esc(S.printed || '')}</p>`);
 }
 function histHtml(e, o) {
   const ha = e.meta && e.meta.slope_hist, hb = o.meta && o.meta.slope_hist;

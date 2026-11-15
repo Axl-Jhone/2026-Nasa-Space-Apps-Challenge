@@ -622,3 +622,22 @@ footer.credit .viewmode+.viewmode{padding-left:18px;border-left:1px solid var(--
   #view-pair .phead .two .place.cand{padding:0 0 16px}
   #view-pair .phead .two .place.anchor{padding:16px 0 0;border-left:0;border-top:1px solid var(--line-2)}
 }
+/* side by side sidebar: one ruled section per topic, similarity first, settings last */
+aside.meas{gap:0}
+aside.meas .ms{padding:24px 0;border-top:1px solid var(--line-2)}
+aside.meas .ms:first-child{padding-top:4px;border-top:0}
+aside.meas .ms>h2{margin:0 0 12px;font-size:17px;font-weight:600}
+aside.meas .ms>*+*{margin-top:10px}
+aside.meas .ms ul{margin:0;padding-left:18px;font-size:13px;line-height:1.5;color:var(--ink-2)}
+aside.meas .ms>div{font-size:13px;line-height:1.5;color:var(--ink-2)}
+aside.meas .ms.brk{padding-left:14px;border-left:2px solid var(--signal)}
+aside.meas .ms.brk>h2{color:var(--signal)}
+aside.meas .ms.brk>a{display:inline-block}
+aside.meas .ms .printed{font-size:12px;line-height:1.6;color:var(--ink-3)}
+#view-side-by-side .sbs>.printed[hidden]{display:none}
+/* in the narrow sidebar a three-column table squeezes its text: name and number on one line, the explanation under them */
+aside.meas table.dt,aside.meas table.dt tbody{display:block}
+aside.meas table.dt tr{display:grid;grid-template-columns:1fr auto;gap:2px 12px;padding:8px 0;border-top:1px solid var(--line-2)}
+aside.meas table.dt tr:first-child{border-top:0}
+aside.meas table.dt th,aside.meas table.dt td{display:block;padding:0;border:0;width:auto;text-align:left}
+aside.meas table.dt td:last-child{grid-column:1/-1;font-size:13px;line-height:1.45;color:var(--ink-2)}

@@ -614,3 +614,11 @@ footer.credit .viewmode+.viewmode{padding-left:18px;border-left:1px solid var(--
 /* a sub-heading inside a section carries no number */
 #view-pair .docin>section>h2.sub{margin-top:28px;font-size:16px}
 #view-pair .docin>section>h2.sub::before{content:none}
+/* pair page: a rule between the Earth analog and what it stands in for; side by side on desktop, stacked on a phone */
+#view-pair .phead .two{gap:0;margin-top:8px;padding:16px 0;border-top:1px solid var(--line-2);border-bottom:1px solid var(--line-2)}
+#view-pair .phead .two .place.cand{padding-right:24px}
+#view-pair .phead .two .place.anchor{padding-left:24px;border-left:1px solid var(--line-2)}
+@media (max-width:820px){
+  #view-pair .phead .two .place.cand{padding:0 0 16px}
+  #view-pair .phead .two .place.anchor{padding:16px 0 0;border-left:0;border-top:1px solid var(--line-2)}
+}

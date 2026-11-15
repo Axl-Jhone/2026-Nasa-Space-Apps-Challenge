@@ -565,3 +565,29 @@ footer.credit .viewmode+.viewmode{padding-left:18px;border-left:1px solid var(--
 #view-explore .xt tbody th a b::after{content:" →";display:inline-block;text-decoration:none;padding-left:4px}
 #view-explore .xt tbody tr[data-id]:hover{background:rgba(112,34,252,.12)}
 #view-explore .xt tbody tr[data-id]:hover th a b{color:#fff}
+/* All pairs table: a wider first column, and room between the world marker and the place it stands in for */
+#view-explore table.xt{min-width:1040px}
+#view-explore .xt thead th:first-child,#view-explore .xt tbody th{width:300px;min-width:300px}
+#view-explore .xt tbody th a{gap:6px}
+#view-explore .xt tbody th a span{gap:12px;line-height:1.4}
+#view-explore .xt tbody th a span .dot{flex:none}
+/* All pairs table: wider two-word columns, and the Confidence heading orders the rows */
+#view-explore table.xt{min-width:1180px}
+#view-explore .xt thead th.c-temp,#view-explore .xt thead th.c-ice,#view-explore .xt thead th.c-dust{min-width:132px;white-space:nowrap}
+#view-explore .sortbtn{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border:1px solid var(--line-2);background:none;color:var(--ink-2);font:inherit;cursor:pointer;white-space:nowrap}
+#view-explore .sortbtn:hover{border-color:var(--lav-ink);color:var(--ink)}
+#view-explore .sortbtn[aria-pressed="true"]{border-color:var(--lav);background:var(--lav);color:#fff}
+/* status colours: one hue each, so no two letters look alike. The letter still carries the meaning */
+:root{--st-M:#18b34a;--st-C:#cdf7d4;--st-P:#b5d93a;--st-H:#fff35c;--st-B:#ff641a;--st-N:var(--ink-3)}
+.st-M>i,.sw.st-M,.needcols li>.st-M{color:var(--st-M)}.st-C>i,.sw.st-C,.needcols li>.st-C{color:var(--st-C)}
+.st-P>i,.sw.st-P,.needcols li>.st-P{color:var(--st-P)}.st-H>i,.sw.st-H,.needcols li>.st-H{color:var(--st-H)}
+.st-B>i,.sw.st-B,.needcols li>.st-B{color:var(--st-B)}.st-N>i,.sw.st-N,.needcols li>.st-N{color:var(--st-N)}
+/* a status is a font colour only: no fill behind the letter or word */
+.st-M,.st-C,.st-P,.st-H,.st-B,.st-N{background:none!important}
+.dims .e-M{border-left-color:var(--st-M)}.dims .e-C{border-left-color:var(--st-C)}.dims .e-P{border-left-color:var(--st-P)}
+.dims .e-H{border-left-color:var(--st-H)}.dims .e-B{border-left-color:var(--st-B)}.dims .e-N{border-left-color:var(--st-N)}
+.st-H i,.st-H>i,.sw.st-H{text-decoration:none}
+/* need lists: the status word sits by the name, the pair label follows in small type. "Does not match" is the heading, not repeated per line */
+#view-explore .needcols li>[class^="st-"]{margin-left:6px;font-family:var(--mono);font-size:13px}
+#view-explore .needcols li .plab{margin-left:8px;white-space:nowrap}
+#view-explore .needcols li .plab .lab{margin:0;font-size:11px}

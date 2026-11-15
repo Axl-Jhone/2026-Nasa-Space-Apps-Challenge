@@ -224,7 +224,7 @@ async function fillPairTerrain(D, s, pair, ctx) {
 function needHtml(D, F, pill) {
   if (!D.needs) return '';
   const k = F.need || D.needs[0][0], dim = D.dims.find(d => d[0] === k);
-  const item = s => `<li><a href="#pair/${s.id}"><b>${esc(s.short)}</b></a> <span class="muted">for ${esc(s.target)}</span> ${labelChip(D, s)} <span class="st-${s.d[k][0]}">${esc(D.status[s.d[k][0]])}</span><br>${esc(s.d[k][1])}${srcLinks(D, (s.dsrc || {})[k])}</li>`;
+  const item = s => `<li><a href="#pair/${s.id}"><b>${esc(s.short)}</b></a> <span class="muted">for ${esc(s.target)}</span>${s.d[k][0] === 'B' ? '' : ` <span class="st-${s.d[k][0]}">${esc(D.status[s.d[k][0]])}</span>`} <span class="plab">${labelChip(D, s)}</span><br>${esc(s.d[k][1])}${srcLinks(D, (s.dsrc || {})[k])}</li>`;
   const use = D.sites.filter(s => 'MCP'.includes(s.d[k][0])).sort((a, b) => 'MCP'.indexOf(a.d[k][0]) - 'MCP'.indexOf(b.d[k][0]));
   const hyp = D.sites.filter(s => s.d[k][0] === 'H'), no = D.sites.filter(s => s.d[k][0] === 'B'), na = D.sites.filter(s => s.d[k][0] === 'N');
   return `<section class="need">
@@ -243,8 +243,12 @@ export function renderExplore(D, F, rerender, ctx) {
   const el = $('#view-explore');
   if (!F.need && D.needs) F.need = D.needs[0][0];   // the first need is the one shown, so its button is the pressed one
   const sites = D.sites.filter(s => (F.world === 'all' || s.body === F.world) && (F.label === 'all' || s.label === F.label));
+  // Confidence order: the stored scores, highest first or lowest first; with no order chosen the list stays as written
+  const cs = x => (x.conf ? x.conf.score : -1);
+  if (F.sort) sites.sort((a, b) => (F.sort === 'desc' ? cs(b) - cs(a) : cs(a) - cs(b)));
+  const sortSay = F.sort === 'desc' ? 'highest first' : F.sort === 'asc' ? 'lowest first' : 'not sorted';
   const pill = (group, k, l) => `<button class="pill" data-g="${group}" data-k="${k}" aria-pressed="${F[group] === k}">${esc(l)}</button>`;
-  const head = D.dims.map(([k, name, short]) => `<th scope="col" title="${esc(name)}">${esc(short || name)}</th>`).join('');
+  const head = D.dims.map(([k, name, short]) => `<th scope="col" class="c-${k}" title="${esc(name)}">${esc((short || name).replace(/^Temp\b/, 'Temperature'))}</th>`).join('');
   const rows = sites.map(s => `<tr data-id="${s.id}">
       <th scope="row"><a href="#pair/${s.id}"><b>${esc(s.short)}</b><span><i class="dot ${s.body}"></i>${esc(s.target)}</span></a></th>
       <td class="lb">${labelChip(D, s)}</td>
@@ -263,7 +267,7 @@ export function renderExplore(D, F, rerender, ctx) {
       <div class="pills" role="group" aria-label="Label">${pill('label', 'all', 'Any label')}${Object.entries(D.labels).map(([k, v]) => pill('label', k, v[0])).join('')}</div>
     </div>
     <div class="mhead">${legendHtml(D)}</div>
-    <div class="xwrap"><table class="xt"><thead><tr><th scope="col">Earth site and what it stands in for</th><th scope="col">Label</th><th scope="col" title="Out of 100. How well the page's statements are supported by sources we opened">Confidence</th>${head}</tr></thead>
+    <div class="xwrap"><table class="xt"><thead><tr><th scope="col">Earth site and what it stands in for</th><th scope="col">Label</th><th scope="col" aria-sort="${F.sort === 'desc' ? 'descending' : F.sort === 'asc' ? 'ascending' : 'none'}"><button class="sortbtn" id="xsort" aria-pressed="${!!F.sort}" title="Out of 100. How well the page's statements are supported by sources we opened. Click to order the rows: highest first, lowest first, then back to the written order. Now: ${sortSay}">Confidence <span aria-hidden="true">${F.sort === 'desc' ? '↓' : F.sort === 'asc' ? '↑' : '↕'}</span></button></th>${head}</tr></thead>
       <tbody>${rows || `<tr><td colspan="${D.dims.length + 3}">No pair matches these filters.</td></tr>`}</tbody></table></div>
     <p class="fineprint">Hover over a cell to read its note. Click a row to open the pair. Terrain is the only dimension measured on both worlds; everything else is cited evidence or marked as not assessed.</p>
     <section id="xclim"></section>
@@ -276,6 +280,7 @@ export function renderExplore(D, F, rerender, ctx) {
     </section>
   </div>`;
   $$('.xbar .pill, .need .pill', el).forEach(b => b.addEventListener('click', () => { F[b.dataset.g] = b.dataset.k; rerender(); }));
+  $('#xsort', el).addEventListener('click', () => { F.sort = !F.sort ? 'desc' : F.sort === 'desc' ? 'asc' : null; rerender(); });
   if (ctx) fillClimateTable(D, sites, ctx);
   $$('.xt tbody tr[data-id]', el).forEach(tr => tr.addEventListener('click', ev => { if (!ev.target.closest('a')) location.hash = '#pair/' + tr.dataset.id; }));
 }

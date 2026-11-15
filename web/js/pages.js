@@ -235,7 +235,6 @@ function needHtml(D, F, pill) {
   return `<section class="need">
     <h2>What do you need to test?</h2>
     <div class="pills" role="group" aria-label="Mission need">${D.needs.map(([id, label]) => pill('need', id, label)).join('')}</div>
-    <p class="fineprint">${esc(dim[1])}. The lists come straight from the table below: each line is that pair's note for this dimension, with its sources. Measured means we measured it, not that it matched: read the note.</p>
     <div class="needcols">
       <div><h3>Sites with evidence on this (${use.length})</h3>${use.length ? `<ul>${use.map(item).join('')}</ul>` : '<p class="muted">No site in the atlas is measured or cited for this.</p>'}
         ${hyp.length ? `<h3>Proposed by us, not tested (${hyp.length})</h3><ul>${hyp.map(item).join('')}</ul>` : ''}</div>
@@ -272,7 +271,6 @@ export function renderExplore(D, F, rerender, ctx) {
     <div class="mhead lgfull">${legendHtml(D, true)}</div>
     <div class="xwrap"><table class="xt"><thead><tr><th scope="col">Earth site and what it stands in for</th><th scope="col">Label</th><th scope="col" aria-sort="${F.sort === 'desc' ? 'descending' : F.sort === 'asc' ? 'ascending' : 'none'}"><button class="sortbtn" id="xsort" aria-pressed="${!!F.sort}" title="Out of 100. How well the page's statements are supported by sources we opened. Click to order the rows: highest first, lowest first, then back to the written order. Now: ${sortSay}">Confidence <span aria-hidden="true">${F.sort === 'desc' ? '↓' : F.sort === 'asc' ? '↑' : '↕'}</span></button></th>${head}</tr></thead>
       <tbody>${rows || `<tr><td colspan="${D.dims.length + 3}">No pair matches these filters.</td></tr>`}</tbody></table></div>
-    <p class="fineprint">Hover over a cell to read its note. Click a row to open the pair. Terrain is the only dimension measured on both worlds; everything else is cited evidence or marked as not assessed.</p>
     <section id="xclim"></section>
     <section class="breaks">
       <h2>${esc(D.negative.head)}</h2>
@@ -296,8 +294,7 @@ async function fillClimateTable(D, sites, ctx) {
     return `<tr><td><a href="#pair/${s.id}">${esc(s.short)}</a></td><td class="n">${k(t.min_night_k)}</td><td class="n">${k(t.max_day_k)}</td><td class="n">${c ? c.t_mean_c.toFixed(1) + ' °C' : '—'}</td><td class="n">${c ? c.wind_mean_ms.toFixed(1) + ' m/s' : '—'}</td><td class="n">${c ? c.rain_mm_year + ' mm' : '—'}</td></tr>`; }).join('');
   slot.innerHTML = `<h2>Temperature, wind and rain at every site</h2>
     <p>Two more NASA datasets, read at each Earth site. They put numbers on what terrain cannot show: how cold, how windy, how dry.</p>
-    <div class="xwrap"><table class="st2"><thead><tr><th>Site</th><th>Coldest night</th><th>Warmest day</th><th>Mean air temperature</th><th>Mean wind</th><th>Rain and snow a year</th></tr></thead><tbody>${rows}</tbody></table></div>
-    <p class="fineprint">Coldest night and warmest day: ${T ? esc(T.dataset) + ', ' + T.year + ', 8-day averages at one 1 km pixel' : 'not read'}. Air temperature, wind and rain: ${C ? esc(C.dataset) : 'not read'}; a grid-cell value, not a reading at the site. A dash means no clear reading.</p>`;
+    <div class="xwrap"><table class="st2"><thead><tr><th>Site</th><th>Coldest night</th><th>Warmest day</th><th>Mean air temperature</th><th>Mean wind</th><th>Rain and snow a year</th></tr></thead><tbody>${rows}</tbody></table></div>`;
 }
 
 /* ---------- method and sources ---------- */

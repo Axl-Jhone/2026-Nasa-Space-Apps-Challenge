@@ -17,7 +17,7 @@ To deploy, upload the `web/` folder to GitHub Pages, Netlify or Vercel as it is.
 | Thing | Status |
 |---|---|
 | Globe imagery (`assets/tiles`) | Real NASA imagery (GIBS Blue Marble, LRO WAC, Viking MDIM), credited in the footer |
-| Site list, labels, claims (`data/sites.json`) | Claims for the ten plan sites come from the research plan's source check and carry source ids. A claim with no source id is shown as "our reading". Río Tinto and Yungay are team additions, confirmed by abstract only |
+| Site list, labels, claims (`data/sites.json`) | Claims for the ten plan sites come from the research plan's source check and carry source ids. A claim with no source id is shown as "our reading". The Río Tinto and Yungay papers were confirmed by abstract only |
 | Planet figures | NASA Planetary Fact Sheets, read 15 November 2026 |
 | 3D terrain and slide view | Real for both pairs (de Gerlache and Shackleton). There is no sample or generated terrain in the code. A pair marked `hideIfMissing` is not listed until its export exists, and a missing export shows a message |
 | Measurements table and slope chart | Blank until both windows have an export with metrics. The browser never invents or recomputes them |
@@ -85,7 +85,7 @@ Both windows are first area-averaged onto one 80 m grid, then measured. Slope is
 - **Relief**: 95th minus 5th percentile height of unmasked cells.
 - **Roughness**: standard deviation of height minus its 5 x 5 pixel (400 m) moving average.
 - **Gentle ground**: share of unmasked cells with slope under `GENTLE_SLOPE_DEG`, 8 degrees: the tilt NASA's Human Landing System must tolerate for surface operations (Chavers et al. 2020; NASA OIG IG-26-004). The requirement has no stated baseline and is applied at about 5 m in site studies, so at 80 m it is a coarse screen.
-- No combined score. The app shows each measure and a plain ratio, not a verdict.
+- No combined score for a pair. The pair page's terrain table shows each measure on both worlds, the difference (the other world against Earth, as a percentage), and the similarity part beside the measures it is built from.
 
 ## Known gaps
 
@@ -95,11 +95,12 @@ Both windows are first area-averaged onto one 80 m grid, then measured. Slope is
 - The measures cannot tell a crater from a dune field (see the controls). A shape measure is the next thing to add.
 - Lake level: the DEM stores 334.5 m, which should be checked against the Copernicus product notes before it is quoted.
 - No Discover (systematic search) tab.
+- The quick test runs only where the selected site's anchor has a measured window (Kamestastin, Lake Salda).
 - Dark theme only. The display mesh (128 x 128) is for pictures; measurements come from the 80 m grid.
 
 ## Site records in `data/sites.json`
 
-Each site has: `label` (`benchmark`, `established` or `hypothesis`), `labelNote`, `confidence`, `claim` (one sentence), `matches` and `breaks` (lists of `{t, src}`; `src` holds source ids), optional `figures` (one quantity on both worlds), `helps`, `prior`, the matrix `d`, and coordinates with `coordSrc` or `coordNote`. Source ids are defined once under `sources` with a title, a link and how much was read. The pages never show a hypothesis as a finding: a `hypothesis` label draws a dashed box at the top of the pair page, and matrix cells proposed by us use status `H`.
+Each site has: `label` (`established` or `hypothesis`; `benchmark` was retired on 15 November), `labelNote`, `confidence`, `claim` (one sentence), `matches` and `breaks` (lists of `{t, src}`; `src` holds source ids), optional `figures` (one quantity on both worlds), `helps`, `prior`, the matrix `d`, and coordinates with `coordSrc` or `coordNote`. Source ids are defined once under `sources` with a title, a link and how much was read. The pages never show a hypothesis as a finding: a `hypothesis` label draws a dashed box at the top of the pair page, and matrix cells proposed by us use status `H`.
 
 ## Theme: ASCII square space
 
@@ -122,3 +123,7 @@ Each pair in `pairs` can carry `sim`: a terrain similarity percentage and its th
 Each site has `conf`: a score out of 100, a band, and five parts with the reason for each. It is written by `pipeline/score_confidence.py`, which counts it from the file: `analogySrc` (sources that make the comparison), the sources behind `matches` and `figures`, each source's `kind` and `depth`, figure rows marked `same`, whether the terrain exports exist, and the `breaks` that carry a source. A hypothesis is capped at 40. The rubric is the team's own and is printed on the Method tab. `planRating` keeps the research plan's wording next to it.
 
 Each dimension row can carry source ids in `dsrc`; a row with none is shown as "our reading".
+
+## Quick test
+
+In the zoom view, a visitor can type coordinates or click the Earth map. `js/quicktest.js` reads open elevation tiles for that spot and measures it with the pipeline's formulas, then compares it with the **selected site's own measured anchor** (`pairs` entry for that site). If the anchor has no measured window, the test form is hidden and the panel says the terrain is not analyzed yet; it never compares against a stand-in. A `#test/lat,lon,world` link carries no site and uses the world's default window (de Gerlache or Jezero). The panel also shows NASA POWER climate for the spot and can scan the eight neighbouring windows. Every number in it is labelled "Quick test" and never enters `sites.json`.

@@ -2,6 +2,8 @@
 
 Written 14 November 2026, 3:15 pm PHT. Deadline: 15 November, 11:59 pm PHT.
 
+**Status, 15 November evening:** this is the original plan and is kept as a record. Where it differs from the app, the app and `web/README.md` are current: `benchmark` is no longer a label, the separate "negative result" block was removed from the pages, and the terrain table shows a percentage difference and the similarity parts instead of a plain ratio. `SUBMISSION.md` lists the known limits and next steps.
+
 **Updated 3:40 pm: the team will build with AI ("vibecoding") and wants every step explained.** The order of work, the clock and the checkpoints below still stand. What changes is who types. The AI writes the code and explains its reasoning at each step. Each lane owner directs it and checks what comes out. The questions and hints in each lane are now your checklist for that checking.
 
 **Updated 1 am, 15 November: the repo was cleaned up and checked.** See "Where things stand". It replaces the 4:25 pm tech stack and modules.

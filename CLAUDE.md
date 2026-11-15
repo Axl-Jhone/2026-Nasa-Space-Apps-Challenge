@@ -61,14 +61,14 @@ The "How to work with us" rules come first. These skills add discipline on top; 
 - Confidence is a number out of 100 with its five parts shown. It is counted by `pipeline/score_confidence.py` from the sources recorded in `sites.json`; never type a score by hand. After changing a claim or a source, rerun the script.
 - A claim in `sites.json` with no source id is shown on the page as "our reading". A pairing we propose ourselves is labelled `hypothesis` and is never shown as a finding.
 - Every number on the page comes from a file. The browser never invents or recomputes a measurement.
-- One exception, agreed 15 November: the quick test (`web/js/quicktest.js`) measures a place the visitor picks, in the browser, from open elevation tiles. Its formulas must stay identical to `export_terrain.py` and `score_terrain.py`. Every number from it is labelled "Quick test, not our pipeline" and never enters `sites.json`.
+- One exception, agreed 15 November: the quick test (`web/js/quicktest.js`) measures a place the visitor picks, in the browser, from open elevation tiles. Its formulas must stay identical to `export_terrain.py` and `score_terrain.py`. It compares a place only with the selected site's own measured anchor; where the anchor has no measured window the test is off and says so, never using a stand-in. Every number from it is labelled "Quick test" and never enters `sites.json`.
 - The star background and the opening ASCII figure (`web/js/intro.js`) are decoration, not data. The Credits say so.
 - Do not change a test's expected value to make it pass. Explain the failure instead.
 
 ## Word lists used in `web/data/sites.json`
 
 - Matrix status codes: `M` measured, `C` cited, `P` partial match, `H` hypothesis (ours), `B` breaks here, `N` not assessed
-- Pair labels: `benchmark`, `established`, `hypothesis`
+- Pair labels: `established`, `hypothesis` (`benchmark` was retired on 15 November; those pairs are `established`)
 - Dimensions: `geo`, `terrain`, `temp`, `ice`, `dust`, `bio`, `sub`, `ops`
 - Bodies: `moon`, `mars`
 

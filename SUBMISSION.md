@@ -20,7 +20,7 @@ ATLAS: Earth Analog Atlas
 
 ATLAS is a web atlas of twelve Earth sites that stand in for places or processes on the Moon and Mars. For each pair it argues one thing: this place is like that one in these ways, and unlike it in these.
 
-Terrain is the only property we could measure the same way on both worlds with open data, so it is the only one we measure, using NASA's LRO LOLA elevation for the Moon and Copernicus DEM for Earth on one 80 m grid. Everything else is shown as cited evidence, with a link to its source beside each claim. Every pair is labelled benchmark, established or hypothesis, carries a confidence percentage with its five parts shown, and ends on where the analogy breaks.
+Terrain is the only property we could measure the same way on both worlds with open data, so it is the only one we measure, using NASA's LRO LOLA elevation for the Moon and Copernicus DEM for Earth on one 80 m grid. Everything else is shown as cited evidence, with a link to its source beside each claim. Every pair is labelled established or hypothesis, carries a confidence percentage with its five parts shown, and ends on where the analogy breaks.
 
 That matters because an analog site is only useful for training crews and testing hardware if its limits are known.
 
@@ -48,17 +48,26 @@ Repository: https://github.com/Axl-Jhone/2026-Nasa-Space-Apps-Challenge
 
 **Zoom to both places.** From the globes, one button dives to two maps side by side, Earth and its counterpart, drawn at one scale so a kilometre is the same length on both. The pictures are live from NASA GIBS and USGS Astrogeology, with saved copies underneath so it runs with no network. A dashed square marks the window we measured, and one click opens that terrain in 3D with a height profile of both worlds on the same axes. A 30-second tour plays the Galena Creek pair through this view and ends on where it breaks.
 
-**Test any place on Earth.** In the zoom view, click the Earth map or type coordinates. ATLAS reads open elevation tiles for that spot, measures it in the browser with the pipeline's own formulas, and scores it against de Gerlache or Jezero in about two seconds. It is labelled a quick test, and a button runs it at Kamestastin or Lake Salda beside our pipeline's numbers so anyone can see how far it can be trusted (Lake Salda: 841 m of relief against 840 m). It lets a visitor look beyond the well-known sites. A second button lights both terrains with the Sun 1.5° above the horizon, as at the lunar poles.
+**Test any place on Earth.** In the zoom view, click the Earth map or type coordinates. ATLAS reads open elevation tiles for that spot, measures it in the browser with the pipeline's own formulas, and scores it against the selected site's own measured anchor in about two seconds: de Gerlache for Kamestastin, Jezero for Lake Salda. Where an anchor has no measured terrain yet, the test is switched off and the page says "not analyzed yet" rather than comparing against a stand-in. Every result is labelled a quick test. It lets a visitor look beyond the well-known sites. In the 3D view, one button lights both terrains with the Sun 1.5° above the horizon, as at the lunar poles.
+
+**One terrain table.** Each pair page shows every terrain measure on both worlds side by side, the difference as a percentage, and the similarity part beside the three measures it is built from, so the headline percentage can be traced row by row.
 
 **Shape, not just ruggedness.** Our controls showed the similarity percentage could not tell a crater from a dune field. We added radial form: the share of a window's height variation explained by distance from its centre. The two lunar craters and Kamestastin score 0.60 to 0.75, the dune field 0.05 and the flat lake bed 0.08. It also exposes a break the similarity hid: Jezero scores 0.66 and Lake Salda 0.15.
 
-**From a need to a site.** On the All pairs tab, pick what a mission must test (reaching water ice, cold and lighting, dust on hardware and so on) and the atlas lists the sites with evidence on it and the sites that do not match, each with its note and sources. The quick test can also scan the eight windows around a tested place, adds NASA POWER climate for the spot, and gives a link that reopens the same test.
+**From a need to a site.** On the All pairs tab, pick what a mission must test (reaching water ice, cold and lighting, dust on hardware and so on) and the atlas lists the sites with evidence on it and the sites that do not match, each with its note and sources. The quick test can also scan the eight windows around a tested place, and adds NASA POWER climate for the spot.
 
 **The negative result.** We found no Earth site that reproduces the cold, the lighting or the volatiles of the lunar south pole. The Moon candidates match rock and caves only.
 
-**What is new and what is not.** Two pairings are our own hypotheses and are labelled as such: the Umm Jirsan lava tube for lunar pits, and the Bodélé Depression for dust lifting on Mars. The rest are established or benchmark analogs. A method page lists every source and how much of it was read.
+**What is new and what is not.** Two pairings are our own hypotheses and are labelled as such: the Umm Jirsan lava tube for lunar pits, and the Bodélé Depression for dust lifting on Mars. The rest are established analogs. A method page lists every source and how much of it was read.
 
 **Tools.** Static HTML, CSS and JavaScript with no framework and no build step; Python with NumPy, Rasterio and PyProj; Microsoft Planetary Computer for the Earth elevation and temperature (a Space Apps Global Offer); Leaflet (open source) for the maps; NASA GIBS and USGS Astrogeology map services; GitHub Pages for hosting.
+
+## Known limits and next steps
+
+- **Measured terrain covers three Moon or Mars windows**: de Gerlache, Shackleton and Jezero. The other anchors are either not exported yet (most Mars regions are large enough for the 463 m MOLA grid), too small for the open grids (the Galena Creek glacier, the Mare Tranquillitatis pit, which also lies outside the polar LOLA product), or not a place at all (lunar highland soil, Mars dust lifting).
+- **The quick test runs only where the anchor is measured** (Kamestastin and Lake Salda). Exporting more anchors through the existing pipeline would switch it on for more sites.
+- **Two of the twelve pairings are new**, and both are untested hypotheses. A ranked search of Earth windows against each anchor, followed by a source check of the best matches, is the next step towards finding new analogs systematically.
+- **Logistics are not yet included.** Distance to the nearest town and airport would fit the operations dimension; it was scoped but not built before the deadline.
 
 ## Use of Super Intelligence (SI)
 

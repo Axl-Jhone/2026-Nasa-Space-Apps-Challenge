@@ -6,6 +6,9 @@
 import { $, esc, reduced, fmtLL } from './util.js';
 
 let CFG = null, IDX = null, maps = [], syncing = false, token = 0, leafletP = null, pending = null;
+let kind = 'sat';                    // which pictures the maps show: 'sat' (satellite) or 'topo' (elevation)
+try { if (localStorage.getItem('atlas-map') === 'topo') kind = 'topo'; } catch (e) { /* storage may be blocked */ }
+const group = () => (kind === 'topo' ? 'topo' : 'layers');
 // The map library (150 kB) is fetched only when the zoom view is first opened, not with the page.
 function leaflet() {
   return leafletP || (leafletP = new Promise((ok, bad) => {
@@ -78,9 +81,16 @@ function buildMap(el, body, lat, lon, saved, win) {
   map._atlasFar = far;
   L.control.zoom({ position: 'topright' }).addTo(map);
   map.createPane('saved').style.zIndex = 150;                     // under the live tiles (200)
-  for (const v of ['wide', 'close']) if (saved && saved.views[v]) new Saved('data/maps/' + saved.views[v].file, g, saved.views[v].b, { pane: 'saved', interactive: false }).addTo(map);
-  const key = g.polar ? 'moonpolar' : body, state = { ok: 0, bad: 0, layers: CFG.layers[key] };
-  for (const layer of state.layers) liveLayer(g, layer).on('tileload', () => { state.ok++; paintBadge(el, state); }).on('tileerror', () => { state.bad++; paintBadge(el, state); }).addTo(map);
+  const key = g.polar ? 'moonpolar' : body, state = { ok: 0, bad: 0, layers: [] }, pics = L.layerGroup().addTo(map);
+  // the pictures: a saved copy underneath, the live service on top. Called again when the Satellite / Topography switch changes.
+  const dress = () => {
+    pics.clearLayers(); state.ok = 0; state.bad = 0; state.layers = CFG[group()][key];
+    const sv = saved && (kind === 'topo' ? saved.topo : saved.views);
+    for (const v of ['wide', 'close']) if (sv && sv[v]) pics.addLayer(new Saved('data/maps/' + sv[v].file, g, sv[v].b, { pane: 'saved', interactive: false }));
+    for (const layer of state.layers) pics.addLayer(liveLayer(g, layer).on('tileload', () => { state.ok++; paintBadge(el, state); }).on('tileerror', () => { state.bad++; paintBadge(el, state); }));
+    paintBadge(el, state);
+  };
+  dress();
   // the place, and the square we measured where there is one
   L.circleMarker([lat, lon], { radius: 5, color: '#fff', weight: 1.5, fillColor: body === 'earth' ? '#a88bff' : body === 'mars' ? '#d0714c' : '#d9d7e6', fillOpacity: 1, interactive: false }).addTo(map);
   if (win) {
@@ -89,7 +99,7 @@ function buildMap(el, body, lat, lon, saved, win) {
   }
   paintBadge(el, state);
   const ro = new ResizeObserver(() => { if (!el.clientWidth || !el.clientHeight) return; map.invalidateSize({ animate: false }); if (pending) { const p = pending; pending = null; p(); } }); ro.observe(el);   // keep the place centred when the layout changes
-  return { map, g, state, el, body, lat, lon, ro };
+  return { map, g, state, el, body, lat, lon, ro, dress, key };
 }
 
 function paintBadge(el, st) {
@@ -97,6 +107,26 @@ function paintBadge(el, st) {
   const live = st.ok > 0, names = st.layers[0].service;
   b.textContent = live ? 'Live · ' + names : st.bad > 0 ? 'Saved copy · the live service did not answer' : 'Saved copy · asking the live service';
   b.classList.toggle('live', live);
+}
+
+// Which pictures are showing, and who made them
+function paintCredit() {
+  const el = $('#zcredit'); if (!el || !CFG) return;
+  const list = [...new Set(maps.flatMap(m => CFG[group()][m.key]).map(l => l.credit))];
+  el.textContent = `Pictures: ${list.join('; ')}.` + (kind === 'topo' ? ' ' + CFG.topo_note : '');
+}
+// The Satellite / Topography switch under the maps
+let kindBound = false;
+function bindKind() {
+  const sw = $('#mapkind'); if (!sw) return;
+  const sync = () => sw.querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', b.dataset.kind === kind));
+  sync(); if (kindBound) return; kindBound = true;
+  sw.addEventListener('click', e => {
+    const b = e.target.closest('button'); if (!b || b.dataset.kind === kind) return;
+    kind = b.dataset.kind === 'topo' ? 'topo' : 'sat';
+    try { localStorage.setItem('atlas-map', kind); } catch (err) { /* ignore */ }
+    sync(); for (const m of maps) m.dress(); paintCredit();
+  });
 }
 
 function paintScale() {
@@ -127,7 +157,7 @@ export async function openZoom(s, opts = {}) {
       : `<figure class="zmap other"><figcaption><b>${world} · ${esc(s.target)}</b></figcaption><div class="zbox none"><p>This pairing is with a process, not one place, so there is no second map.</p></div></figure>`);
   const w = opts.windows || {};
   $('#zoommsg').innerHTML = (w.earth ? `The dashed square is the ${w.earth.km} km window we measured on each world. ` : '')
-    + `Pictures: ${esc([...new Set([...CFG.layers.earth, ...(has ? CFG.layers[isPolar(s.body, s.tlat) ? 'moonpolar' : s.body] : [])].map(l => l.credit))].join('; '))}.`
+    + `<span id="zcredit"></span>`
     + (IDX ? ` Saved copies fetched ${esc(IDX.fetched)}.` : '')
     + (opts.onPick ? ` <b>Click anywhere on the Earth map to test that place against our measured window${opts.pickName ? ', ' + esc(opts.pickName) : ''}. The second map then switches to that window.</b>` : '');
   const tb = $('#zterrain'); tb.hidden = !opts.pair; tb.onclick = opts.pair ? () => opts.onTerrain(opts.pair) : null;
@@ -136,6 +166,7 @@ export async function openZoom(s, opts = {}) {
   maps.push(buildMap($('#zm-earth'), 'earth', s.lat, s.lon, sv.earth, w.earth));
   if (opts.onPick) { $('#zm-earth').classList.add('pick'); maps[0].map.on('click', e => opts.onPick(e.latlng.lat, e.latlng.lng)); }
   if (has) maps.push(buildMap($('#zm-other'), s.body, s.tlat, s.tlon, sv.other, w.other));
+  paintCredit(); bindKind();
   // one zoom level for both, chosen so the measured window (or 80 km) fits the smaller map
   const span = ((w.earth && w.earth.km) || 60) * 1000 * 1.5, px = Math.min(...maps.map(m => Math.min(m.el.clientWidth, m.el.clientHeight))) || 400;
   const z = Math.max(4, Math.min(8, Math.floor(Math.log2(CFG.m0 * px / span))));

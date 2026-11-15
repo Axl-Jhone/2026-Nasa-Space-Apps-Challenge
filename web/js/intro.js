@@ -6,75 +6,21 @@ import { ATLAS_ART } from './atlas-art.js';
 const RAMP = ' .:-=+*#%@';
 const COLS = ATLAS_ART[0].length, ROWS = ATLAS_ART.length;
 
-/* ---------- sky: stars, a band of galaxy and one small spiral, drawn by code in the site's three colours ---------- */
-// Decoration, not data and not a picture of the real sky. The same sky is built once from a fixed seed, in window-relative
-// units, then drawn either as points and glows (Image) or as characters (ASCII), following the lower-left switch.
-// It is still: drawn once, and again only when the window or the switch changes.
-const LAV = '168,139,255', DEEP = '112,34,252', SUN = '253,176,50', WHITE = '239,238,245';
-function buildSky() {
-  let s = 20261115; const rnd = () => (s = (s * 1664525 + 1013904223) >>> 0) / 4294967296;
-  const gauss = () => { let t = 0; for (let i = 0; i < 6; i++) t += rnd(); return (t - 3) / 0.707; };   // roughly normal, sd 1
-  const pts = [];
-  // field stars: mostly faint, a few bright; one in twelve is sunrise orange
-  for (let i = 0; i < 900; i++) { const m = Math.pow(rnd(), 2.2); pts.push({ x: rnd(), y: rnd(), m, c: rnd() < 0.08 ? SUN : rnd() < 0.5 ? LAV : WHITE, k: 'star' }); }
-  // the band: a diagonal river of faint stars, densest along its middle
-  for (let i = 0; i < 4200; i++) { const t = rnd() * 1.3 - 0.15, d = gauss() * 0.065; pts.push({ x: t + d * 0.55, y: 0.92 - t * 0.84 + d, m: 0.25 + 0.5 * rnd() * Math.exp(-d * d / 0.012), c: rnd() < 0.05 ? SUN : LAV, k: 'band' }); }
-  // a small spiral galaxy, two arms, seen at a tilt
-  const gx = 0.84, gy = 0.2;
-  for (let i = 0; i < 1500; i++) {
-    const arm = i % 2, r = Math.pow(rnd(), 0.7) * 0.085, th = arm * Math.PI + r * 46 + gauss() * (0.25 + r * 2.2), X = r * Math.cos(th), Y = r * Math.sin(th) * 0.5, co = Math.cos(-0.5), si = Math.sin(-0.5);
-    pts.push({ x: gx + X * co - Y * si, y: gy + (X * si + Y * co), m: 0.3 + 0.7 * Math.exp(-r / 0.03) * rnd() + 0.2 * rnd(), c: r < 0.012 ? SUN : LAV, k: 'gal', sq: true });
-  }
-  return { pts, gx, gy };
-}
-
+/* ---------- star background: one still canvas behind the page, redrawn only when the window changes size ---------- */
 export function initSky() {
   const c = document.createElement('canvas'); c.id = 'sky'; c.setAttribute('aria-hidden', 'true'); document.body.prepend(c);
-  const sky = buildSky();
-  const mode = () => { try { const v = localStorage.getItem('atlas-view'); if (v) return v === 'image' ? 'image' : 'ascii'; } catch (e) { /* storage may be blocked */ } const b = document.querySelector('#viewmode [aria-pressed="true"]'); return b ? b.dataset.view : 'ascii'; };
   const draw = () => {
-    const d = Math.min(devicePixelRatio || 1, 2), w = innerWidth, h = innerHeight, unit = Math.min(w, h);
+    const d = Math.min(devicePixelRatio || 1, 2), w = innerWidth, h = innerHeight;
     c.width = w * d; c.height = h * d; const g = c.getContext('2d'); g.scale(d, d);
-    // the spiral keeps its shape on any window: its offsets are scaled by the shorter side
-    const px = p => (p.k === 'gal' ? sky.gx * w + (p.x - sky.gx) * unit * 1.6 : p.x * w), py = p => (p.k === 'gal' ? sky.gy * h + (p.y - sky.gy) * unit * 1.6 : p.y * h);
-    if (mode() === 'ascii') {
-      // characters: each cell shows how much starlight falls in it; single bright stars get their own mark
-      const cell = 14, cols = Math.ceil(w / cell), rows = Math.ceil(h / cell), dens = new Float32Array(cols * rows), warm = new Float32Array(cols * rows);
-      g.font = `500 ${cell}px "IBM Plex Mono", ui-monospace, Consolas, monospace`; g.textAlign = 'center'; g.textBaseline = 'middle';
-      const singles = [];
-      for (const p of sky.pts) {
-        const x = px(p), y = py(p); if (x < 0 || y < 0 || x >= w || y >= h) continue;
-        if (p.k === 'star') { if (p.m > 0.4) singles.push([x, y, p]); continue; }
-        const i = ((y / cell) | 0) * cols + ((x / cell) | 0); dens[i] += p.m; if (p.c === SUN) warm[i] += p.m;
-      }
-      for (let j = 0; j < rows; j++) for (let i = 0; i < cols; i++) {
-        const v = dens[j * cols + i]; if (v < 0.9) continue;
-        const t = Math.min(1, v / 5.5), ch = RAMP[1 + Math.min(RAMP.length - 2, Math.floor(t * (RAMP.length - 1)))];
-        g.fillStyle = `rgba(${warm[j * cols + i] > v * 0.45 ? SUN : LAV},${(0.1 + 0.5 * t).toFixed(2)})`;
-        g.fillText(ch, i * cell + cell / 2, j * cell + cell / 2);
-      }
-      for (const [x, y, p] of singles) {
-        g.fillStyle = `rgba(${p.c},${(0.15 + 0.6 * p.m).toFixed(2)})`;
-        g.fillText(p.m > 0.8 ? '*' : p.m > 0.6 ? '+' : '.', Math.floor(x / cell) * cell + cell / 2, Math.floor(y / cell) * cell + cell / 2);
-      }
-      return;
-    }
-    // image: soft lavender light under the band and the spiral, then the points
-    g.save(); g.translate(w * 0.5, h * 0.5); g.rotate(Math.atan2(-0.84 * h, w)); const bw = unit * 0.2, lg = g.createLinearGradient(0, -bw, 0, bw);
-    lg.addColorStop(0, `rgba(${DEEP},0)`); lg.addColorStop(0.5, `rgba(${DEEP},0.16)`); lg.addColorStop(1, `rgba(${DEEP},0)`); g.fillStyle = lg; g.fillRect(-w * 1.2, -bw, w * 2.4, bw * 2); g.restore();
-    const rg = g.createRadialGradient(sky.gx * w, sky.gy * h, 0, sky.gx * w, sky.gy * h, unit * 0.17);
-    rg.addColorStop(0, `rgba(${SUN},0.22)`); rg.addColorStop(0.18, `rgba(${DEEP},0.2)`); rg.addColorStop(1, `rgba(${DEEP},0)`); g.fillStyle = rg; g.fillRect(0, 0, w, h);
-    for (const p of sky.pts) {
-      const x = px(p), y = py(p); if (x < 0 || y < 0 || x >= w || y >= h) continue;
-      const big = p.k === 'star' && p.m > 0.6;
-      g.fillStyle = `rgba(${p.c},${(p.k === 'star' ? 0.25 + 0.75 * p.m : 0.12 + 0.5 * p.m).toFixed(2)})`;
-      g.fillRect(Math.round(x), Math.round(y), big ? 2 : 1, big ? 2 : 1);                         // square stars, to match the square theme
-      if (p.k === 'star' && p.m > 0.85) { g.fillStyle = `rgba(${p.c},0.35)`; g.fillRect(Math.round(x) - 2, Math.round(y), 6, 1); g.fillRect(Math.round(x), Math.round(y) - 2, 1, 6); }   // a small cross on the brightest
+    let s = 20261115; const rnd = () => (s = (s * 1664525 + 1013904223) >>> 0) / 4294967296;   // fixed seed: the same sky on every visit
+    const n = Math.round(w * h / 5200);
+    for (let i = 0; i < n; i++) {
+      const x = rnd() * w, y = rnd() * h, m = rnd(), big = m > 0.985;
+      g.fillStyle = `rgba(${m > 0.9 ? '255,236,200' : '205,216,240'},${(0.12 + m * m * 0.5).toFixed(2)})`;
+      g.fillRect(Math.round(x), Math.round(y), big ? 2 : 1, big ? 2 : 1);                       // square stars, to match the square theme
     }
   };
   draw(); let t = 0; addEventListener('resize', () => { clearTimeout(t); t = setTimeout(draw, 150); });
-  const sw = document.querySelector('#viewmode'); if (sw) sw.addEventListener('click', () => setTimeout(draw, 0));   // follows the ASCII / Image switch
-  if (document.fonts && document.fonts.ready) document.fonts.ready.then(draw);
 }
 
 /* ---------- the two pictures, as grids of characters ---------- */

@@ -15,6 +15,7 @@ import datetime
 import json
 import math
 import sys
+import time
 import urllib.request
 from pathlib import Path
 
@@ -48,28 +49,42 @@ def bbox_for(layer, body, lat0, lon0, b):
 def fetch(layer, bbox, transparent=False):
     url = layer["url"] + ("&FORMAT=image/jpeg" if "FORMAT" not in layer["url"].upper() else "")
     url += "&BBOX=" + ",".join(f"{v:.6f}" for v in bbox) + f"&WIDTH={SIZE}&HEIGHT={SIZE}"
-    with urllib.request.urlopen(urllib.request.Request(url, headers={"User-Agent": "atlas-prerender"}), timeout=120) as r:
-        kind, data = r.headers.get("Content-Type", ""), r.read()
-    assert kind.startswith("image/"), (kind, data[:200])
-    return data
+    for attempt in range(4):                     # the services sometimes answer with an error page; ask again before giving up
+        try:
+            with urllib.request.urlopen(urllib.request.Request(url, headers={"User-Agent": "atlas-prerender"}), timeout=120) as r:
+                kind, data = r.headers.get("Content-Type", ""), r.read()
+            if kind.startswith("image/"):
+                return data
+            problem = (kind, data[:600])
+        except OSError as e:
+            problem = repr(e)
+        time.sleep(2 + 3 * attempt)
+    raise RuntimeError(f"no picture from {url}: {problem}")
 
 
 def one(site_id, tag, body, lat, lon):
+    out = {"body": body, "polar": is_polar(body, lat), "lat": lat, "lon": lon}
+    out["views"] = views_for(site_id, tag, body, lat, lon, "layers", "")       # satellite pictures
+    out["topo"] = views_for(site_id, tag, body, lat, lon, "topo", "-topo")      # elevation pictures
+    return out
+
+
+def views_for(site_id, tag, body, lat, lon, group, suffix):
     key = "moonpolar" if is_polar(body, lat) else body
     cx, cy = centre_xy(body, lat, lon)
-    out = {"body": body, "polar": is_polar(body, lat), "lat": lat, "lon": lon, "views": {}}
+    out = {}
     for view, half in VIEWS.items():
         b = [cx - half, cy - half, cx + half, cy + half]
         # the sharpest layer that is offered at this scale; fall back to the base layer if it comes back empty
         mpp = 2 * half / SIZE
-        cands = [l for l in reversed(CFG["layers"][key]) if mpp <= l.get("maxMpp", 1e12)]
+        cands = [l for l in reversed(CFG[group][key]) if mpp <= l.get("maxMpp", 1e12)]
         for layer in cands:
             data = fetch(layer, bbox_for(layer, body, lat, lon, b))
             if len(data) > 6000 or layer is cands[-1]:      # an all-blank picture compresses to almost nothing
                 break
-        name = f"{site_id}-{tag}-{view}.jpg"
+        name = f"{site_id}-{tag}-{view}{suffix}.jpg"
         (OUT / name).write_bytes(data)
-        out["views"][view] = {"file": name, "b": [round(v, 1) for v in b], "layer": layer["id"], "bytes": len(data)}
+        out[view] = {"file": name, "b": [round(v, 1) for v in b], "layer": layer["id"], "bytes": len(data)}
         print(f"  {name:36s} {layer['id']:10s} {len(data) / 1000:6.0f} kB")
     return out
 

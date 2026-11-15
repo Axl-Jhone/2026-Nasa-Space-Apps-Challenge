@@ -36,7 +36,11 @@
         <!-- zoom view: two maps at one scale, live pictures over saved copies (js/zoom.js) -->
         <div class="zoomwrap" id="zoomwrap" hidden>
           <div class="zmaps" id="zmaps"></div>
-          <div class="zfoot"><span class="zscale" id="zscale"></span><button class="btn alt" id="zterrain" hidden>See the measured terrain in 3D →</button></div>
+          <div class="zfoot"><span class="zscale" id="zscale"></span>
+            <div class="seg mapkind" id="mapkind" role="group" aria-label="What the maps show">
+              <button data-kind="sat" aria-pressed="true">Satellite</button>
+              <button data-kind="topo" aria-pressed="false" title="Height shown as colour with shading">Topography</button>
+            </div><button class="btn alt" id="zterrain" hidden>See the measured terrain in 3D →</button></div>
           <form class="qtform" id="qtform">
             <label for="qtll">Test any place on Earth</label>
             <input id="qtll" name="ll" inputmode="decimal" autocomplete="off" placeholder="latitude, longitude  e.g. 64.07, -16.20" aria-describedby="qthelp">
@@ -113,8 +117,8 @@
         <button data-size="equal" aria-pressed="false" title="All three drawn the same size, easier to read">Equal</button>
       </div>
     </div>
-    <div class="viewmode"><span>Draw as</span>
-      <div class="seg" id="viewmode" role="group" aria-label="How the globes and the sky are drawn">
+    <div class="viewmode"><span>Globes</span>
+      <div class="seg" id="viewmode" role="group" aria-label="How the globes are drawn">
         <button data-view="ascii" aria-pressed="true" title="Characters drawn from the NASA imagery">ASCII</button>
         <button data-view="image" aria-pressed="false" title="The NASA imagery itself">Image</button>
       </div>

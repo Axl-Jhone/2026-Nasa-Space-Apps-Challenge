@@ -29,6 +29,30 @@
       "layer": "weld",
       "bytes": 110786
      }
+    },
+    "topo": {
+     "wide": {
+      "file": "galena-earth-wide-topo.jpg",
+      "b": [
+       -512000.0,
+       -512000.0,
+       512000.0,
+       512000.0
+      ],
+      "layer": "aster",
+      "bytes": 61535
+     },
+     "close": {
+      "file": "galena-earth-close-topo.jpg",
+      "b": [
+       -64000.0,
+       -64000.0,
+       64000.0,
+       64000.0
+      ],
+      "layer": "aster",
+      "bytes": 119311
+     }
     }
    },
    "other": {
@@ -58,6 +82,30 @@
       ],
       "layer": "themis",
       "bytes": 63723
+     }
+    },
+    "topo": {
+     "wide": {
+      "file": "galena-other-wide-topo.jpg",
+      "b": [
+       -512000.0,
+       -512000.0,
+       512000.0,
+       512000.0
+      ],
+      "layer": "mola",
+      "bytes": 135950
+     },
+     "close": {
+      "file": "galena-other-close-topo.jpg",
+      "b": [
+       -64000.0,
+       -64000.0,
+       64000.0,
+       64000.0
+      ],
+      "layer": "mola",
+      "bytes": 72320
      }
     }
    }
@@ -91,6 +139,30 @@
       "layer": "weld",
       "bytes": 61806
      }
+    },
+    "topo": {
+     "wide": {
+      "file": "ummjirsan-earth-wide-topo.jpg",
+      "b": [
+       -512000.0,
+       -512000.0,
+       512000.0,
+       512000.0
+      ],
+      "layer": "aster",
+      "bytes": 29821
+     },
+     "close": {
+      "file": "ummjirsan-earth-close-topo.jpg",
+      "b": [
+       -64000.0,
+       -64000.0,
+       64000.0,
+       64000.0
+      ],
+      "layer": "aster",
+      "bytes": 57327
+     }
     }
    },
    "other": {
@@ -120,6 +192,30 @@
       ],
       "layer": "wac",
       "bytes": 18111
+     }
+    },
+    "topo": {
+     "wide": {
+      "file": "ummjirsan-other-wide-topo.jpg",
+      "b": [
+       -512000.0,
+       -512000.0,
+       512000.0,
+       512000.0
+      ],
+      "layer": "lola",
+      "bytes": 111391
+     },
+     "close": {
+      "file": "ummjirsan-other-close-topo.jpg",
+      "b": [
+       -64000.0,
+       -64000.0,
+       64000.0,
+       64000.0
+      ],
+      "layer": "lola",
+      "bytes": 49035
      }
     }
    }
@@ -153,6 +249,30 @@
       "layer": "weld",
       "bytes": 25270
      }
+    },
+    "topo": {
+     "wide": {
+      "file": "bodele-earth-wide-topo.jpg",
+      "b": [
+       -512000.0,
+       -512000.0,
+       512000.0,
+       512000.0
+      ],
+      "layer": "aster",
+      "bytes": 18465
+     },
+     "close": {
+      "file": "bodele-earth-close-topo.jpg",
+      "b": [
+       -64000.0,
+       -64000.0,
+       64000.0,
+       64000.0
+      ],
+      "layer": "aster",
+      "bytes": 62730
+     }
     }
    }
   },
@@ -185,6 +305,30 @@
       "layer": "weld",
       "bytes": 69382
      }
+    },
+    "topo": {
+     "wide": {
+      "file": "sittampundi-earth-wide-topo.jpg",
+      "b": [
+       -512000.0,
+       -512000.0,
+       512000.0,
+       512000.0
+      ],
+      "layer": "aster",
+      "bytes": 25631
+     },
+     "close": {
+      "file": "sittampundi-earth-close-topo.jpg",
+      "b": [
+       -64000.0,
+       -64000.0,
+       64000.0,
+       64000.0
+      ],
+      "layer": "aster",
+      "bytes": 59486
+     }
     }
    },
    "other": {
@@ -214,6 +358,30 @@
       ],
       "layer": "wacsouth",
       "bytes": 77357
+     }
+    },
+    "topo": {
+     "wide": {
+      "file": "sittampundi-other-wide-topo.jpg",
+      "b": [
+       -522340.3,
+       -523088.6,
+       501659.7,
+       500911.4
+      ],
+      "layer": "lolasouth",
+      "bytes": 158172
+     },
+     "close": {
+      "file": "sittampundi-other-close-topo.jpg",
+      "b": [
+       -74340.3,
+       -75088.6,
+       53659.7,
+       52911.4
+      ],
+      "layer": "lolasouth",
+      "bytes": 144612
      }
     }
    }
@@ -247,6 +415,30 @@
       "layer": "weld",
       "bytes": 88484
      }
+    },
+    "topo": {
+     "wide": {
+      "file": "kobuk-earth-wide-topo.jpg",
+      "b": [
+       -512000.0,
+       -512000.0,
+       512000.0,
+       512000.0
+      ],
+      "layer": "aster",
+      "bytes": 39898
+     },
+     "close": {
+      "file": "kobuk-earth-close-topo.jpg",
+      "b": [
+       -64000.0,
+       -64000.0,
+       64000.0,
+       64000.0
+      ],
+      "layer": "aster",
+      "bytes": 45711
+     }
     }
    },
    "other": {
@@ -276,6 +468,30 @@
       ],
       "layer": "themis",
       "bytes": 72377
+     }
+    },
+    "topo": {
+     "wide": {
+      "file": "kobuk-other-wide-topo.jpg",
+      "b": [
+       -512000.0,
+       -512000.0,
+       512000.0,
+       512000.0
+      ],
+      "layer": "mola",
+      "bytes": 52704
+     },
+     "close": {
+      "file": "kobuk-other-close-topo.jpg",
+      "b": [
+       -64000.0,
+       -64000.0,
+       64000.0,
+       64000.0
+      ],
+      "layer": "mola",
+      "bytes": 55719
      }
     }
    }
@@ -309,6 +525,30 @@
       "layer": "weld",
       "bytes": 51805
      }
+    },
+    "topo": {
+     "wide": {
+      "file": "matanomadh-earth-wide-topo.jpg",
+      "b": [
+       -512000.0,
+       -512000.0,
+       512000.0,
+       512000.0
+      ],
+      "layer": "aster",
+      "bytes": 22140
+     },
+     "close": {
+      "file": "matanomadh-earth-close-topo.jpg",
+      "b": [
+       -64000.0,
+       -64000.0,
+       64000.0,
+       64000.0
+      ],
+      "layer": "aster",
+      "bytes": 18522
+     }
     }
    },
    "other": {
@@ -338,6 +578,30 @@
       ],
       "layer": "themis",
       "bytes": 60430
+     }
+    },
+    "topo": {
+     "wide": {
+      "file": "matanomadh-other-wide-topo.jpg",
+      "b": [
+       -512000.0,
+       -512000.0,
+       512000.0,
+       512000.0
+      ],
+      "layer": "mola",
+      "bytes": 119821
+     },
+     "close": {
+      "file": "matanomadh-other-close-topo.jpg",
+      "b": [
+       -64000.0,
+       -64000.0,
+       64000.0,
+       64000.0
+      ],
+      "layer": "mola",
+      "bytes": 48283
      }
     }
    }
@@ -371,6 +635,30 @@
       "layer": "weld",
       "bytes": 65350
      }
+    },
+    "topo": {
+     "wide": {
+      "file": "makgadikgadi-earth-wide-topo.jpg",
+      "b": [
+       -512000.0,
+       -512000.0,
+       512000.0,
+       512000.0
+      ],
+      "layer": "aster",
+      "bytes": 16638
+     },
+     "close": {
+      "file": "makgadikgadi-earth-close-topo.jpg",
+      "b": [
+       -64000.0,
+       -64000.0,
+       64000.0,
+       64000.0
+      ],
+      "layer": "aster",
+      "bytes": 27342
+     }
     }
    },
    "other": {
@@ -400,6 +688,30 @@
       ],
       "layer": "themis",
       "bytes": 77958
+     }
+    },
+    "topo": {
+     "wide": {
+      "file": "makgadikgadi-other-wide-topo.jpg",
+      "b": [
+       -512000.0,
+       -512000.0,
+       512000.0,
+       512000.0
+      ],
+      "layer": "mola",
+      "bytes": 165031
+     },
+     "close": {
+      "file": "makgadikgadi-other-close-topo.jpg",
+      "b": [
+       -64000.0,
+       -64000.0,
+       64000.0,
+       64000.0
+      ],
+      "layer": "mola",
+      "bytes": 93071
      }
     }
    }
@@ -433,6 +745,30 @@
       "layer": "weld",
       "bytes": 54443
      }
+    },
+    "topo": {
+     "wide": {
+      "file": "azerbaijan-earth-wide-topo.jpg",
+      "b": [
+       -512000.0,
+       -512000.0,
+       512000.0,
+       512000.0
+      ],
+      "layer": "aster",
+      "bytes": 53587
+     },
+     "close": {
+      "file": "azerbaijan-earth-close-topo.jpg",
+      "b": [
+       -64000.0,
+       -64000.0,
+       64000.0,
+       64000.0
+      ],
+      "layer": "aster",
+      "bytes": 38249
+     }
     }
    },
    "other": {
@@ -462,6 +798,30 @@
       ],
       "layer": "themis",
       "bytes": 100780
+     }
+    },
+    "topo": {
+     "wide": {
+      "file": "azerbaijan-other-wide-topo.jpg",
+      "b": [
+       -512000.0,
+       -512000.0,
+       512000.0,
+       512000.0
+      ],
+      "layer": "mola",
+      "bytes": 83550
+     },
+     "close": {
+      "file": "azerbaijan-other-close-topo.jpg",
+      "b": [
+       -64000.0,
+       -64000.0,
+       64000.0,
+       64000.0
+      ],
+      "layer": "mola",
+      "bytes": 63505
      }
     }
    }
@@ -495,6 +855,30 @@
       "layer": "weld",
       "bytes": 118828
      }
+    },
+    "topo": {
+     "wide": {
+      "file": "kamestastin-earth-wide-topo.jpg",
+      "b": [
+       -512000.0,
+       -512000.0,
+       512000.0,
+       512000.0
+      ],
+      "layer": "aster",
+      "bytes": 31033
+     },
+     "close": {
+      "file": "kamestastin-earth-close-topo.jpg",
+      "b": [
+       -64000.0,
+       -64000.0,
+       64000.0,
+       64000.0
+      ],
+      "layer": "aster",
+      "bytes": 60902
+     }
     }
    },
    "other": {
@@ -524,6 +908,30 @@
       ],
       "layer": "wacsouth",
       "bytes": 77921
+     }
+    },
+    "topo": {
+     "wide": {
+      "file": "kamestastin-other-wide-topo.jpg",
+      "b": [
+       -558074.9,
+       -510664.7,
+       465925.1,
+       513335.3
+      ],
+      "layer": "lolasouth",
+      "bytes": 160515
+     },
+     "close": {
+      "file": "kamestastin-other-close-topo.jpg",
+      "b": [
+       -110074.9,
+       -62664.7,
+       17925.1,
+       65335.3
+      ],
+      "layer": "lolasouth",
+      "bytes": 142366
      }
     }
    }
@@ -557,6 +965,30 @@
       "layer": "weld",
       "bytes": 96593
      }
+    },
+    "topo": {
+     "wide": {
+      "file": "salda-earth-wide-topo.jpg",
+      "b": [
+       -512000.0,
+       -512000.0,
+       512000.0,
+       512000.0
+      ],
+      "layer": "aster",
+      "bytes": 47378
+     },
+     "close": {
+      "file": "salda-earth-close-topo.jpg",
+      "b": [
+       -64000.0,
+       -64000.0,
+       64000.0,
+       64000.0
+      ],
+      "layer": "aster",
+      "bytes": 93770
+     }
     }
    },
    "other": {
@@ -586,6 +1018,30 @@
       ],
       "layer": "themis",
       "bytes": 93781
+     }
+    },
+    "topo": {
+     "wide": {
+      "file": "salda-other-wide-topo.jpg",
+      "b": [
+       -512000.0,
+       -512000.0,
+       512000.0,
+       512000.0
+      ],
+      "layer": "mola",
+      "bytes": 138872
+     },
+     "close": {
+      "file": "salda-other-close-topo.jpg",
+      "b": [
+       -64000.0,
+       -64000.0,
+       64000.0,
+       64000.0
+      ],
+      "layer": "mola",
+      "bytes": 108786
      }
     }
    }
@@ -619,6 +1075,30 @@
       "layer": "weld",
       "bytes": 113798
      }
+    },
+    "topo": {
+     "wide": {
+      "file": "riotinto-earth-wide-topo.jpg",
+      "b": [
+       -512000.0,
+       -512000.0,
+       512000.0,
+       512000.0
+      ],
+      "layer": "aster",
+      "bytes": 36572
+     },
+     "close": {
+      "file": "riotinto-earth-close-topo.jpg",
+      "b": [
+       -64000.0,
+       -64000.0,
+       64000.0,
+       64000.0
+      ],
+      "layer": "aster",
+      "bytes": 67862
+     }
     }
    },
    "other": {
@@ -648,6 +1128,30 @@
       ],
       "layer": "themis",
       "bytes": 60430
+     }
+    },
+    "topo": {
+     "wide": {
+      "file": "riotinto-other-wide-topo.jpg",
+      "b": [
+       -512000.0,
+       -512000.0,
+       512000.0,
+       512000.0
+      ],
+      "layer": "mola",
+      "bytes": 119821
+     },
+     "close": {
+      "file": "riotinto-other-close-topo.jpg",
+      "b": [
+       -64000.0,
+       -64000.0,
+       64000.0,
+       64000.0
+      ],
+      "layer": "mola",
+      "bytes": 48283
      }
     }
    }
@@ -681,6 +1185,30 @@
       "layer": "weld",
       "bytes": 71470
      }
+    },
+    "topo": {
+     "wide": {
+      "file": "yungay-earth-wide-topo.jpg",
+      "b": [
+       -512000.0,
+       -512000.0,
+       512000.0,
+       512000.0
+      ],
+      "layer": "aster",
+      "bytes": 52775
+     },
+     "close": {
+      "file": "yungay-earth-close-topo.jpg",
+      "b": [
+       -64000.0,
+       -64000.0,
+       64000.0,
+       64000.0
+      ],
+      "layer": "aster",
+      "bytes": 54562
+     }
     }
    },
    "other": {
@@ -710,6 +1238,30 @@
       ],
       "layer": "themis",
       "bytes": 98417
+     }
+    },
+    "topo": {
+     "wide": {
+      "file": "yungay-other-wide-topo.jpg",
+      "b": [
+       -512000.0,
+       -512000.0,
+       512000.0,
+       512000.0
+      ],
+      "layer": "mola",
+      "bytes": 99886
+     },
+     "close": {
+      "file": "yungay-other-close-topo.jpg",
+      "b": [
+       -64000.0,
+       -64000.0,
+       64000.0,
+       64000.0
+      ],
+      "layer": "mola",
+      "bytes": 53848
      }
     }
    }

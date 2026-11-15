@@ -54,6 +54,8 @@ Repository: https://github.com/Axl-Jhone/2026-Nasa-Space-Apps-Challenge
 
 **Shape, not just ruggedness.** Our controls showed the similarity percentage could not tell a crater from a dune field. We added radial form: the share of a window's height variation explained by distance from its centre. The two lunar craters and Kamestastin score 0.60 to 0.75, the dune field 0.05 and the flat lake bed 0.08. It also exposes a break the similarity hid: Jezero scores 0.66 and Lake Salda 0.15.
 
+**Logistics.** Every site's panel, and every quick test, shows the straight-line distance to the nearest town and airport listed in Natural Earth: Umm Jirsan is 122 km from Medina and 116 km from Madinah airport. It gives a first idea of how hard a field team would find it to reach the site.
+
 **From a need to a site.** On the All pairs tab, pick what a mission must test (reaching water ice, cold and lighting, dust on hardware and so on) and the atlas lists the sites with evidence on it and the sites that do not match, each with its note and sources. The quick test can also scan the eight windows around a tested place, and adds NASA POWER climate for the spot.
 
 **The negative result.** We found no Earth site that reproduces the cold, the lighting or the volatiles of the lunar south pole. The Moon candidates match rock and caves only.
@@ -67,7 +69,7 @@ Repository: https://github.com/Axl-Jhone/2026-Nasa-Space-Apps-Challenge
 - **Measured terrain covers three Moon or Mars windows**: de Gerlache, Shackleton and Jezero. The other anchors are either not exported yet (most Mars regions are large enough for the 463 m MOLA grid), too small for the open grids (the Galena Creek glacier, the Mare Tranquillitatis pit, which also lies outside the polar LOLA product), or not a place at all (lunar highland soil, Mars dust lifting).
 - **The quick test runs only where the anchor is measured** (Kamestastin and Lake Salda). Exporting more anchors through the existing pipeline would switch it on for more sites.
 - **Two of the twelve pairings are new**, and both are untested hypotheses. A ranked search of Earth windows against each anchor, followed by a source check of the best matches, is the next step towards finding new analogs systematically.
-- **Logistics are not yet included.** Distance to the nearest town and airport would fit the operations dimension; it was scoped but not built before the deadline.
+- **Logistics are a first pass.** Distances to the nearest town and airport are straight-line, from Natural Earth, which lists only larger towns and mainly bigger airports. Road distance and smaller airstrips are next.
 
 ## Use of Super Intelligence (SI)
 
@@ -93,6 +95,7 @@ No image, video or audio in the project is AI-generated: the globes are NASA ima
 
 - Copernicus DEM GLO-30 (European Union and ESA Copernicus programme), read through Microsoft Planetary Computer. The Earth side of every terrain measure. https://doi.org/10.5270/ESA-c5d3d65
 - ISRO results cited as evidence: the Chandrayaan-3 soil analysis and the LSS-ISAC-1 lunar soil simulant.
+- Natural Earth 1:10m populated places and airports (public domain), for the logistics distances. https://www.naturalearthdata.com/
 - Typeface: IBM Plex Mono (SIL Open Font License), served by Google Fonts.
 - No third-party JavaScript library is used.
 - Full source list: the Method and sources tab of the app, and the list at the end of this file.

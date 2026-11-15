@@ -175,7 +175,7 @@ function buildSiteList() {
 }
 
 function selectSite(id, open = false) {
-  const s = byId(id); if (!s) return; S.site = id;
+  const s = byId(id); if (!s) return; if (S.site !== id) S.qtStandIn = null; S.site = id;
   $$('#sitelist .site').forEach(b => b.setAttribute('aria-pressed', b.dataset.id === id));
   for (const g of Object.values(G)) g.markOn([id]);
   pinText(s);
@@ -219,7 +219,7 @@ async function zoomTo(s) {
     if (!e.missing && !o.missing) { windows.earth = { ...e.meta.centre, km: e.windowKm }; windows.other = { ...o.meta.centre, km: o.windowKm }; }
   }
   $('#zoom-go').textContent = '← Back to the globes'; $('#zoom-go').setAttribute('aria-pressed', 'true');
-  setHash('#zoom/' + s.id);
+  setHash('#zoom/' + s.id); S.qtStandIn = null;
   const T = testTarget(), canTest = syncTestForm(T);
   openZoom(s, { pair: pair && windows.earth ? pair.id : null, windows, onTerrain: id => ctx.openSbs(id), onPick: canTest ? (lat, lon) => quickTest(lat, lon) : null, pickName: T.name });
 }
@@ -228,17 +228,29 @@ async function zoomTo(s) {
    reads open elevation tiles in the browser and is not the pipeline. The measures are the pipeline's own (js/quicktest.js). */
 // The test is against the selected site's own anchor. An anchor with no measured window has no test, never a stand-in.
 // Only a shared #test/ link, which carries no site, uses the world's default window.
+// The visitor can opt in to the world's default window instead; the result then names it as a stand-in.
+const defaultTarget = w => (w === 'mars' ? { pair: pairById('jezero'), name: 'Jezero crater, Mars', world: 'Mars' } : { pair: pairById('degerlache'), name: 'de Gerlache crater, Moon', world: 'Moon' });
 const testTarget = () => {
   const s = S.site && byId(S.site);
-  if (!s) return S.other === 'mars' ? { pair: pairById('jezero'), name: 'Jezero crater, Mars', world: 'Mars' } : { pair: pairById('degerlache'), name: 'de Gerlache crater, Moon', world: 'Moon' };
+  if (!s) return defaultTarget(S.other);
   const pair = D.pairs.find(p => p.site === s.id), world = s.body === 'mars' ? 'Mars' : 'Moon';
-  return { pair: pair || null, name: pair ? pair.otherTitle : s.target, world };
+  if (pair) return { pair, name: pair.otherTitle, world };
+  if (S.qtStandIn === s.id) return { ...defaultTarget(s.body), standInFor: s.target };
+  return { pair: null, name: s.target, world, site: s };
 };
-const noTestMsg = T => `<p class="qtoff"><b>Terrain at ${esc(T.name)} is not analyzed yet.</b> The quick test needs a measured window of the anchor, so it is off for this site.</p>`;
+// No measured anchor: say so, and offer the world's default window as a named, opt-in stand-in
+function showNoTest(box, T) {
+  const d = T.site && defaultTarget(T.site.body);
+  box.hidden = false;
+  box.innerHTML = `<p class="qtoff"><b>Terrain at ${esc(T.name)} is not analyzed yet.</b> The quick test needs a measured window of the anchor.</p>`
+    + (d && d.pair ? `<div class="qtbtns"><button class="zoomgo" id="qtstandin">Test against ${esc(d.name)} instead →</button></div>` : '');
+  const b = $('#qtstandin');
+  if (b) b.addEventListener('click', () => { S.qtStandIn = T.site.id; $('#qtform').hidden = false; quickTest(T.site.lat, T.site.lon); });
+}
 // Show the test form only when the selected site's anchor has a measured window
 function syncTestForm(T) {
   const ok = !!T.pair; $('#qtform').hidden = !ok;
-  const box = $('#ztest'); if (!ok) { box.hidden = false; box.innerHTML = noTestMsg(T); } else box.hidden = true;
+  const box = $('#ztest'); if (!ok) showNoTest(box, T); else box.hidden = true;
   return ok;
 }
 let qtAbort = null;
@@ -308,10 +320,10 @@ async function scanAround(lat, lon, km, cell, o, centreScore, ac) {
 }
 const f0 = v => v.toFixed(0);
 async function quickTest(lat, lon, check = false) {
-  const T = testTarget(), box = $('#ztest'); if (!T.pair) { box.hidden = false; box.innerHTML = noTestMsg(T); return; }
+  const T = testTarget(), box = $('#ztest'); if (!T.pair) { showNoTest(box, T); return; }
   if (qtAbort) qtAbort.abort(); const ac = qtAbort = new AbortController();     // a newer click cancels the older requests
   const [o, pe] = await Promise.all([getField(T.pair.other, T.pair.body || 'moon'), getField(T.pair.earth, 'earth')]);
-  if (o.missing) { box.hidden = false; box.innerHTML = noTestMsg(T); return; }
+  if (o.missing) { showNoTest(box, { ...T, pair: null }); return; }
   if (check) { lat = pe.meta.centre.lat; lon = pe.meta.centre.lon; }
   const km = o.windowKm, cell = o.meta.analysis_cell_m, oc = o.meta.centre, ts = byId(T.pair.site);
   stopTour();
@@ -331,7 +343,7 @@ async function quickTest(lat, lon, check = false) {
     const f = (v, d) => v.toFixed(d), row = (name, k, d, unit, pct) => `<tr><th scope="row">${name}</th><td class="n">${pct ? f(q.metrics[k] * 100, 0) : f(q.metrics[k], d)}${unit}</td>${pm ? `<td class="n">${pct ? f(pm[k] * 100, 0) : f(pm[k], d)}${unit}</td>` : ''}<td class="n">${pct ? f(o.meta.metrics[k] * 100, 0) : f(o.meta.metrics[k], d)}${unit}</td></tr>`;
     box.innerHTML = `<div class="qthead"><span class="tag">Quick test</span>
         <p class="qtwho">${check ? `<b>${esc(pe.meta.name)}</b> ` : ''}<span class="mono">${fmtLL(lat, lon)}</span></p>
-        <p class="qtvs">against <b>${esc(T.name)}</b></p></div>
+        <p class="qtvs">against <b>${esc(T.name)}</b>${T.standInFor ? `<small class="qtstand">a stand-in: ${esc(T.standInFor)} is not analyzed yet</small>` : ''}</p></div>
       ${sea}
       <p class="qtscore">Terrain similarity: <b>${sim.score}%</b></p>
       <div class="xwrap"><table class="st2 qtt"><thead><tr><th>Measure</th><th>${check ? 'Quick test' : 'Earth'}</th>${pm ? '<th>Our pipeline, same place</th>' : ''}<th>${esc(T.world)} window</th></tr></thead><tbody>

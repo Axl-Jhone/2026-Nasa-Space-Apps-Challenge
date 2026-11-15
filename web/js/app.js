@@ -3,7 +3,7 @@
 import { $, $$, esc, reduced, fmtLL } from './util.js';
 import { loadField, drawTerrain, drawHillshade } from './terrain.js';
 import { Globe, loadTextures, refreshAll, kick } from './globe.js';
-import { renderPair, renderExplore, renderMethod, labelChip, legendHtml, measTableHtml, srcLinks, matrixHtml, confText, simHtml } from './pages.js';
+import { renderPair, renderExplore, renderMethod, labelChip, legendHtml, measTableHtml, srcLinks, simHtml } from './pages.js';
 import { initAscii } from './ascii.js';
 import { openZoom, closeZoom, zoomOpen, pauseZoom, drawScan } from './zoom.js';
 import { readWindow, measure, similarity, radialForm } from './quicktest.js';
@@ -11,7 +11,7 @@ import { initSky, playIntro, initScramble } from './intro.js';
 
 const TABS = ['worlds', 'explore', 'side-by-side', 'method'];   // side-by-side has no tab of its own: it opens from a pair page
 const VIEWS = [...TABS, 'pair'];   // 'pair' is reached as #pair/<site id>, not from the tab bar
-const S = { tab: 'worlds', site: 'kamestastin', other: 'moon', side: 'list', filter: 'moon', pair: 'degerlache', mode: '3d', T: { view: 35, az: 300, el: 14, ve: 2 }, ex: { world: 'all', label: 'all' } };
+const S = { tab: 'worlds', site: null, other: 'moon', side: 'list', filter: 'moon', pair: 'degerlache', mode: '3d', T: { view: 35, az: 300, el: 14, ve: 2 }, ex: { world: 'all', label: 'all' } };
 let D, G = {}, TEX = null;
 const fields = new Map();           // terrain id -> field (a real export, or a 'missing' marker)
 const byId = id => D.sites.find(s => s.id === id);
@@ -28,8 +28,9 @@ async function boot() {
   initAscii(); buildGlobes(); bindDock(); bindZoom(); initSize(); buildFilters(); buildSiteList(); buildPairs(); bindSbs();
   $$('nav.tabs button').forEach(b => b.addEventListener('click', () => { location.hash = '#' + b.dataset.tab; }));
   addEventListener('hashchange', route);
-  try { const s = localStorage.getItem('atlas-site'); if (s && byId(s)) S.site = s; } catch (e) { /* storage may be blocked */ }
-  selectSite(S.site); route();
+  // a plain click on ATLAS goes home; Ctrl-click and middle-click still open a new tab
+  $('.brand').addEventListener('click', e => { if (e.button || e.ctrlKey || e.metaKey || e.shiftKey || e.altKey) return; e.preventDefault(); goHome(); });
+  clearSite(); route();   // no site is chosen until the visitor picks one (or a link names one)
   try { TEX = await loadTextures(); for (const k of ['earth', 'moon', 'mars']) { G[k].setTexture(TEX[k]); } }
   catch (e) { console.warn('globe textures missing; showing plain discs', e); }
 }
@@ -60,6 +61,14 @@ function route() {
   const tm = h.match(/^test\/(-?\d+(?:\.\d+)?),(-?\d+(?:\.\d+)?),(moon|mars)$/);
   if (tm && Math.abs(+tm[1]) <= 80 && Math.abs(+tm[2]) <= 180) { setOther(tm[3]); quickTest(+tm[1], +tm[2]); }
 }
+// ATLAS in the header: back to the globes from anywhere, with the tour stopped, the maps closed and the site list showing
+function goHome() {
+  stopTour();
+  if (zoomOpen()) zoomOut();
+  clearSite();
+  if (location.hash === '#worlds') route(); else location.hash = '#worlds';   // the same hash fires no hashchange
+  scrollTo(0, 0); for (const el of [$('#slist'), $('#sdetail'), $('aside.side')]) if (el) el.scrollTop = 0;
+}
 const setHash = h => { try { history.replaceState(null, '', h); } catch (e) { /* not allowed in this frame */ } };
 
 /* ---------- 1. three worlds ---------- */
@@ -77,10 +86,10 @@ function buildGlobes() {
   G.moon = new Globe({ root: $('#globe-moon'), body: 'moon', pins: P.moon, gain: 1.35, S: 512, onPin, auto: true });
   G.mars = new Globe({ root: $('#globe-mars'), body: 'mars', pins: P.mars, gain: 1.15, S: 512, onPin, auto: true });
   G.moon.lat = -35; G.moon.lon = 20; G.mars.lat = 30; G.mars.lon = 40;
-  // Earth is always shown; the toggle picks the second world. Choosing one with no selected site there selects its first site.
+  // Earth is always shown; the toggle picks the second world and selects nothing. A site of the other world is let go.
   $$('#other-toggle button').forEach(b => b.addEventListener('click', () => {
     setOther(b.dataset.b);
-    if (byId(S.site).body !== b.dataset.b) { const first = D.sites.find(s => s.body === b.dataset.b); if (first) selectSite(first.id); }
+    if (S.site && byId(S.site).body !== b.dataset.b && !zoomOpen()) clearSite();
   }));
 }
 
@@ -162,18 +171,38 @@ function buildSiteList() {
 
 function selectSite(id, open = false) {
   const s = byId(id); if (!s) return; S.site = id;
-  try { localStorage.setItem('atlas-site', id); } catch (e) { /* ignore */ }
   $$('#sitelist .site').forEach(b => b.setAttribute('aria-pressed', b.dataset.id === id));
   for (const g of Object.values(G)) g.markOn([id]);
+  pinText(s);
   if (s.body === 'moon' || s.body === 'mars') setOther(s.body);   // show the world this site stands in for
   G.earth.focus(s.lat, s.lon);
   const tg = s.body === 'moon' ? G.moon : G.mars; if (s.tlat != null) tg.focus(s.tlat, s.tlon);
   $('#cap-earth').textContent = `${s.name}, ${s.where}`;
   $('#cap-moon').textContent = s.body === 'moon' ? s.target : 'No counterpart selected';
   $('#cap-mars').textContent = s.body === 'mars' ? s.target : 'No counterpart selected';
+  syncZoomBtn();
   if (zoomOpen()) zoomTo(s);                                       // already zoomed in: the maps move to the new pair
   if (open) setDock(true);
   if (open || S.side === 'detail') showSideDetail(s);   // pressing a site opens its details; the toggle only updates them if already open
+}
+// The chosen site's Earth pin carries its full name and place; every other pin keeps its short name
+function pinText(s) {
+  for (const p of G.earth.pins) p.el.firstChild.textContent = s && p.ids.includes(s.id) ? `${s.name}, ${s.where}` : p.label;
+}
+// No site chosen: nothing pressed, no pin marked, the list showing, and the captions ask for a pick
+function clearSite() {
+  S.site = null;
+  $$('#sitelist .site').forEach(b => b.setAttribute('aria-pressed', 'false'));
+  for (const g of Object.values(G)) g.markOn([]);
+  pinText(null);
+  for (const k of ['earth', 'moon', 'mars']) $('#cap-' + k).textContent = 'Pick a site';
+  showSideList(); syncZoomBtn();
+}
+// The zoom button needs a site to zoom to; with the maps open it is the way back
+function syncZoomBtn() {
+  const b = $('#zoom-go'), open = zoomOpen();
+  b.disabled = !open && !S.site; b.setAttribute('aria-pressed', open);
+  b.textContent = open ? '← Back to the globes' : S.site ? 'Zoom in to both places' : 'Pick a site to zoom in';
 }
 
 /* Zoom view: the globes give way to two maps at one scale. The measured windows are outlined where a pair has them. */
@@ -275,10 +304,10 @@ async function quickTest(lat, lon, check = false) {
 }
 function zoomOut() {
   if (qtAbort) qtAbort.abort(); $('#ztest').hidden = true; setHash('#worlds');
-  closeZoom(); $('#zoom-go').textContent = 'Zoom in to both places'; $('#zoom-go').setAttribute('aria-pressed', 'false'); refreshAll(); kick();
+  closeZoom(); syncZoomBtn(); refreshAll(); kick();
 }
 function bindZoom() {
-  $('#zoom-go').addEventListener('click', () => { stopTour(); zoomOpen() ? zoomOut() : zoomTo(byId(S.site)); });
+  $('#zoom-go').addEventListener('click', () => { stopTour(); if (zoomOpen()) zoomOut(); else if (S.site) zoomTo(byId(S.site)); });
   $('#qtform').addEventListener('submit', e => {
     e.preventDefault();
     const m = $('#qtll').value.trim().match(/^(-?\d+(?:\.\d+)?)\s*[,\s]\s*(-?\d+(?:\.\d+)?)$/), lat = m && +m[1], lon = m && +m[2];
@@ -288,7 +317,7 @@ function bindZoom() {
     $('#qthelp').classList.toggle('err', bad); $('#qtll').setAttribute('aria-invalid', bad);
     if (!bad) quickTest(lat, lon);
   });
-  $('#tour-go').addEventListener('click', () => (tourT.length ? stopTour() : playTour(byId(D.tourSite) || byId(S.site))));
+  $('#tour-go').addEventListener('click', () => { const s = byId(D.tourSite) || byId(S.site); if (tourT.length) stopTour(); else if (s) playTour(s); });
   document.addEventListener('keydown', e => { if (e.key === 'Escape') stopTour(); });
 }
 
@@ -321,16 +350,19 @@ function showSideList() {
 function showSideDetail(s) {
   const pair = D.pairs.find(p => p.site === s.id);
   const legend = legendHtml(D);
-  const cmp = s.cmp || {};
+  const cmp = s.cmp || {}, vals = !!s.cmp;   // only a site with recorded values shows the two values
   // An empty cell says why it is empty, so it never contradicts the status next to it
   const empty = (k, c) => k === 'terrain' && c === 'M' ? 'measured, see rows below' : k === 'ops' && c === 'M' ? 'needs a cited slope limit' : 'no data yet';
-  const cell = (t, k, c) => t ? `<td>${esc(t)}</td>` : `<td class="none">${empty(k, c)}</td>`;
-  // Two value columns (anchor, Earth analog) per parameter, then the match verdict and note underneath
+  // One block per parameter: the legend's letter and the name, the two values where recorded, then the note. Nothing folds.
   const rows = D.dims.map(([k, name]) => {
-    const [c, note] = s.d[k], [a, e] = cmp[k] || [];
-    return `<tr class="p"><th scope="row" class="st-${c}">${esc(name)}<i>${esc(D.status[c])}</i></th>${cell(a, k, c)}${cell(e, k, c)}</tr>
-      <tr class="n${k === 'terrain' ? '' : ' end'}"><td colspan="3">${esc(note)}</td></tr>${k === 'terrain' ? '<tr id="tmslot"></tr>' : ''}`;
+    const [c, note] = s.d[k], [a, e] = cmp[k] || [], word = D.status[c], help = (D.statusHelp || {})[c];
+    const say = esc(word + (help ? ': ' + help : ''));
+    const val = (t, who) => `<div><span class="role">${who}</span>${t ? esc(t) : `<span class="none">${empty(k, c)}</span>`}</div>`;
+    return `<li class="dim e-${c}"><h4><span class="sw st-${c}" role="img" title="${say}" aria-label="${say}">${esc(word[0])}</span>${esc(name)}</h4>
+      ${vals ? `<div class="vals">${val(a, 'Anchor')}${val(e, 'Earth analog')}</div>` : ''}
+      <p>${esc(note)}</p>${vals && k === 'terrain' ? '<table class="cmp2 tm"><tbody><tr id="tmslot"></tr></tbody></table>' : ''}</li>`;
   }).join('');
+  const band = s.conf ? String(s.conf.band).toLowerCase() : 'none';
   const world = s.body === 'moon' ? 'Moon' : 'Mars';
   const el = $('#sdetail');
   el.innerHTML = `<button class="back" id="sback">← All sites</button>
@@ -338,18 +370,19 @@ function showSideDetail(s) {
       <div class="place anchor"><span class="role">Anchor · ${world}</span><strong>${esc(s.target)}</strong><span class="mono muted">${s.tlat != null ? fmtLL(s.tlat, s.tlon) : 'A process, with no single place'}</span></div>
       <div class="place cand"><span class="role">Earth analog</span><strong>${esc(s.name)}</strong><span class="mono muted">${esc(s.where)} · ${fmtLL(s.lat, s.lon)}</span></div>
     </div>
-    <div class="chips">${labelChip(D, s)}<span>${confText(s)}</span><span>${esc(s.kind)}</span></div>
+    <div class="chips">${labelChip(D, s)}<span>${esc(s.kind)}</span></div>
+    <p class="confbadge band-${esc(band)}"><span>Evidence confidence</span> ${s.conf ? `<b>${s.conf.score}%</b> · ${esc(s.conf.band)}` : 'not scored'}</p>
     <p>${esc(s.claim || '')}</p>
     <a class="btn go" href="#pair/${s.id}">Open the full case: alike, and where it breaks →</a>
-    <p><span class="muted">How it helps exploration: </span>${esc(s.helps)}</p>
+    <p class="fineprint">Every site, always: Earth cannot reproduce the reduced gravity, the lunar vacuum, the thin Martian air or their radiation.</p>
     <div class="mhead"><h3>Are they similar? Parameter by parameter</h3></div>
     <div class="mhead">${legend}</div>
-    ${s.cmp ? `<table class="cmp2"><thead><tr><th></th><th>Anchor<small>${esc(s.target)}</small></th><th>Earth analog<small>${esc(s.short)}</small></th></tr></thead><tbody>${rows}</tbody></table>
-    <p class="fineprint">${esc(s.cmpNote || '')}</p>` : matrixHtml(D, s, 'one')}
-    <p class="fineprint">Data: ${esc(s.data)}</p>
+    <ul class="dims">${rows}</ul>
+    ${s.cmpNote ? `<p class="fineprint">${esc(s.cmpNote)}</p>` : ''}
+    <div class="more"><h4>How it helps exploration</h4><p>${esc(s.helps)}</p></div>
+    <div class="more"><h4>Data</h4><p>${esc(s.data)}</p></div>
     <button class="btn alt" id="gozoom">Zoom in to both places on the map</button>
-    ${pair ? `<button class="btn alt" id="goside">Compare terrain side by side</button>` : ''}
-    <p class="fineprint">Every site, always: Earth cannot reproduce the reduced gravity, the lunar vacuum, the thin Martian air or their radiation.</p>`;
+    ${pair ? `<button class="btn alt" id="goside">Compare terrain side by side</button>` : ''}`;
   S.side = 'detail'; $('#slist').hidden = true; el.hidden = false; el.scrollTop = 0;
   $('aside.side').classList.add('wide');   // two value columns need more width than the site list
   $('#sback').addEventListener('click', showSideList);

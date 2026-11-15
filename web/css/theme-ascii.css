@@ -506,3 +506,34 @@ footer.credit .viewmode+.viewmode{padding-left:18px;border-left:1px solid var(--
 .mapkind button{min-height:30px;padding:4px 12px;font-size:13px}
 .mapkind button+button{border-left:1px solid var(--line-2)}
 .mapkind button[aria-pressed="true"]{background:var(--lav);color:#fff;box-shadow:none}
+
+/* 15 Nov: the zoom button waits for a site */
+.zoomgo:disabled,.zoomgo:disabled:hover{border-color:var(--line-2);color:var(--ink-2);background:none;cursor:not-allowed;opacity:.7}
+
+/* 15 Nov: quick-details panel. Confidence badge, one line per parameter, notes fold away */
+.confbadge{display:inline-flex;align-self:flex-start;flex-wrap:wrap;align-items:baseline;gap:8px;margin:2px 0;padding:6px 12px;border:1px solid var(--ink);font-family:var(--mono);font-size:14px;color:var(--ink)}
+.confbadge span{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2)}
+.confbadge b{font-size:20px;font-weight:600}
+.confbadge.band-high{border-color:var(--lav-ink);background:rgba(112,34,252,.14)}.confbadge.band-high b{color:var(--lav-ink)}
+.confbadge.band-low,.confbadge.band-none{border-style:dashed;border-color:var(--ink-3);color:var(--ink-2)}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+/* quick-details panel: one block per parameter, a rule and a status-coloured edge between them */
+.dims{list-style:none;margin:4px 0 0;padding:0}
+.dims .dim{padding:12px 0 12px 12px;border-top:1px solid var(--line-2);border-left:3px solid var(--ink-3)}
+.dims .dim+.dim{margin-top:6px}
+.dims .e-M,.dims .e-H{border-left-color:var(--lav-ink)}.dims .e-H{border-left-style:dashed}
+.dims .e-C{border-left-color:var(--ink)}.dims .e-P{border-left-color:var(--ink-2)}.dims .e-B{border-left-color:var(--break)}
+.dims h4{display:flex;align-items:baseline;gap:8px;margin:0 0 6px;font-size:14px;font-weight:600;color:var(--ink)}
+.dims h4 .sw{flex:none;font-family:var(--mono);font-style:normal;padding:0 5px}
+.dims .vals{display:grid;grid-template-columns:1fr 1fr;gap:4px 14px;margin:0 0 6px;font-size:14px;line-height:1.4}
+.dims .vals .role{display:block;font-family:var(--mono);font-size:11px;color:var(--ink-3)}
+.dims .vals .none{color:var(--ink-3);font-size:13px}
+.dims p{margin:0;font-size:13px;line-height:1.45;color:var(--ink-2)}
+.dims table.tm{margin-top:6px}.dims table.tm th{width:44%}.dims table.tm tr.end td{border-bottom:0;padding-left:0}
+.sdetail div.more{margin-top:4px}
+.sdetail div.more h4{margin:0 0 2px;font-family:var(--mono);font-size:11px;font-weight:400;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)}
+.sdetail div.more p{margin:0;font-size:13px;line-height:1.45;color:var(--ink-2)}
+/* home: the sentence, the world names and the place lines stay for screen readers only; the pin carries the place */
+#view-worlds .lede,.globes figcaption,.globes .cap{position:absolute;width:1px;height:1px;margin:0;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.pin span{top:auto;bottom:calc(100% + 8px)}
+.pin.on span{width:max-content;max-width:230px;white-space:normal;text-align:center;line-height:1.3}

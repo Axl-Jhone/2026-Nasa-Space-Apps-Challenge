@@ -5,7 +5,7 @@
 /* global L */
 import { $, esc, reduced, fmtLL } from './util.js';
 
-let CFG = null, IDX = null, maps = [], syncing = false, token = 0, leafletP = null;
+let CFG = null, IDX = null, maps = [], syncing = false, token = 0, leafletP = null, pending = null;
 // The map library (150 kB) is fetched only when the zoom view is first opened, not with the page.
 function leaflet() {
   return leafletP || (leafletP = new Promise((ok, bad) => {
@@ -88,7 +88,7 @@ function buildMap(el, body, lat, lon, saved, win) {
     L.polygon([[-1, -1], [1, -1], [1, 1], [-1, 1]].map(([i, j]) => g.unproject(L.point(w.x + i * h, w.y + j * h))), { color: '#fff', weight: 1.5, dashArray: '5 4', fill: false, interactive: false }).addTo(map);
   }
   paintBadge(el, state);
-  const ro = new ResizeObserver(() => map.invalidateSize({ animate: false })); ro.observe(el);   // keep the place centred when the layout changes
+  const ro = new ResizeObserver(() => { if (!el.clientWidth || !el.clientHeight) return; map.invalidateSize({ animate: false }); if (pending) { const p = pending; pending = null; p(); } }); ro.observe(el);   // keep the place centred when the layout changes
   return { map, g, state, el, body, lat, lon, ro };
 }
 
@@ -106,7 +106,8 @@ function paintScale() {
   $('#zscale').innerHTML = `<i style="width:${px}px"></i><span>${km} km on both maps · ${mpp >= 1000 ? (mpp / 1000).toFixed(0) + ' km' : mpp.toFixed(0) + ' m'} per pixel</span>`;
 }
 
-function destroy() { for (const m of maps) { m.ro.disconnect(); m.map.stop(); m.map.off(); m.map.remove(); } maps = []; }
+function destroy() { pending = null; _destroy(); }
+function _destroy() { for (const m of maps) { m.ro.disconnect(); m.map.stop(); m.map.off(); m.map.remove(); } maps = []; }
 
 /* Open the zoom view for one site. opts: { pair, windows: {earth:{lat,lon,km}, other:{...}}, onTerrain } */
 export async function openZoom(s, opts = {}) {
@@ -128,7 +129,7 @@ export async function openZoom(s, opts = {}) {
   $('#zoommsg').innerHTML = (w.earth ? `The dashed square is the ${w.earth.km} km window we measured on each world. ` : '')
     + `Pictures: ${esc([...new Set([...CFG.layers.earth, ...(has ? CFG.layers[isPolar(s.body, s.tlat) ? 'moonpolar' : s.body] : [])].map(l => l.credit))].join('; '))}.`
     + (IDX ? ` Saved copies fetched ${esc(IDX.fetched)}.` : '')
-    + (opts.onPick ? ` <b>Click anywhere on the Earth map to test that place${opts.pickName ? ' against ' + esc(opts.pickName) : ''}.</b>` : '');
+    + (opts.onPick ? ` <b>Click anywhere on the Earth map to test that place against our measured window${opts.pickName ? ', ' + esc(opts.pickName) : ''}. The second map then switches to that window.</b>` : '');
   const tb = $('#zterrain'); tb.hidden = !opts.pair; tb.onclick = opts.pair ? () => opts.onTerrain(opts.pair) : null;
   globes.hidden = true; wrap.hidden = false; globes.classList.remove('diving');
   document.body.dataset.zoom = 'on';
@@ -144,14 +145,16 @@ export async function openZoom(s, opts = {}) {
   }
   // once the flight is over the two maps are tied to one zoom level, so they always share a scale
   const flown = maps.slice();
-  setTimeout(() => {
+  const settle = () => {
     if (my !== token) return;
     for (const m of flown) {
       if (m.map.getZoom() !== z) m.map.setView([m.lat, m.lon], z, { animate: false });
       m.map.on('zoomend', () => { if (syncing) return; syncing = true; for (const o of maps) if (o !== m && o.map.getZoom() !== m.map.getZoom()) o.map.setZoom(m.map.getZoom(), { animate: false }); syncing = false; paintScale(); });
     }
     paintScale();
-  }, reduced || opts.noFly ? 0 : 2900);
+  };
+  // if the view was left mid-flight, the maps are settled when it is shown again, never while hidden
+  setTimeout(() => { if (my !== token) return; if (flown[0].el.clientWidth) settle(); else pending = settle; }, reduced || opts.noFly ? 0 : 2900);
   $('#zscale').textContent = '';
 }
 
@@ -160,3 +163,5 @@ export function closeZoom() {
   $('#zoomwrap').hidden = true; $('.globes').hidden = false; delete document.body.dataset.zoom;
 }
 export const zoomOpen = () => !$('#zoomwrap').hidden;
+// Leaving the view: stop any flight in progress, so nothing animates on a hidden page
+export function pauseZoom() { for (const m of maps) m.map.stop(); }

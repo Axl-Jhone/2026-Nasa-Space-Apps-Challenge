@@ -5,7 +5,7 @@ import { loadField, drawTerrain, drawHillshade } from './terrain.js';
 import { Globe, loadTextures, refreshAll, kick } from './globe.js';
 import { renderPair, renderExplore, renderMethod, labelChip, legendHtml, measTableHtml, srcLinks, matrixHtml, confText, simHtml } from './pages.js';
 import { initAscii } from './ascii.js';
-import { openZoom, closeZoom, zoomOpen } from './zoom.js';
+import { openZoom, closeZoom, zoomOpen, pauseZoom } from './zoom.js';
 import { readWindow, measure, similarity } from './quicktest.js';
 import { initSky, playIntro } from './intro.js';
 
@@ -43,6 +43,9 @@ const ctx = { getField: (id, kind) => getField(id, kind), getTemp, getClimate, o
 function route() {
   const h = location.hash.slice(1), ps = h.startsWith('pair/') ? byId(h.slice(5)) : null;
   const t = ps ? 'pair' : TABS.includes(h) ? h : 'worlds';
+  if (t !== 'worlds') { stopTour(); pauseZoom(); }                             // the tour belongs to the Three worlds view
+  const names = { worlds: 'Three worlds', explore: 'All pairs', method: 'Method and sources', 'side-by-side': 'Side by side', pair: ps ? ps.short : '' };
+  document.title = (names[t] ? names[t] + ' · ' : '') + 'ATLAS: Earth Analog Atlas';
   S.tab = t; document.body.dataset.tab = t;   // the stylesheet shows the globe switch only where there are globes
   for (const id of VIEWS) $('#view-' + id).hidden = id !== t;
   $$('nav.tabs button').forEach(b => b.setAttribute('aria-pressed', b.dataset.tab === (t === 'pair' || t === 'side-by-side' ? 'explore' : t)));
@@ -143,6 +146,7 @@ function selectSite(id, open = false) {
 
 /* Zoom view: the globes give way to two maps at one scale. The measured windows are outlined where a pair has them. */
 async function zoomTo(s) {
+  if (S.tab !== 'worlds') return;                                 // maps are never built on a page that is not showing
   const pair = D.pairs.find(p => p.site === s.id), windows = {};
   if (pair) {
     const [e, o] = await Promise.all([getField(pair.earth, 'earth'), getField(pair.other, pair.body || 'moon')]);
@@ -157,6 +161,7 @@ async function zoomTo(s) {
    reads open elevation tiles in the browser and is not the pipeline. The measures are the pipeline's own (js/quicktest.js). */
 const testTarget = () => (S.other === 'mars' ? { pair: pairById('jezero'), name: 'Jezero crater, Mars', world: 'Mars', check: 'Lake Salda' } : { pair: pairById('degerlache'), name: 'de Gerlache crater, Moon', world: 'Moon', check: 'Kamestastin' });
 let qtAbort = null;
+const f0 = v => v.toFixed(0);
 async function quickTest(lat, lon, check = false) {
   const T = testTarget(), box = $('#ztest'); if (!T.pair) return;
   if (qtAbort) qtAbort.abort(); const ac = qtAbort = new AbortController();     // a newer click cancels the older requests
@@ -173,10 +178,14 @@ async function quickTest(lat, lon, check = false) {
   try {
     const w = await readWindow(lat, lon, km, cell, { signal: ac.signal, onStep: (d, n) => { if (!ac.signal.aborted) box.firstChild.textContent = `Reading open elevation for ${fmtLL(lat, lon)} … ${d} of ${n} tiles`; } });
     if (ac.signal.aborted) return;
+    let low = 0; for (const z of w.dem) if (z <= 0) low++; low /= w.dem.length;       // open sea is stored as sea floor, below zero
+    const sea = low > 0.5 ? `<p class="err"><b>${f0(low * 100)}% of this window lies below sea level.</b> If this is open sea, the tiles hold the sea floor, not a surface anyone could visit, and the score below means nothing.</p>`
+      : low > 0.05 ? `<p class="fineprint">${f0(low * 100)}% of this window lies below sea level. Where that is sea, the tiles hold the sea floor, which is counted as ground here.</p>` : '';
     const q = measure(w), sim = similarity(q, o.meta), ms = Math.round(performance.now() - t0), pm = check ? pe.meta.metrics : null;
     const f = (v, d) => v.toFixed(d), row = (name, k, d, unit, pct) => `<tr><th scope="row">${name}</th><td class="n">${pct ? f(q.metrics[k] * 100, 0) : f(q.metrics[k], d)}${unit}</td>${pm ? `<td class="n">${pct ? f(pm[k] * 100, 0) : f(pm[k], d)}${unit}</td>` : ''}<td class="n">${pct ? f(o.meta.metrics[k] * 100, 0) : f(o.meta.metrics[k], d)}${unit}</td></tr>`;
     box.innerHTML = `<div class="qthead"><span class="tag">Quick test · not our pipeline</span>
         <b>${check ? esc(pe.meta.name) : 'Your place'}</b> <span class="mono">${fmtLL(lat, lon)}</span> against <b>${esc(T.name)}</b></div>
+      ${sea}
       <p class="qtscore"><b>${sim.score}%</b> terrain similarity <span>slopes ${f(sim.parts.slopes, 0)}% · relief ${f(sim.parts.relief, 0)}% · roughness ${f(sim.parts.roughness, 0)}%</span></p>
       <div class="xwrap"><table class="st2"><thead><tr><th>Measure</th><th>${check ? 'Quick test' : 'Your place'}</th>${pm ? '<th>Our pipeline, same place</th>' : ''}<th>${esc(T.world)} window</th></tr></thead><tbody>
         ${row('Relief', 'relief_p5_p95_m', 0, ' m')}${row('Median slope', 'median_slope_deg', 1, '°')}${row('Steep-end slope', 'p95_slope_deg', 1, '°')}${row('Roughness', 'roughness_m', 1, ' m')}${row('Ground flatter than 8°', 'gentle_share', 0, '%', true)}
@@ -199,7 +208,8 @@ function bindZoom() {
     e.preventDefault();
     const m = $('#qtll').value.trim().match(/^(-?\d+(?:\.\d+)?)\s*[,\s]\s*(-?\d+(?:\.\d+)?)$/), lat = m && +m[1], lon = m && +m[2];
     const bad = !m || Math.abs(lat) > 80 || Math.abs(lon) > 180;
-    $('#qthelp').textContent = bad ? 'Type latitude, then longitude, in degrees: for example 64.07, -16.20 (latitude within ±80)' : 'or click the Earth map';
+    $('#qthelp').textContent = !bad ? 'or click the Earth map' : m && Math.abs(lat) > 80 && Math.abs(lat) <= 90 ? 'The open elevation tiles stop at 80° of latitude, so this place cannot be tested' : 'Type latitude, then longitude, in decimal degrees: for example 64.07, -16.20';
+    if (bad) { if (qtAbort) qtAbort.abort(); $('#ztest').hidden = true; }   // an old result must not stand under a new, rejected place
     $('#qthelp').classList.toggle('err', bad); $('#qtll').setAttribute('aria-invalid', bad);
     if (!bad) quickTest(lat, lon);
   });
@@ -384,7 +394,7 @@ function renderMeasurements(p, e, o) {
     <h2>Measured on one grid</h2>
     ${pending ? `<p class="err">Measurements appear when both windows have a real export with metrics. Until then every number here is blank on purpose.</p>` : ''}
     ${measTableHtml(e, o)}
-    <p class="fineprint">The last column is a plain ratio, not a verdict. We report each measure separately and do not combine them into one score.</p>
+    <p class="fineprint">The last column is a plain ratio, not a verdict. The terrain similarity further down averages three of these measures, and is always shown with its three parts.</p>
     ${histHtml(e, o)}
     ${profileHtml(e, o)}
     <div class="box"><b>Does the method work? Controls</b><ul>${D.controls.map(c => `<li>${esc(c.text)}: ${esc(c.state)}</li>`).join('')}</ul></div>

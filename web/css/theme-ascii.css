@@ -443,3 +443,9 @@ footer.credit{background:transparent}
 .intro pre{margin:0;font-family:var(--mono);font-size:min(2.5vw,1.75vh,16px);line-height:1.02;color:var(--ink-2);white-space:pre;transition:color .4s}
 .intro.named pre{color:var(--accent)}
 .intro span{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3)}
+
+/* review fixes (15 November): one sentence on the home view says what the site is */
+.lede{align-self:stretch;margin:14px 16px 2px;font-size:16px;font-weight:500;line-height:1.4;color:var(--ink);text-align:center;text-wrap:balance}
+body[data-zoom="on"] .lede{display:none}
+.qt .err{color:var(--break)}
+@media (max-width:560px){.lede{font-size:14px}}

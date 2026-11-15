@@ -43,11 +43,11 @@ export function playIntro() {
   const deep = location.hash && location.hash !== '#worlds';        // someone following a link to a page is not made to wait
   if (reduced || seen || deep) return;
   const el = document.createElement('div'); el.className = 'intro'; el.setAttribute('role', 'img'); el.setAttribute('aria-label', 'Atlas holding the sky, then the name ATLAS');
-  el.innerHTML = '<pre aria-hidden="true"></pre><span>press any key to skip</span>';
+  el.innerHTML = '<pre aria-hidden="true"></pre><span>tap or press any key to skip</span>';
   document.body.append(el);
   const pre = el.firstChild, A = atlasGrid(), B = nameGrid();
   const when = A.map(row => row.map(() => Math.random()));           // each character changes at its own moment
-  const T = { draw: 650, hold: 1000, morph: 900, rest: 650, fade: 350 };
+  const T = { draw: 500, hold: 750, morph: 800, rest: 500, fade: 300 };
   const t0 = performance.now(); let raf = 0, over = false;
   const end = () => {
     if (over) return; over = true; cancelAnimationFrame(raf);

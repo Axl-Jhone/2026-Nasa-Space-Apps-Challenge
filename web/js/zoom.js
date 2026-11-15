@@ -82,7 +82,7 @@ function buildMap(el, body, lat, lon, saved, win) {
   const key = g.polar ? 'moonpolar' : body, state = { ok: 0, bad: 0, layers: CFG.layers[key] };
   for (const layer of state.layers) liveLayer(g, layer).on('tileload', () => { state.ok++; paintBadge(el, state); }).on('tileerror', () => { state.bad++; paintBadge(el, state); }).addTo(map);
   // the place, and the square we measured where there is one
-  L.circleMarker([lat, lon], { radius: 5, color: '#fff', weight: 1.5, fillColor: body === 'earth' ? '#6fb1ff' : body === 'mars' ? '#e0805a' : '#d7dbe4', fillOpacity: 1, interactive: false }).addTo(map);
+  L.circleMarker([lat, lon], { radius: 5, color: '#fff', weight: 1.5, fillColor: body === 'earth' ? '#a88bff' : body === 'mars' ? '#d0714c' : '#d9d7e6', fillOpacity: 1, interactive: false }).addTo(map);
   if (win) {
     const w = g.project(L.latLng(win.lat, win.lon)), h = win.km * 500;
     L.polygon([[-1, -1], [1, -1], [1, 1], [-1, 1]].map(([i, j]) => g.unproject(L.point(w.x + i * h, w.y + j * h))), { color: '#fff', weight: 1.5, dashArray: '5 4', fill: false, interactive: false }).addTo(map);
@@ -173,7 +173,7 @@ export function drawScan(cells, km, onPick) {
     const p = m.g.project(L.latLng(c.lat, c.lon)), h = km * 500;
     const ring = [[-1, -1], [1, -1], [1, 1], [-1, 1]].map(([i, j]) => m.g.unproject(L.point(p.x + i * h, p.y + j * h)));
     const top = c.score === best;
-    L.polygon(ring, { color: top ? '#f0c060' : '#ffffff', weight: top ? 2.5 : 1, fillColor: '#f0c060', fillOpacity: 0.08 + 0.4 * c.score / 100 })
+    L.polygon(ring, { color: top ? '#a88bff' : '#ffffff', weight: top ? 2.5 : 1, fillColor: '#7022fc', fillOpacity: 0.08 + 0.4 * c.score / 100 })
       .bindTooltip(c.score + '%', { permanent: true, direction: 'center', className: 'ztip' + (top ? ' top' : '') })
       .on('click', e => { L.DomEvent.stopPropagation(e); onPick(c.lat, c.lon); }).addTo(m.scan);
   }

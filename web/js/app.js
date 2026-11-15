@@ -458,10 +458,10 @@ function histHtml(e, o) {
   const pts = f => f.map((v, i) => `${(x0 + (i + 0.5) / nb * (x1 - x0)).toFixed(1)},${(y0 - v / top * (y0 - y1)).toFixed(1)}`).join(' ');
   const maxDeg = ha.edges_deg[ha.edges_deg.length - 1];
   return `<figure class="hist">${head}<svg role="img" aria-label="Slope histograms for the two windows" viewBox="0 0 ${W} ${H}" style="width:100%;height:auto">
-    <line x1="${x0}" y1="${y0}" x2="${x1}" y2="${y0}" stroke="#3a4560"/><line x1="${x0}" y1="${y1}" x2="${x0}" y2="${y0}" stroke="#3a4560"/>
-    <polyline fill="none" stroke="#e0a03a" stroke-width="2" points="${pts(ha.frac)}"/><polyline fill="none" stroke="#a9b4c8" stroke-width="2" stroke-dasharray="5 3" points="${pts(hb.frac)}"/>
-    <text x="160" y="132" fill="#a3acbd" font-size="12" text-anchor="middle">slope (degrees, 0 to ${maxDeg})</text>
-    <text x="${x1 - 40}" y="22" fill="#e0a03a" font-size="12">Earth</text><text x="${x1 - 40}" y="36" fill="#a9b4c8" font-size="12">${o.kind === 'mars' ? 'Mars' : 'Moon'}</text></svg></figure>`;
+    <line x1="${x0}" y1="${y0}" x2="${x1}" y2="${y0}" stroke="#2c2748"/><line x1="${x0}" y1="${y1}" x2="${x0}" y2="${y0}" stroke="#2c2748"/>
+    <polyline fill="none" stroke="#a88bff" stroke-width="2" points="${pts(ha.frac)}"/><polyline fill="none" stroke="#c9c7d8" stroke-width="2" stroke-dasharray="5 3" points="${pts(hb.frac)}"/>
+    <text x="160" y="132" fill="#a09db5" font-size="12" text-anchor="middle">slope (degrees, 0 to ${maxDeg})</text>
+    <text x="${x1 - 40}" y="22" fill="#a88bff" font-size="12">Earth</text><text x="${x1 - 40}" y="36" fill="#c9c7d8" font-size="12">${o.kind === 'mars' ? 'Mars' : 'Moon'}</text></svg></figure>`;
 }
 
 // One line across each window, drawn from the exported heights on one pair of axes. Nothing is recomputed: these are the
@@ -478,13 +478,13 @@ function profileHtml(e, o) {
   const other = o.kind === 'mars' ? 'Mars' : 'Moon';
   return `<figure class="hist"><figcaption>One line across each window, same axes</figcaption>
     <svg role="img" aria-label="Height along the middle of each window" viewBox="0 0 ${W} ${H}" style="width:100%;height:auto">
-    <line x1="${x0}" y1="${y0}" x2="${x1}" y2="${y0}" stroke="#3a4560"/><line x1="${x0}" y1="${y1}" x2="${x0}" y2="${y0}" stroke="#3a4560"/>
-    <line x1="${x0}" y1="${yz.toFixed(1)}" x2="${x1}" y2="${yz.toFixed(1)}" stroke="#3a4560" stroke-dasharray="2 4"/>
-    <polyline fill="none" stroke="#e0a03a" stroke-width="2" points="${pts(a)}"/><polyline fill="none" stroke="#a9b4c8" stroke-width="2" stroke-dasharray="5 3" points="${pts(b)}"/>
-    <text x="${x0 - 4}" y="${y1 + 4}" fill="#a3acbd" font-size="11" text-anchor="end">${Math.round(hi)}</text><text x="${x0 - 4}" y="${y0}" fill="#a3acbd" font-size="11" text-anchor="end">${Math.round(lo)}</text>
-    <text x="${x0}" y="${y0 + 13}" fill="#a3acbd" font-size="11">0</text><text x="${x1}" y="${y0 + 13}" fill="#a3acbd" font-size="11" text-anchor="end">${km} km</text>
-    <text x="165" y="${H - 4}" fill="#a3acbd" font-size="12" text-anchor="middle">left to right through the centre</text>
-    <text x="${x1 - 40}" y="22" fill="#e0a03a" font-size="12">Earth</text><text x="${x1 - 40}" y="36" fill="#a9b4c8" font-size="12">${other}</text></svg>
+    <line x1="${x0}" y1="${y0}" x2="${x1}" y2="${y0}" stroke="#2c2748"/><line x1="${x0}" y1="${y1}" x2="${x0}" y2="${y0}" stroke="#2c2748"/>
+    <line x1="${x0}" y1="${yz.toFixed(1)}" x2="${x1}" y2="${yz.toFixed(1)}" stroke="#2c2748" stroke-dasharray="2 4"/>
+    <polyline fill="none" stroke="#a88bff" stroke-width="2" points="${pts(a)}"/><polyline fill="none" stroke="#c9c7d8" stroke-width="2" stroke-dasharray="5 3" points="${pts(b)}"/>
+    <text x="${x0 - 4}" y="${y1 + 4}" fill="#a09db5" font-size="11" text-anchor="end">${Math.round(hi)}</text><text x="${x0 - 4}" y="${y0}" fill="#a09db5" font-size="11" text-anchor="end">${Math.round(lo)}</text>
+    <text x="${x0}" y="${y0 + 13}" fill="#a09db5" font-size="11">0</text><text x="${x1}" y="${y0 + 13}" fill="#a09db5" font-size="11" text-anchor="end">${km} km</text>
+    <text x="165" y="${H - 4}" fill="#a09db5" font-size="12" text-anchor="middle">left to right through the centre</text>
+    <text x="${x1 - 40}" y="22" fill="#a88bff" font-size="12">Earth</text><text x="${x1 - 40}" y="36" fill="#c9c7d8" font-size="12">${other}</text></svg>
     <p class="fineprint">Heights in metres from each window's own median, read from the middle row of the two exports. The vertical scale is stretched ${ve.toFixed(0)} times.${wet ? ' The flat stretch on the Earth line is the lake surface.' : ''} One line is one line: the table above uses the whole window.</p></figure>`;
 }
 

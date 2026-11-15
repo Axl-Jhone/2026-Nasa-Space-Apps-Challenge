@@ -36,7 +36,7 @@ function shadeCell(f, i, j, sun, ve) {
   const gx = (h[j * n + i1] - h[j * n + i0]) / ((i1 - i0) * dx) * ve, gy = (h[j1 * n + i] - h[j0 * n + i]) / ((j1 - j0) * dx) * ve, m = Math.hypot(gx, gy, 1);
   return Math.max(0, (-gx * sun[0] - gy * sun[1] + sun[2]) / m) * (f.water[j * n + i] ? 0.55 : 1);
 }
-export function palette(kind) { const lo = hex(tok('--relief-lo')), hi = mix(hex(tok(kind === 'earth' ? '--earth' : kind === 'mars' ? '--mars' : '--moon')), hex(tok('--relief-hi')), 0.5), wa = hex(tok('--water')); return { lo, hi, wa }; }
+export function palette(kind) { const lo = hex(tok('--relief-lo')), hi = mix(hex(tok(kind === 'earth' ? '--terrain-earth' : kind === 'mars' ? '--mars' : '--moon')), hex(tok('--relief-hi')), 0.5), wa = hex(tok('--water')); return { lo, hi, wa }; }
 const colour = (f, k, l, pal) => f.water[k] ? mix(pal.lo, pal.wa, 0.35 + 0.65 * l) : mix(pal.lo, pal.hi, l);
 
 // Cell draw order depends only on grid size and view angle, so cache it while the sun sweeps.

@@ -432,13 +432,13 @@ body[data-zoom="on"] .otherbar{margin:10px 0 14px}
 
 /* ---------- space ground and opening (15 November) ---------- */
 /* A still field of small square stars behind the page. Text panels stay near-opaque so nothing is read over stars. */
-#sky{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none;background:radial-gradient(120% 90% at 70% 0%,#0a1024 0%,#04060b 55%,#020308 100%)}
-body{background:#020308}
+#sky{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none;background:radial-gradient(120% 90% at 72% -5%,#150a33 0%,#07041a 38%,#010102 72%)}
+body{background:#010102}
 .view.doc{background:rgba(4,6,11,.93)}
 aside.side,aside.meas{background:rgba(7,10,18,.96)}
 footer.credit{background:transparent}
 /* Opening: Atlas holding the sky; its characters rearrange into the name. Under three seconds, skippable, once per visit. */
-.intro{position:fixed;inset:0;z-index:2000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;background:#020308;cursor:pointer;transition:opacity .35s ease-out}
+.intro{position:fixed;inset:0;z-index:2000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;background:#010102;cursor:pointer;transition:opacity .35s ease-out}
 .intro.out{opacity:0;pointer-events:none}
 .intro pre{margin:0;font-family:var(--mono);font-size:min(2.5vw,1.75vh,16px);line-height:1.02;color:var(--ink-2);white-space:pre;transition:color .4s}
 .intro.named pre{color:var(--accent)}
@@ -452,7 +452,7 @@ body[data-zoom="on"] #view-worlds .lede{display:none}
 
 /* scan squares, quick-test buttons, mission need */
 .ztip{background:rgba(0,0,0,.7);border:0;border-radius:0;box-shadow:none;color:#fff;font-family:var(--mono);font-size:12px;padding:1px 4px}
-.ztip::before{display:none}.ztip.top{background:#f0c060;color:#000;font-weight:600}
+.ztip::before{display:none}.ztip.top{background:#7022fc;color:#fff;font-weight:600}
 .qtbtns{display:flex;flex-wrap:wrap;gap:8px}
 .qt th small{display:block;font-weight:400;color:var(--ink-3)}
 .linkbtn{padding:0;border:0;background:none;color:var(--accent);font:inherit;text-decoration:underline;cursor:pointer}
@@ -461,3 +461,37 @@ body[data-zoom="on"] #view-worlds .lede{display:none}
 .needcols h3{margin:0 0 8px;font-size:14px;color:var(--accent)}.needcols .no h3{color:var(--break)}
 .needcols ul{margin:0 0 16px;padding:0;list-style:none}.needcols li{padding:8px 0;border-top:1px solid var(--line);font-size:14px;line-height:1.5}
 @media (max-width:760px){.needcols{grid-template-columns:1fr}}
+
+/* ---------- palette (15 November): space black, deep lavender, sunrise orange ---------- */
+/* Three colours, three jobs. Black is the ground. Lavender is the brand and everything you can act on.
+   Orange is kept for one thing only: where an analogy stops, and warnings.
+   Deep lavender (#7022FC) is 3.3:1 on black, too dark for text, so it is used for fills, rules and rings;
+   text and thin lines use its lighter tint (--lav-ink, 7:1). */
+:root{
+  --bg:#010102; --panel:#07060d; --aside:#05040a; --line:#17142a; --line-2:#2c2748;
+  --ink:#efeef5; --ink-2:#c9c7d8; --ink-3:#a09db5;
+  --lav:#7022fc; --lav-ink:#a88bff; --sun:#fdb032;
+  --accent:#a88bff; --break:#fdb032; --signal:#fdb032;
+  --earth:#a88bff; --moon:#c9c7d8; --mars:#d0714c; --terrain-earth:#e0a03a;
+  --relief-lo:#030208;
+}
+header.mast{background:rgba(1,1,2,.9)}
+.view.doc{background:rgba(1,1,2,.93)}
+aside.side,aside.meas{background:rgba(4,3,9,.96)}
+/* fills carry the deep lavender, with white text (6.3:1) */
+.otherbar .seg button[aria-pressed="true"]{background:var(--lav);color:#fff}
+/* .btn is an underlined text link in this theme (minimal pass), so it takes the text tint, never a fill */
+.zoomgo{border-color:var(--lav);color:var(--lav-ink)}
+.zoomgo:hover{background:var(--lav);color:#fff}
+.qthead .tag{border-color:var(--lav);color:var(--lav-ink)}
+.qt{border-left-color:var(--lav)}
+:focus-visible{outline-color:var(--lav-ink)}
+.leaflet-bar a:hover{background:var(--lav)}
+::selection{background:var(--lav);color:#fff}
+.intro.named pre{color:var(--lav-ink)}
+/* leftovers from the amber palette */
+.st-M{border-color:var(--lav-ink)!important;background:rgba(112,34,252,.14)}.st-M i,.st-H i,.nov-new{color:var(--lav-ink)}
+.st-H{border-color:var(--lav-ink)!important;background:rgba(112,34,252,.06)}
+.breaks h2::after,.limits{border-color:rgba(253,176,50,.4)}
+.sites li.neg{border-color:rgba(253,176,50,.35);background:rgba(253,176,50,.05)}
+.globe.earth,.globe.moon,.globe.mars{background:radial-gradient(circle at 35% 30%,#16102e,#030208)}

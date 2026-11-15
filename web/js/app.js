@@ -295,13 +295,9 @@ async function quickTest(lat, lon, check = false) {
       </tbody></table></div>
       <div id="qtclim"></div>
       <p class="fineprint">Measured in your browser just now: a ${km} km window on ${String(cell).startsWith('8') ? 'an' : 'a'} ${cell} m grid, from ${w.tiles} open elevation tiles (Mapzen Terrain Tiles on AWS Open Data, about ${f(w.tilePixelM, 0)} m here) in ${ms} ms. ${q.metrics.masked_share > 0.005 ? `Flat water left out: ${f(q.metrics.masked_share * 100, 0)}% of the window. ` : ''}The measures are the same ones our pipeline uses, but the elevation source is different and coarser, so treat this as a first look. On very flat ground the tiles are too coarse to trust. Terrain only: it says nothing about rock, temperature or ice.${T.pair.sim ? ` For scale, ${esc(T.check)} scores ${T.pair.sim.score}% in our pipeline.` : ''}</p>
-      <div class="qtbtns">${check ? '' : `<button class="zoomgo" id="qtscan">Scan the eight windows around it</button>`}
-        ${check ? '' : `<button class="zoomgo" id="qtcheck">Check this tool at ${esc(T.check)}</button>`}
-        ${check ? '' : `<button class="zoomgo" id="qtshare">Copy a link to this test</button>`}</div>
+      <div class="qtbtns">${check ? '' : `<button class="zoomgo" id="qtscan">Scan the eight windows around it</button>`}</div>
       <div id="qtscanout"></div>`;
-    const b = $('#qtcheck'); if (b) b.addEventListener('click', () => quickTest(0, 0, true));
     const sc = $('#qtscan'); if (sc) sc.addEventListener('click', () => scanAround(lat, lon, km, cell, o, sim.score, ac));
-    const sh = $('#qtshare'); if (sh) sh.addEventListener('click', async () => { try { await navigator.clipboard.writeText(location.href); sh.textContent = 'Link copied'; } catch (e) { sh.textContent = 'Copy it from the address bar'; } });
     quickClimate(lat, lon, ac);
   } catch (e) {
     if (ac.signal.aborted) return;

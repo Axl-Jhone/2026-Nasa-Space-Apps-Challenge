@@ -18,12 +18,23 @@ export async function loadTextures() {
 let globes = [], raf = 0, post = null;   // post: optional pass run after a globe draws (the ASCII view)
 export const setPost = fn => { post = fn; refreshAll(); };
 export const kick = () => { if (!raf) raf = requestAnimationFrame(tick); };
-function tick() { raf = 0; let more = false; for (const g of globes) { if (!g.visible()) continue; if (g.step()) more = true; if (g.dirty) { g.render(); g.dirty = false; } if (g.spin && !reduced) { g.lon += 0.12; g.dirty = true; more = true; } } if (more) kick(); }
+const IDLE_MS = 3500, SPIN_DEG_S = 2.5;   // a globe left alone this long turns slowly; pointing at it stops it
+let last = 0;
+function tick(now) {
+  raf = 0; const dt = Math.min(100, now - (last || now)); last = now; let more = false;
+  for (const g of globes) {
+    if (!g.visible()) continue;
+    if (g.step()) more = true;
+    if (g.auto && !reduced) { more = true; if (g.idle(now)) { g.lon = (g.lon + SPIN_DEG_S * dt / 1000) % 360; g.dirty = true; } }
+    if (g.dirty) { g.render(); g.dirty = false; }
+  }
+  if (more) kick();
+}
 
 export class Globe {
   // opts: { root, body, pins:[{lat,lon,label,ids,ctx}], gain, S, onPin(ids), spin }
   constructor(o) {
-    this.root = o.root; this.cv = $('canvas', this.root); this.body = o.body; this.gain = o.gain; this.spin = !!o.spin;
+    this.root = o.root; this.cv = $('canvas', this.root); this.body = o.body; this.gain = o.gain; this.auto = !!o.auto; this.hover = false; this.dragging = false; this.touched = performance.now();
     this.S = o.S || 400; this.cv.width = this.cv.height = this.S; this.ctx = this.cv.getContext('2d'); this.out = this.ctx.createImageData(this.S, this.S);
     this.lon = 0; this.lat = 0; this.tLon = null; this.tLat = null; this.dirty = true; this.pre();
     this.pins = (o.pins || []).map(p => {
@@ -34,6 +45,7 @@ export class Globe {
     this.drag(); globes.push(this);
   }
   visible() { return this.root.offsetParent !== null; }
+  idle(now) { return !this.hover && !this.dragging && this.tLon == null && now - this.touched > IDLE_MS; }
   pre() {
     const S = this.S, R = S / 2, n = S * S; this.px = new Float32Array(n); this.py = new Float32Array(n); this.pz = new Float32Array(n); this.sh = new Float32Array(n); this.al = new Uint8Array(n);
     const sx = -0.58, sy = 0.3, sz = 0.757;
@@ -47,13 +59,25 @@ export class Globe {
   setTexture(c) { this.tw = c.width; this.th = c.height; this.tex = c.getContext('2d').getImageData(0, 0, c.width, c.height).data; this.dirty = true; kick(); }
   render() {
     if (!this.tex) { this.place(); return; }
-    const { S, px, py, pz, sh, al, tex, tw, th } = this, d = this.out.data, l0 = this.lon * DEG, c = Math.cos(this.lat * DEG), s = Math.sin(this.lat * DEG);
-    for (let i = 0, n = S * S; i < n; i++) {
+    const { S, px, py, pz, sh, al, tex, tw, th } = this, d = this.out.data, n = S * S;
+    // The costly part (asin, atan2 per pixel) depends only on the tilt. It is kept until the tilt changes, so a globe that
+    // only turns about its axis, as the idle spin does, redraws with plain arithmetic.
+    if (this.cLat !== this.lat || this.cTw !== tw) {
+      const c = Math.cos(this.lat * DEG), sn = Math.sin(this.lat * DEG);
+      this.cRow = this.cRow || new Int32Array(n); this.cLon = this.cLon || new Float32Array(n);
+      for (let i = 0; i < n; i++) {
+        if (!al[i]) continue;
+        let Y = py[i] * c + pz[i] * sn; const Z = -py[i] * sn + pz[i] * c; if (Y > 1) Y = 1; else if (Y < -1) Y = -1;
+        let ty = ((0.5 - Math.asin(Y) / Math.PI) * th) | 0; if (ty >= th) ty = th - 1;
+        this.cRow[i] = ty * tw; this.cLon[i] = Math.atan2(px[i], Z) / TAU + 0.5;
+      }
+      this.cLat = this.lat; this.cTw = tw;
+    }
+    const row = this.cRow, lon = this.cLon, l0 = this.lon / 360;
+    for (let i = 0; i < n; i++) {
       const a = al[i], o = i * 4; if (!a) { d[o + 3] = 0; continue; }
-      let Y = py[i] * c + pz[i] * s; const Z = -py[i] * s + pz[i] * c; if (Y > 1) Y = 1; else if (Y < -1) Y = -1;
-      const lat = Math.asin(Y), lon = l0 + Math.atan2(px[i], Z);
-      let u = (lon / TAU + 0.5) % 1; if (u < 0) u += 1; let tx = (u * tw) | 0; if (tx >= tw) tx = tw - 1; let ty = ((0.5 - lat / Math.PI) * th) | 0; if (ty >= th) ty = th - 1;
-      const t = (ty * tw + tx) * 4, k = sh[i]; d[o] = tex[t] * k; d[o + 1] = tex[t + 1] * k; d[o + 2] = tex[t + 2] * k; d[o + 3] = a;
+      let u = l0 + lon[i]; u -= Math.floor(u); let tx = (u * tw) | 0; if (tx >= tw) tx = tw - 1;
+      const t = (row[i] + tx) * 4, k = sh[i]; d[o] = tex[t] * k; d[o + 1] = tex[t + 1] * k; d[o + 2] = tex[t + 2] * k; d[o + 3] = a;
     }
     this.ctx.putImageData(this.out, 0, 0); if (post) post(this); this.place();
   }
@@ -67,6 +91,7 @@ export class Globe {
   markOn(ids) { for (const p of this.pins) p.el.classList.toggle('on', !!ids && !!p.ids && p.ids.some(i => ids.includes(i))); }
   focus(lat, lon) {
     const tl = Math.max(-55, Math.min(55, lat));
+    this.touched = performance.now();                              // a newly chosen place is held still for a moment before the globe drifts on
     if (reduced) { this.lat = tl; this.lon = lon; this.tLon = null; this.dirty = true; } else { this.tLat = tl; this.tLon = lon; }
     kick();
   }
@@ -78,9 +103,12 @@ export class Globe {
   }
   drag() {
     let on = false, lx = 0, ly = 0;
-    this.root.addEventListener('pointerdown', e => { if (e.target.closest('.pin')) return; on = true; lx = e.clientX; ly = e.clientY; this.tLon = null; this.root.setPointerCapture(e.pointerId); this.root.style.cursor = 'grabbing'; });
+    const touch = () => { this.touched = performance.now(); };
+    this.root.addEventListener('pointerenter', e => { if (e.pointerType !== 'touch') this.hover = true; });
+    this.root.addEventListener('pointerleave', () => { this.hover = false; touch(); });
+    this.root.addEventListener('pointerdown', e => { if (e.target.closest('.pin')) return; on = true; this.dragging = true; touch(); lx = e.clientX; ly = e.clientY; this.tLon = null; this.root.setPointerCapture(e.pointerId); this.root.style.cursor = 'grabbing'; });
     this.root.addEventListener('pointermove', e => { if (!on) return; const k = 110 / this.root.clientWidth; this.lon -= (e.clientX - lx) * k; if (e.pointerType !== 'touch') this.lat = Math.max(-80, Math.min(80, this.lat + (e.clientY - ly) * k)); lx = e.clientX; ly = e.clientY; this.dirty = true; kick(); });
-    const end = () => { on = false; this.root.style.cursor = ''; };
+    const end = () => { on = false; this.dragging = false; touch(); this.root.style.cursor = ''; };
     this.root.addEventListener('pointerup', end); this.root.addEventListener('pointercancel', end);
   }
 }

@@ -75,3 +75,24 @@ export function playIntro() {
   raf = requestAnimationFrame(frame);
   setTimeout(end, 6000);                                             // never left on screen if the tab was in the background
 }
+
+/* ---------- hover: a label breaks into ASCII and settles back, left to right ---------- */
+// Decoration. The real text stays in aria-label, so a screen reader never hears the scrambled characters.
+export function initScramble(selector) {
+  if (reduced) return;
+  for (const el of document.querySelectorAll(selector)) {
+    const text = el.textContent; el.setAttribute('aria-label', text);
+    let raf = 0;
+    const run = () => {
+      cancelAnimationFrame(raf); const t0 = performance.now(), dur = 260 + text.length * 22;
+      const frame = now => {
+        const p = (now - t0) / dur, settled = Math.floor(p * text.length * 1.25);
+        el.textContent = [...text].map((ch, i) => (ch === ' ' || i < settled ? ch : RAMP[2 + ((Math.random() * (RAMP.length - 2)) | 0)])).join('');
+        if (p < 1) raf = requestAnimationFrame(frame); else el.textContent = text;
+      };
+      raf = requestAnimationFrame(frame);
+    };
+    el.addEventListener('pointerenter', e => { if (e.pointerType !== 'touch') run(); });
+    el.addEventListener('focus', run);
+  }
+}

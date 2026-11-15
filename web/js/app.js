@@ -7,7 +7,7 @@ import { renderPair, renderExplore, renderMethod, labelChip, legendHtml, measTab
 import { initAscii } from './ascii.js';
 import { openZoom, closeZoom, zoomOpen, pauseZoom, drawScan } from './zoom.js';
 import { readWindow, measure, similarity, radialForm } from './quicktest.js';
-import { initSky, playIntro } from './intro.js';
+import { initSky, playIntro, initScramble } from './intro.js';
 
 const TABS = ['worlds', 'explore', 'side-by-side', 'method'];   // side-by-side has no tab of its own: it opens from a pair page
 const VIEWS = [...TABS, 'pair'];   // 'pair' is reached as #pair/<site id>, not from the tab bar
@@ -20,7 +20,7 @@ const count = (s, code) => D.dims.filter(d => s.d[d[0]][0] === code).length;
 
 /* ---------- boot ---------- */
 async function boot() {
-  initSky(); playIntro();   // decoration; the data loads behind it
+  initSky(); playIntro(); initScramble('.brand b, nav.tabs button');   // decoration; the data loads behind it
   try { D = await (await fetch('data/sites.json', { cache: 'no-cache' })).json(); }
   catch (e) { $('main').innerHTML = `<p class="err" style="margin:24px">Could not load data/sites.json. Serve the web folder over http (for example: python -m http.server) instead of opening the file directly.</p>`; return; }
   // A pair marked hideIfMissing is listed only once its terrain export exists
@@ -73,9 +73,9 @@ function makePins() {
 function buildGlobes() {
   const P = makePins();
   const onPin = ids => selectSite(ids.includes(S.site) ? S.site : ids[0], true);
-  G.earth = new Globe({ root: $('#globe-earth'), body: 'earth', pins: P.earth, gain: 1.2, S: 512, onPin });
-  G.moon = new Globe({ root: $('#globe-moon'), body: 'moon', pins: P.moon, gain: 1.35, S: 512, onPin });
-  G.mars = new Globe({ root: $('#globe-mars'), body: 'mars', pins: P.mars, gain: 1.15, S: 512, onPin });
+  G.earth = new Globe({ root: $('#globe-earth'), body: 'earth', pins: P.earth, gain: 1.2, S: 512, onPin, auto: true });
+  G.moon = new Globe({ root: $('#globe-moon'), body: 'moon', pins: P.moon, gain: 1.35, S: 512, onPin, auto: true });
+  G.mars = new Globe({ root: $('#globe-mars'), body: 'mars', pins: P.mars, gain: 1.15, S: 512, onPin, auto: true });
   G.moon.lat = -35; G.moon.lon = 20; G.mars.lat = 30; G.mars.lon = 40;
   // Earth is always shown; the toggle picks the second world. Choosing one with no selected site there selects its first site.
   $$('#other-toggle button').forEach(b => b.addEventListener('click', () => {

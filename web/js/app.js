@@ -25,7 +25,7 @@ async function boot() {
   catch (e) { $('main').innerHTML = `<p class="err" style="margin:24px">Could not load data/sites.json. Serve the web folder over http (for example: python -m http.server) instead of opening the file directly.</p>`; return; }
   // A pair marked hideIfMissing is listed only once its terrain export exists
   for (const p of D.pairs.filter(x => x.hideIfMissing)) if ((await getField(p.other, p.body || 'moon')).missing) D.pairs = D.pairs.filter(x => x !== p);
-  initAscii(); buildGlobes(); bindDock(); bindZoom(); buildFilters(); buildSiteList(); buildPairs(); bindSbs();
+  initAscii(); buildGlobes(); bindDock(); bindZoom(); initSize(); buildFilters(); buildSiteList(); buildPairs(); bindSbs();
   $$('nav.tabs button').forEach(b => b.addEventListener('click', () => { location.hash = '#' + b.dataset.tab; }));
   addEventListener('hashchange', route);
   try { const s = localStorage.getItem('atlas-site'); if (s && byId(s)) S.site = s; } catch (e) { /* storage may be blocked */ }
@@ -82,6 +82,33 @@ function buildGlobes() {
     setOther(b.dataset.b);
     if (byId(S.site).body !== b.dataset.b) { const first = D.sites.find(s => s.body === b.dataset.b); if (first) selectSite(first.id); }
   }));
+}
+
+/* True size: the Moon and Mars globes are drawn at their real width next to Earth. The radii are read from
+   data/maplayers.json (the same ones the maps use); nothing is typed here. "Equal" draws all three the same, which is easier to read. */
+let RAD = null;
+async function initSize() {
+  const cfg = await fetch('data/maplayers.json', { cache: 'no-cache' }).then(r => (r.ok ? r.json() : null)).catch(() => null);
+  if (!cfg || !cfg.radius_m) { $('#sizemode').parentNode.hidden = true; return; }
+  RAD = cfg.radius_m;
+  let v = 'true'; try { v = localStorage.getItem('atlas-size') || 'true'; } catch (e) { /* storage may be blocked */ }
+  $$('#sizemode button').forEach(b => b.addEventListener('click', () => setSize(b.dataset.size)));
+  new ResizeObserver(applySize).observe($('#globe-earth'));
+  setSize(v);
+}
+function setSize(v) {
+  S.size = v === 'equal' ? 'equal' : 'true';
+  try { localStorage.setItem('atlas-size', S.size); } catch (e) { /* ignore */ }
+  $$('#sizemode button').forEach(b => b.setAttribute('aria-pressed', b.dataset.size === S.size));
+  $('.globes').dataset.size = S.size;
+  for (const b of ['moon', 'mars']) $('#sz-' + b).textContent = S.size === 'true' ? ` · ${Math.round(100 * RAD[b] / RAD.earth)}% of Earth's width` : '';
+  applySize();
+}
+function applySize() {
+  if (!RAD) return;
+  const base = $('#globe-earth').clientWidth;
+  for (const b of ['moon', 'mars']) $('#globe-' + b).style.width = S.size === 'true' && base ? Math.round(base * RAD[b] / RAD.earth) + 'px' : '';
+  refreshAll();
 }
 
 /* The site panel is a sidebar docked on the right. It sits beside the globes, which shrink to make room and stay usable.

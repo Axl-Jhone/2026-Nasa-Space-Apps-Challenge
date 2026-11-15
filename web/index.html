@@ -30,8 +30,8 @@
         <h1 class="lede">Places on Earth that stand in for the Moon and Mars, and where each stand-in stops.</h1>
         <div class="globes">
           <figure><figcaption><span class="dot earth"></span>Earth</figcaption><div class="globe earth" id="globe-earth" role="img" aria-label="Globe of Earth with analog site pins"><canvas></canvas></div><p class="cap" id="cap-earth"></p></figure>
-          <figure id="fig-moon"><figcaption><span class="dot moon"></span>Moon</figcaption><div class="globe moon" id="globe-moon" role="img" aria-label="Globe of the Moon with counterpart pins"><canvas></canvas></div><p class="cap" id="cap-moon"></p></figure>
-          <figure id="fig-mars" hidden><figcaption><span class="dot mars"></span>Mars</figcaption><div class="globe mars" id="globe-mars" role="img" aria-label="Globe of Mars with counterpart pins"><canvas></canvas></div><p class="cap" id="cap-mars"></p></figure>
+          <figure id="fig-moon"><figcaption><span class="dot moon"></span>Moon<small id="sz-moon"></small></figcaption><div class="globe moon" id="globe-moon" role="img" aria-label="Globe of the Moon with counterpart pins"><canvas></canvas></div><p class="cap" id="cap-moon"></p></figure>
+          <figure id="fig-mars" hidden><figcaption><span class="dot mars"></span>Mars<small id="sz-mars"></small></figcaption><div class="globe mars" id="globe-mars" role="img" aria-label="Globe of Mars with counterpart pins"><canvas></canvas></div><p class="cap" id="cap-mars"></p></figure>
         </div>
         <!-- zoom view: two maps at one scale, live pictures over saved copies (js/zoom.js) -->
         <div class="zoomwrap" id="zoomwrap" hidden>
@@ -107,6 +107,12 @@
     <section class="view doc" id="view-method" hidden></section>
   </main>
   <footer class="credit">
+    <div class="viewmode"><span>Size</span>
+      <div class="seg" id="sizemode" role="group" aria-label="How big the globes are drawn">
+        <button data-size="true" aria-pressed="true" title="The Moon and Mars drawn at their real size next to Earth">True</button>
+        <button data-size="equal" aria-pressed="false" title="All three drawn the same size, easier to read">Equal</button>
+      </div>
+    </div>
     <div class="viewmode"><span>Globes</span>
       <div class="seg" id="viewmode" role="group" aria-label="How the globes are drawn">
         <button data-view="ascii" aria-pressed="true" title="Characters drawn from the NASA imagery">ASCII</button>

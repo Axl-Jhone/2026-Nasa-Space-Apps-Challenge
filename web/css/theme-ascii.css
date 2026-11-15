@@ -645,3 +645,18 @@ aside.meas table.dt td:last-child{grid-column:1/-1;font-size:13px;line-height:1.
 :root{--pin-mars:#f0bda1}
 .pin.moon,.pin.earth.to-moon{background:var(--moon)}
 .pin.mars,.pin.earth.to-mars{background:var(--pin-mars)}
+
+/* All pairs, need lists: more air, a rule under each column heading, and a clear line between entries */
+#view-explore .need{margin:0 0 72px}
+#view-explore .need .pills{margin:0 0 28px}
+#view-explore .needcols{gap:0 64px;margin-top:36px;align-items:start}
+#view-explore .needcols>div+div{padding-left:64px;border-left:1px solid var(--line-2)}
+#view-explore .needcols h3{margin:0 0 6px;padding:0 0 14px;border-bottom:2px solid var(--line-2);font-size:15px}
+#view-explore .needcols h3:not(:first-child){margin-top:40px}
+#view-explore .needcols ul{margin:0}
+#view-explore .needcols li{padding:20px 0;line-height:1.75;border-top:0;border-bottom:1px solid var(--line)}
+#view-explore .needcols li:last-child{border-bottom:0}
+#view-explore .needcols li .plab{display:inline-block;margin:4px 0 4px 8px}
+#view-explore .needcols li br{display:block;content:"";margin-top:6px}
+#view-explore .needcols .fineprint{margin-top:28px;padding-top:16px;border-top:1px dashed var(--line-2)}
+@media (max-width:760px){#view-explore .needcols>div+div{padding-left:0;border-left:0;margin-top:40px}}

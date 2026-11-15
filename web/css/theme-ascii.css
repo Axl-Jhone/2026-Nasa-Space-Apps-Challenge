@@ -500,3 +500,9 @@ aside.side,aside.meas{background:rgba(4,3,9,.96)}
 .globes[data-size="true"]{align-items:center}
 .globes figcaption small{font-size:12px;color:var(--ink-3)}
 footer.credit .viewmode+.viewmode{padding-left:18px;border-left:1px solid var(--line-2)}
+
+/* text that sits directly over the sky gets a dark edge, so stars never run through the letters */
+#view-worlds .lede,.globes figcaption,.globes .cap,.otherbar>.mono,.viewmode>span{text-shadow:0 0 2px #010102,0 0 6px #010102,0 0 12px #010102}
+
+/* the sky is turned down a little, so it stays behind the content */
+#sky{opacity:.6}

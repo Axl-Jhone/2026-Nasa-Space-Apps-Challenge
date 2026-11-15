@@ -219,13 +219,28 @@ async function zoomTo(s) {
     if (!e.missing && !o.missing) { windows.earth = { ...e.meta.centre, km: e.windowKm }; windows.other = { ...o.meta.centre, km: o.windowKm }; }
   }
   $('#zoom-go').textContent = '← Back to the globes'; $('#zoom-go').setAttribute('aria-pressed', 'true');
-  $('#ztest').hidden = true; setHash('#zoom/' + s.id);
-  openZoom(s, { pair: pair && windows.earth ? pair.id : null, windows, onTerrain: id => ctx.openSbs(id), onPick: (lat, lon) => quickTest(lat, lon), pickName: testTarget().name });
+  setHash('#zoom/' + s.id);
+  const T = testTarget(), canTest = syncTestForm(T);
+  openZoom(s, { pair: pair && windows.earth ? pair.id : null, windows, onTerrain: id => ctx.openSbs(id), onPick: canTest ? (lat, lon) => quickTest(lat, lon) : null, pickName: T.name });
 }
 
 /* Quick test: any place on Earth against the measured Moon or Mars window. Labelled everywhere as a quick test, because it
    reads open elevation tiles in the browser and is not the pipeline. The measures are the pipeline's own (js/quicktest.js). */
-const testTarget = () => (S.other === 'mars' ? { pair: pairById('jezero'), name: 'Jezero crater, Mars', world: 'Mars', check: 'Lake Salda' } : { pair: pairById('degerlache'), name: 'de Gerlache crater, Moon', world: 'Moon', check: 'Kamestastin' });
+// The test is against the selected site's own anchor. An anchor with no measured window has no test, never a stand-in.
+// Only a shared #test/ link, which carries no site, uses the world's default window.
+const testTarget = () => {
+  const s = S.site && byId(S.site);
+  if (!s) return S.other === 'mars' ? { pair: pairById('jezero'), name: 'Jezero crater, Mars', world: 'Mars' } : { pair: pairById('degerlache'), name: 'de Gerlache crater, Moon', world: 'Moon' };
+  const pair = D.pairs.find(p => p.site === s.id), world = s.body === 'mars' ? 'Mars' : 'Moon';
+  return { pair: pair || null, name: pair ? pair.otherTitle : s.target, world };
+};
+const noTestMsg = T => `<p class="qtoff"><b>Terrain at ${esc(T.name)} is not analyzed yet.</b> The quick test needs a measured window of the anchor, so it is off for this site.</p>`;
+// Show the test form only when the selected site's anchor has a measured window
+function syncTestForm(T) {
+  const ok = !!T.pair; $('#qtform').hidden = !ok;
+  const box = $('#ztest'); if (!ok) { box.hidden = false; box.innerHTML = noTestMsg(T); } else box.hidden = true;
+  return ok;
+}
 let qtAbort = null;
 // Climate for the tested place: one request to NASA POWER, the same service and fields as pipeline/earth_climate.py
 async function quickClimate(lat, lon, ac) {
@@ -267,10 +282,10 @@ async function scanAround(lat, lon, km, cell, o, centreScore, ac) {
 }
 const f0 = v => v.toFixed(0);
 async function quickTest(lat, lon, check = false) {
-  const T = testTarget(), box = $('#ztest'); if (!T.pair) return;
+  const T = testTarget(), box = $('#ztest'); if (!T.pair) { box.hidden = false; box.innerHTML = noTestMsg(T); return; }
   if (qtAbort) qtAbort.abort(); const ac = qtAbort = new AbortController();     // a newer click cancels the older requests
   const [o, pe] = await Promise.all([getField(T.pair.other, T.pair.body || 'moon'), getField(T.pair.earth, 'earth')]);
-  if (o.missing) return;
+  if (o.missing) { box.hidden = false; box.innerHTML = noTestMsg(T); return; }
   if (check) { lat = pe.meta.centre.lat; lon = pe.meta.centre.lon; }
   const km = o.windowKm, cell = o.meta.analysis_cell_m, oc = o.meta.centre, ts = byId(T.pair.site);
   stopTour();

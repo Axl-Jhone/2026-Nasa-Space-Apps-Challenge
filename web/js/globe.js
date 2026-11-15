@@ -105,7 +105,7 @@ export class Globe {
     let on = false, lx = 0, ly = 0;
     const touch = () => { this.touched = performance.now(); };
     this.root.addEventListener('pointerenter', e => { if (e.pointerType !== 'touch') this.hover = true; });
-    this.root.addEventListener('pointerleave', () => { this.hover = false; touch(); });
+    this.root.addEventListener('pointerleave', () => { this.hover = false; if (this.dragging) touch(); else this.touched = 0; });   // leaving resumes the spin at once; a drag still pauses it
     this.root.addEventListener('pointerdown', e => { if (e.target.closest('.pin')) return; on = true; this.dragging = true; touch(); lx = e.clientX; ly = e.clientY; this.tLon = null; this.root.setPointerCapture(e.pointerId); this.root.style.cursor = 'grabbing'; });
     this.root.addEventListener('pointermove', e => { if (!on) return; const k = 110 / this.root.clientWidth; this.lon -= (e.clientX - lx) * k; if (e.pointerType !== 'touch') this.lat = Math.max(-80, Math.min(80, this.lat + (e.clientY - ly) * k)); lx = e.clientX; ly = e.clientY; this.dirty = true; kick(); });
     const end = () => { on = false; this.dragging = false; touch(); this.root.style.cursor = ''; };

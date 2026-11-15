@@ -537,3 +537,31 @@ footer.credit .viewmode+.viewmode{padding-left:18px;border-left:1px solid var(--
 #view-worlds .lede,.globes figcaption,.globes .cap{position:absolute;width:1px;height:1px;margin:0;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 .pin span{top:auto;bottom:calc(100% + 8px)}
 .pin.on span{width:max-content;max-width:230px;white-space:normal;text-align:center;line-height:1.3}
+
+/* 15 Nov: the world toggle sits lower, clear of the globes */
+.otherbar{margin-top:30px}
+/* All pairs: headings sit with their own content, sections stand apart, and anything clickable looks clickable */
+#view-explore .docin{gap:0}
+#view-explore .phead{margin-bottom:36px}
+#view-explore .docin h2{margin:0 0 14px}
+#view-explore .need{margin:0 0 48px}
+#view-explore .need .pills,#view-explore .xbar{margin:0 0 14px}
+#view-explore .need>.fineprint{margin:0 0 20px;max-width:80ch}
+#view-explore .docin>.mhead{margin:0 0 10px;gap:6px 16px}
+#view-explore .docin>.fineprint{margin:12px 0 0}
+#view-explore section#xclim:not(:empty),#view-explore section.breaks{margin-top:48px}
+#view-explore .pills{gap:8px}
+#view-explore .pill{min-height:34px;margin:0;padding:5px 14px;border:1px solid var(--line-2);color:var(--ink-2);box-shadow:none}
+#view-explore .pill:hover{border-color:var(--lav-ink);color:var(--ink)}
+#view-explore .pill[aria-pressed="true"]{border-color:var(--lav);background:var(--lav);color:#fff;box-shadow:none}
+#view-explore .xbar{gap:10px 32px}
+#view-explore .needcols{gap:36px}
+#view-explore .needcols h3{margin:0 0 10px}
+#view-explore .needcols li{padding:12px 0}
+#view-explore .needcols li .lab{margin:0 8px 0 6px}
+#view-explore .needcols li a{font-size:15px}
+#view-explore .xt th,#view-explore .xt td{padding:12px 10px}
+#view-explore .xt tbody th a b{color:var(--lav-ink);text-decoration:underline;text-underline-offset:3px}
+#view-explore .xt tbody th a b::after{content:" →";display:inline-block;text-decoration:none;padding-left:4px}
+#view-explore .xt tbody tr[data-id]:hover{background:rgba(112,34,252,.12)}
+#view-explore .xt tbody tr[data-id]:hover th a b{color:#fff}

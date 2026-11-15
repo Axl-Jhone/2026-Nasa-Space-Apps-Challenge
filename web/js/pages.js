@@ -241,6 +241,7 @@ function needHtml(D, F, pill) {
 
 export function renderExplore(D, F, rerender, ctx) {
   const el = $('#view-explore');
+  if (!F.need && D.needs) F.need = D.needs[0][0];   // the first need is the one shown, so its button is the pressed one
   const sites = D.sites.filter(s => (F.world === 'all' || s.body === F.world) && (F.label === 'all' || s.label === F.label));
   const pill = (group, k, l) => `<button class="pill" data-g="${group}" data-k="${k}" aria-pressed="${F[group] === k}">${esc(l)}</button>`;
   const head = D.dims.map(([k, name, short]) => `<th scope="col" title="${esc(name)}">${esc(short || name)}</th>`).join('');

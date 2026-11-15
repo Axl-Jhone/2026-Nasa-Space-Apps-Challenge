@@ -170,8 +170,7 @@ function buildSiteList() {
   $('#sitelist').innerHTML = visibleSites().map(s => `<li><button class="site" data-id="${s.id}" aria-pressed="${s.id === S.site}" title="${esc(s.labelNote || '')}">
     <span class="r1"><i class="dot earth"></i>${esc(s.short)}<em class="lb-${esc(s.label)}">${esc((D.labels[s.label] || [s.label])[0])}${s.conf ? ' · ' + s.conf.score + '%' : ''}</em></span>
     <span class="r2"><i class="dot ${s.body}"></i>${esc(s.target)}</span>
-    <span class="r3">${count(s, 'M')} measured, ${count(s, 'C')} cited</span></button></li>`).join('')
-    + (S.filter === 'moon' || S.filter === 'all' ? `<li class="neg"><b>${esc(D.negative.head)}</b>${esc(D.negative.text)}</li>` : '');
+    <span class="r3">${count(s, 'M')} measured, ${count(s, 'C')} cited</span></button></li>`).join('');
   $$('#sitelist .site').forEach(b => b.addEventListener('click', () => selectSite(b.dataset.id, true)));
 }
 
@@ -231,12 +230,16 @@ let qtAbort = null;
 // Climate for the tested place: one request to NASA POWER, the same service and fields as pipeline/earth_climate.py
 async function quickClimate(lat, lon, ac) {
   const slot = $('#qtclim'); if (!slot) return;
+  const gone = () => { if (slot.isConnected) slot.querySelectorAll('td.qtc').forEach(td => { td.textContent = 'no reading'; }); };
   try {
     const r = await fetch(`https://power.larc.nasa.gov/api/temporal/climatology/point?parameters=T2M,T2M_MAX,T2M_MIN,WS10M,PRECTOTCORR&community=AG&longitude=${lon.toFixed(3)}&latitude=${lat.toFixed(3)}&format=JSON`, { signal: ac.signal });
     const p = (await r.json()).properties.parameter, v = k => p[k].ANN;
-    if (ac.signal.aborted || !slot.isConnected || [v('T2M'), v('WS10M'), v('PRECTOTCORR')].some(x => x == null || x === -999)) return;
-    slot.innerHTML = `<p class="fineprint"><b>Climate here</b> (NASA POWER, a long-term value for a grid cell of about 50 km, not a reading at the spot): mean air temperature ${v('T2M').toFixed(1)} °C, extremes ${v('T2M_MIN').toFixed(0)} to ${v('T2M_MAX').toFixed(0)} °C; mean wind ${v('WS10M').toFixed(1)} m/s; rain and snow ${Math.round(v('PRECTOTCORR') * 365)} mm a year.</p>`;
-  } catch (e) { /* the climate line is extra; the test stands without it */ }
+    if (ac.signal.aborted || !slot.isConnected) return;
+    if ([v('T2M'), v('T2M_MIN'), v('T2M_MAX'), v('WS10M'), v('PRECTOTCORR')].some(x => x == null || x === -999)) return gone();
+    const put = (id, t) => { const td = slot.querySelector('#' + id); if (td) td.textContent = t; };
+    put('qtc-t', `${v('T2M').toFixed(1)} °C`); put('qtc-x', `${v('T2M_MIN').toFixed(0)} to ${v('T2M_MAX').toFixed(0)} °C`);
+    put('qtc-w', `${v('WS10M').toFixed(1)} m/s`); put('qtc-r', `${Math.round(v('PRECTOTCORR') * 365)} mm a year`);
+  } catch (e) { if (!ac.signal.aborted) gone(); }   // the climate rows are extra; the test stands without them
 }
 
 // Scan: the eight windows that touch the tested one, each measured the same way, to see if a neighbour matches better.
@@ -285,16 +288,19 @@ async function quickTest(lat, lon, check = false) {
       : low > 0.05 ? `<p class="fineprint">${f0(low * 100)}% of this window lies below sea level. Where that is sea, the tiles hold the sea floor, which is counted as ground here.</p>` : '';
     const q = measure(w), sim = similarity(q, o.meta), ms = Math.round(performance.now() - t0), pm = check ? pe.meta.metrics : null;
     const f = (v, d) => v.toFixed(d), row = (name, k, d, unit, pct) => `<tr><th scope="row">${name}</th><td class="n">${pct ? f(q.metrics[k] * 100, 0) : f(q.metrics[k], d)}${unit}</td>${pm ? `<td class="n">${pct ? f(pm[k] * 100, 0) : f(pm[k], d)}${unit}</td>` : ''}<td class="n">${pct ? f(o.meta.metrics[k] * 100, 0) : f(o.meta.metrics[k], d)}${unit}</td></tr>`;
-    box.innerHTML = `<div class="qthead"><span class="tag">Quick test · not our pipeline</span>
-        <b>${check ? esc(pe.meta.name) : 'Your place'}</b> <span class="mono">${fmtLL(lat, lon)}</span> against <b>${esc(T.name)}</b></div>
+    box.innerHTML = `<div class="qthead"><span class="tag">Quick test</span>
+        <p class="qtwho">${check ? `<b>${esc(pe.meta.name)}</b> ` : ''}<span class="mono">${fmtLL(lat, lon)}</span></p>
+        <p class="qtvs">against <b>${esc(T.name)}</b></p></div>
       ${sea}
-      <p class="qtscore"><b>${sim.score}%</b> terrain similarity <span>slopes ${f(sim.parts.slopes, 0)}% · relief ${f(sim.parts.relief, 0)}% · roughness ${f(sim.parts.roughness, 0)}%</span></p>
-      <div class="xwrap"><table class="st2"><thead><tr><th>Measure</th><th>${check ? 'Quick test' : 'Your place'}</th>${pm ? '<th>Our pipeline, same place</th>' : ''}<th>${esc(T.world)} window</th></tr></thead><tbody>
+      <p class="qtscore">Terrain similarity: <b>${sim.score}%</b></p>
+      <div class="xwrap"><table class="st2 qtt"><thead><tr><th>Measure</th><th>${check ? 'Quick test' : 'Earth'}</th>${pm ? '<th>Our pipeline, same place</th>' : ''}<th>${esc(T.world)} window</th></tr></thead><tbody>
+        <tr class="qtsec"><th colspan="${pm ? 4 : 3}">Terrain</th></tr>
         ${row('Relief', 'relief_p5_p95_m', 0, ' m')}${row('Median slope', 'median_slope_deg', 1, '°')}${row('Steep-end slope', 'p95_slope_deg', 1, '°')}${row('Roughness', 'roughness_m', 1, ' m')}${row('Ground flatter than 8°', 'gentle_share', 0, '%', true)}
         ${T.pair.form ? `<tr><th scope="row">Radial form <small>0 no centred shape, 1 a perfect bowl</small></th><td class="n">${f(radialForm(w), 2)}</td>${pm ? `<td class="n">${f(T.pair.form.earth, 2)}</td>` : ''}<td class="n">${f(T.pair.form.other, 2)}</td></tr>` : ''}
+      </tbody><tbody id="qtclim">
+        <tr class="qtsec"><th colspan="${pm ? 4 : 3}">Climate <small>NASA POWER, long-term, about 50 km grid cell</small></th></tr>
+        ${[['Mean air temperature', 't'], ['Coldest to warmest', 'x'], ['Mean wind', 'w'], ['Rain and snow', 'r']].map(([n, k]) => `<tr><th scope="row">${n}</th><td class="n qtc" id="qtc-${k}">…</td>${pm ? '<td class="n qtna">–</td>' : ''}<td class="n qtna">–</td></tr>`).join('')}
       </tbody></table></div>
-      <div id="qtclim"></div>
-      <p class="fineprint">Measured in your browser just now: a ${km} km window on ${String(cell).startsWith('8') ? 'an' : 'a'} ${cell} m grid, from ${w.tiles} open elevation tiles (Mapzen Terrain Tiles on AWS Open Data, about ${f(w.tilePixelM, 0)} m here) in ${ms} ms. ${q.metrics.masked_share > 0.005 ? `Flat water left out: ${f(q.metrics.masked_share * 100, 0)}% of the window. ` : ''}The measures are the same ones our pipeline uses, but the elevation source is different and coarser, so treat this as a first look. On very flat ground the tiles are too coarse to trust. Terrain only: it says nothing about rock, temperature or ice.${T.pair.sim ? ` For scale, ${esc(T.check)} scores ${T.pair.sim.score}% in our pipeline.` : ''}</p>
       <div class="qtbtns">${check ? '' : `<button class="zoomgo" id="qtscan">Scan the eight windows around it</button>`}</div>
       <div id="qtscanout"></div>`;
     const sc = $('#qtscan'); if (sc) sc.addEventListener('click', () => scanAround(lat, lon, km, cell, o, sim.score, ac));
@@ -360,8 +366,8 @@ function showSideDetail(s) {
     const [c, note] = s.d[k], [a, e] = cmp[k] || [], word = D.status[c], help = (D.statusHelp || {})[c];
     const say = esc(word + (help ? ': ' + help : ''));
     const val = (t, who) => `<div><span class="role">${who}</span>${t ? esc(t) : `<span class="none">${empty(k, c)}</span>`}</div>`;
-    return `<li class="dim e-${c}"><h4><span class="sw st-${c}" role="img" title="${say}" aria-label="${say}">${esc(word[0])}</span>${esc(name)}</h4>
-      ${vals ? `<div class="vals">${val(a, 'Anchor')}${val(e, 'Earth analog')}</div>` : ''}
+    return `<li class="dim e-${c}"><h4><span class="sw st-${c}" role="img" title="${say}" aria-label="${say}">${esc(word[0])}</span>${esc(name)}<em class="stw st-${c}">${esc(word)}</em></h4>
+      ${vals ? `<div class="vals">${val(a, s.target.split(',')[0])}${val(e, s.short)}</div>` : ''}
       <p>${esc(note)}</p>${vals && k === 'terrain' ? '<table class="cmp2 tm"><tbody><tr id="tmslot"></tr></tbody></table>' : ''}</li>`;
   }).join('');
   const band = s.conf ? String(s.conf.band).toLowerCase() : 'none';
@@ -369,7 +375,7 @@ function showSideDetail(s) {
   const el = $('#sdetail');
   el.innerHTML = `<button class="back" id="sback">← All sites</button>
     <div class="two">
-      <div class="place anchor"><span class="role">Anchor · ${world}</span><strong>${esc(s.target)}</strong><span class="mono muted">${s.tlat != null ? fmtLL(s.tlat, s.tlon) : 'A process, with no single place'}</span></div>
+      <div class="place anchor"><span class="role">Anchor · ${world}</span><strong>${esc(s.target)}</strong><span class="mono muted">${s.tlat != null ? fmtLL(s.tlat, s.tlon) : ''}</span></div>
       <div class="place cand"><span class="role">Earth analog</span><strong>${esc(s.name)}</strong><span class="mono muted">${esc(s.where)} · ${fmtLL(s.lat, s.lon)}</span></div>
     </div>
     <div class="chips">${labelChip(D, s)}<span>${esc(s.kind)}</span></div>
@@ -398,8 +404,7 @@ async function fillTerrainMetrics(pair) {
   if (!slot.isConnected) return;   // the panel was replaced while loading
   if (e.missing || o.missing) return say('Waiting for terrain exports of both windows.');
   const M = [['relief_p5_p95_m', 'Relief (5th to 95th percentile)', 'm'], ['median_slope_deg', 'Median slope', '°'], ['p95_slope_deg', '95th percentile slope', '°'], ['roughness_m', 'Roughness', 'm']];
-  slot.outerHTML = M.map(([k, l, u]) => `<tr class="m"><th scope="row">${l}</th><td>${o.meta.metrics[k].toFixed(1)} ${u}</td><td>${e.meta.metrics[k].toFixed(1)} ${u}</td></tr>`).join('')
-    + `<tr class="n end"><td colspan="3"><em>Both windows are ${e.windowKm} km, measured on one ${e.meta.analysis_cell_m} m grid (${esc((o.meta.source || {}).dataset || '')}; ${esc((e.meta.source || {}).dataset || '')}).</em></td></tr>`;
+  slot.outerHTML = M.map(([k, l, u]) => `<tr class="m"><th scope="row">${l}</th><td>${o.meta.metrics[k].toFixed(1)} ${u}</td><td>${e.meta.metrics[k].toFixed(1)} ${u}</td></tr>`).join('');
 }
 
 /* ---------- 3. side by side ---------- */
@@ -505,8 +510,7 @@ function renderMeasurements(p, e, o) {
   $('#meas').innerHTML =
     (sim ? sec('Terrain similarity', sim) : '') +
     sec('Measured on one grid', `${pending ? `<p class="err">Measurements appear when both windows have a real export with metrics. Until then every number here is blank on purpose.</p>` : ''}
-    ${measTableHtml(e, o)}
-    <p class="fineprint">The last column is a plain ratio, not a verdict. The terrain similarity ${sim ? 'above ' : ''}averages three of these measures, and is always shown with its three parts.</p>`) +
+    ${measTableHtml(e, o, p)}`) +
     sec('', histHtml(e, o)) + sec('', profileHtml(e, o)) +
     sec('Does the method work? Controls', `<ul>${D.controls.map(c => `<li>${esc(c.text)}: ${esc(c.state)}</li>`).join('')}</ul>`) +
     sec('What it means for operations', `<div>${esc(D.operations)}${srcLinks(D, D.operationsSrc)}</div>`) +

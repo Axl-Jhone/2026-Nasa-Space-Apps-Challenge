@@ -9,7 +9,7 @@ const World = b => (b === 'moon' ? 'Moon' : 'Mars');
 /* ---------- shared pieces ---------- */
 export function labelChip(D, s) {
   const L = (D.labels || {})[s.label] || [s.label || 'Unlabelled', ''];
-  return `<span class="lab lab-${esc(s.label)}" title="${esc(L[1])}">${esc(L[0])}</span>` + (s.origin === 'team' ? '<span class="lab lab-team" title="Added by the team after the source check">Team addition</span>' : '');
+  return `<span class="lab lab-${esc(s.label)}" title="${esc(L[1])}">${esc(L[0])}</span>`;
 }
 
 // Source chips: each id links to the source and says in its tooltip how much of it was read
@@ -58,17 +58,25 @@ export const METRICS = [
   ['gentle_share', 'Gentle ground', null, v => (v * 100).toFixed(0) + '%'],
   ['masked_share', 'Masked area', 'lake or no data, left out of the measures', v => (v * 100).toFixed(1) + '%']
 ];
-export function measTableHtml(e, o) {
+// One table: both worlds' values, their difference, and the similarity part where one exists (from score_terrain.py)
+const SIMKEY = { relief_p5_p95_m: 'relief', roughness_m: 'roughness' };
+export function measTableHtml(e, o, pair) {
   const me = (e.meta && e.meta.metrics) || null, mo = (o.meta && o.meta.metrics) || null;
+  const sim = pair && pair.sim, part = k => sim && (sim.parts.find(q => q.k === k) || {}).pct, pc = v => (v == null ? '—' : v + '%');
+  const sc = v => (sim ? `<td class="n${v == null ? '' : ' sim'}">${pc(v)}</td>` : '');
   const gs = (me && me.gentle_slope_deg) || (mo && mo.gentle_slope_deg);
   const rows = METRICS.map(([k, name, def, fmt]) => {
     const a = me && me[k], b = mo && mo[k], ok = Number.isFinite(a) && Number.isFinite(b);
-    const ratio = ok && k !== 'masked_share' && a !== 0 ? '×' + (b / a).toFixed(1) : '—';
+    const pd = ok && k !== 'masked_share' && a !== 0 ? (b - a) / a * 100 : null;   // other world against Earth
+    const diff = pd == null ? '—' : (pd > 0.5 ? '+' : pd < -0.5 ? '−' : '') + Math.round(Math.abs(pd)).toLocaleString() + '%';
     const d = def || `share of ground flatter than ${gs != null ? gs + '°' : 'the slope limit'}${(me && me.gentle_slope_source) ? ' (' + esc(me.gentle_slope_source) + ')' : ''}`;
-    return `<tr><td>${name}<small>${d}</small></td><td class="n">${Number.isFinite(a) ? fmt(a) : '—'}</td><td class="n">${Number.isFinite(b) ? fmt(b) : '—'}</td><td class="n">${ratio}</td></tr>`;
+    return `<tr><td>${name}<small>${d}</small></td><td class="n">${Number.isFinite(a) ? fmt(a) : '—'}</td><td class="n">${Number.isFinite(b) ? fmt(b) : '—'}</td><td class="n">${diff}</td>${sc(part(SIMKEY[k]))}</tr>`;
   }).join('');
-  const W = o.kind === 'mars' ? 'Mars' : 'Moon';
-  return `<table><thead><tr><th>Measure</th><th>Earth</th><th>${W}</th><th>${W} ÷ Earth</th></tr></thead><tbody>${rows}</tbody></table>`;
+  const W = o.kind === 'mars' ? 'Mars' : 'Moon', f = pair && pair.form;
+  const slopes = sim ? `<tr><td>Slope histogram<small>overlap of the share of ground at each steepness</small></td><td class="n">—</td><td class="n">—</td><td class="n">—</td>${sc(part('slopes'))}</tr>` : '';
+  const form = f ? `<tr><td>Radial form<small>0 no centred shape, 1 a perfect bowl</small></td><td class="n">${f.earth.toFixed(2)}</td><td class="n">${f.other.toFixed(2)}</td><td class="n">—</td>${sc(null)}</tr>` : '';
+  const total = sim ? `<tr class="tot"><td>Terrain similarity<small>average of slope histogram, relief and roughness</small></td><td></td><td></td><td></td><td class="n sim">${sim.score}%</td></tr>` : '';
+  return `<table class="mt${sim ? ' has-sim' : ''}"><thead><tr><th>Parameter</th><th>Earth</th><th>${W}</th><th>Difference</th>${sim ? '<th>Similarity</th>' : ''}</tr></thead><tbody>${slopes}${rows}${form}${total}</tbody></table>`;
 }
 
 /* ---------- pair page ---------- */
@@ -76,8 +84,7 @@ function figuresHtml(D, s) {
   if (!(s.figures || []).length) return '';
   const cell = (v, note, src) => `<td><b>${esc(v)}</b><small>${esc(note || '')}</small>${srcLinks(D, src)}</td>`;
   return `<table class="figs"><thead><tr><th></th><th class="e"><i class="dot earth"></i>${esc(s.short)}</th><th class="o"><i class="dot ${s.body}"></i>${esc(s.target)}</th></tr></thead><tbody>
-    ${s.figures.map(f => `<tr><td class="q">${esc(f.q)}</td>${cell(f.earth, f.earthNote, f.earthSrc)}${cell(f.other, f.otherNote, f.otherSrc)}</tr>`).join('')}</tbody></table>
-    <p class="fineprint">Figures as published. They are cited, not measured by us, and are not combined into a score.</p>`;
+    ${s.figures.map(f => `<tr><td class="q">${esc(f.q)}</td>${cell(f.earth, f.earthNote, f.earthSrc)}${cell(f.other, f.otherNote, f.otherSrc)}</tr>`).join('')}</tbody></table>`;
 }
 
 function pairSources(D, s) {
@@ -87,20 +94,17 @@ function pairSources(D, s) {
   (s.matches || []).forEach(c => add(c.src)); add(s.helpsSrc); (s.breaks || []).forEach(c => add(c.src)); add(s.priorSrc); add(s.coordSrc);
   if (!ids.length) return '<p class="fineprint">No sources are attached to this pair yet.</p>';
   return `<ol class="srclist">${ids.map(id => { const x = D.sources[id] || { title: id, read: 'not in the source list' };
-    return `<li><b>${esc(id)}</b><span>${x.url ? `<a href="${esc(x.url)}" target="_blank" rel="noopener">${esc(x.title)}</a>` : esc(x.title)}<small>How much was read: ${esc(x.read)}</small></span></li>`; }).join('')}</ol>`;
+    return `<li><b>${esc(id)}</b><span>${x.url ? `<a href="${esc(x.url)}" target="_blank" rel="noopener">${esc(x.title)}</a>` : esc(x.title)}</span></li>`; }).join('')}</ol>`;
 }
 
 // Confidence: the number, the five parts it is made of, and why each part scored as it did
 function confHtml(D, s) {
-  const c = s.conf, R = D.confidenceRubric || {}; if (!c) return '';
+  const c = s.conf; if (!c) return '';
   const rows = c.parts.map(p => `<tr><th scope="row">${esc(p.label)}</th><td class="s n">${p.pts} / ${p.max}</td><td>${esc(p.why)}${srcLinks(D, p.src)}</td></tr>`).join('');
   return `<section id="conf">
       <h2>Confidence</h2>
       <p class="cfnum"><b>${c.score}%</b> · ${esc(c.band)}</p>
-      <p>${esc(R.what || '')}</p>
       <div class="xwrap dtw"><table class="dt"><tbody>${rows}<tr><th scope="row">Total</th><td class="s n">${c.score}%</td><td>${esc(c.note || '')}</td></tr></tbody></table></div>
-      ${s.planRating ? `<p class="fineprint">The research plan rated this pair in words: "${esc(s.planRating)}". ${esc(R.planNote || '')}</p>` : ''}
-      <p class="fineprint">${esc(R.own || '')}</p>
     </section>`;
 }
 
@@ -114,13 +118,13 @@ export function renderPair(D, s, ctx) {
   el.innerHTML = `<div class="docin pair">
     <nav class="crumbs" aria-label="Pairs"><a href="#worlds" id="pback">← Back to the globes</a><span>Pair ${i + 1} of ${N}</span><span class="sp"></span><a href="#pair/${prev.id}">‹ ${esc(prev.short)}</a><a href="#pair/${next.id}">${esc(next.short)} ›</a></nav>
     <header class="phead">
-      <div class="chips">${labelChip(D, s)}<span>${confText(s)}</span><span>${esc(s.kind)}</span></div>
+      <div class="chips">${labelChip(D, s)}<span>${esc(s.kind)}</span></div>
       <h1>${esc(s.name)} <span class="ar">↔</span> ${esc(s.target)}</h1>
       <p class="lede">${esc(s.claim || '')}</p>
       <p class="${hyp ? 'hypo' : 'fineprint'}">${hyp ? '<b>This pairing is a hypothesis, not a finding.</b> ' : ''}${esc(s.labelNote || '')} ${esc(s.role || '')}</p>
       <div class="two">
         <div class="place cand"><span class="role">Earth analog</span><strong>${esc(s.name)}</strong><span class="mono muted">${esc(s.where)} · ${fmtLL(s.lat, s.lon)}${s.coordSrc ? srcLinks(D, s.coordSrc) : ''}</span>${s.coordNote ? `<span class="mono muted">${esc(s.coordNote)}</span>` : ''}</div>
-        <div class="place anchor"><span class="role">Stands in for · ${World(s.body)}</span><strong>${esc(s.target)}</strong><span class="mono muted">${s.tlat != null ? fmtLL(s.tlat, s.tlon) + srcLinks(D, s.tcoordSrc) : 'A process, with no single place'}</span>${s.tcoordNote ? `<span class="mono muted">${esc(s.tcoordNote)}</span>` : ''}</div>
+        <div class="place anchor"><span class="role">Stands in for · ${World(s.body)}</span><strong>${esc(s.target)}</strong><span class="mono muted">${s.tlat != null ? fmtLL(s.tlat, s.tlon) + srcLinks(D, s.tcoordSrc) : ''}</span>${s.tcoordNote ? `<span class="mono muted">${esc(s.tcoordNote)}</span>` : ''}</div>
       </div>
     </header>
     ${confHtml(D, s)}
@@ -149,9 +153,9 @@ export function renderPair(D, s, ctx) {
     <section class="breaks" id="breaks">
       <h2>Where it breaks</h2>
       ${brk}
-      <div class="limits"><b class="h">${esc(D.limitsHead)}</b>
-        <dl>${D.limits.map(([t, d]) => `<div><dt>${esc(t)}</dt><dd>${esc(d)}</dd></div>`).join('')}</dl>
-        <p class="fineprint">${esc(D.limitsNote || '')}${srcLinks(D, D.limitsSrc)}</p></div>
+      <div class="nolimits inpair"><h3>${esc(D.limitsHead)}</h3>
+        <p class="nlsub">${esc(D.limitsNote || '')}${srcLinks(D, D.limitsSrc)}</p>
+        <dl>${D.limits.map(([t, d], i) => `<div><span class="nlno">${String(i + 1).padStart(2, '0')}</span><dt>${esc(t)}</dt><dd>${esc(d)}</dd></div>`).join('')}</dl></div>
     </section>
     <section>
       <h2>Sources for this pair</h2>
@@ -163,22 +167,10 @@ export function renderPair(D, s, ctx) {
   fillPairTemp(D, s, ctx);
 }
 
-// Terrain similarity: one percentage, always with the three parts it is the average of
-// Radial form: a separate figure for shape, because the similarity above cannot tell a crater from a dune field
-const formWord = v => (v >= 0.5 ? 'a centred bowl or peak' : v >= 0.25 ? 'partly centred' : 'no centred shape');
-export function formHtml(pair) {
-  const f = pair && pair.form; if (!f) return '';
-  const w = pair.body === 'mars' ? 'Mars' : 'Moon', gap = Math.abs(f.earth - f.other);
-  return `<div class="xwrap dtw"><table class="dt"><tbody>
-      <tr><th scope="row">Radial form, Earth</th><td class="s n">${f.earth.toFixed(2)}</td><td>${formWord(f.earth)}</td></tr>
-      <tr><th scope="row">Radial form, ${w}</th><td class="s n">${f.other.toFixed(2)}</td><td>${formWord(f.other)}</td></tr></tbody></table></div>
-    <p class="fineprint">Radial form is the share of a window's height variation explained by distance from its centre: 1 for a perfect bowl, about 0 for dunes or a flat pan. ${gap <= 0.15 ? 'The two windows are alike in form.' : 'The two windows differ in form.'} It is shown beside the similarity and is not part of it. <a href="#method">How it is worked out</a></p>`;
-}
+// Terrain similarity: the headline number; its three parts are in the measurement table
 export function simHtml(pair) {
   const m = pair && pair.sim; if (!m) return '';
-  return `<p class="cfnum"><b>${m.score}%</b> terrain similarity</p>
-    <div class="xwrap dtw"><table class="dt"><tbody>${m.parts.map(q => `<tr><th scope="row">${esc(q.label)}</th><td class="s n">${q.pct}%</td><td>${esc(q.why)}</td></tr>`).join('')}
-      <tr><th scope="row">Average</th><td class="s n">${m.score}%</td><td>The plain average of the three parts. Terrain only: it says nothing about rock, temperature or ice.</td></tr></tbody></table></div>${formHtml(pair)}`;
+  return `<p class="cfnum"><b>${m.score}%</b> terrain similarity</p>`;
 }
 
 // Measured temperature: MODIS at the Earth site, set against the published figure for the counterpart
@@ -192,18 +184,16 @@ async function fillPairTemp(D, s, ctx) {
       <tr><th scope="row">Air temperature</th><td class="s n">${c.t_mean_c.toFixed(1)} °C</td><td>Long-term mean; extremes ${c.t_min_c.toFixed(0)} to ${c.t_max_c.toFixed(0)} °C</td></tr>
       <tr><th scope="row">Wind at 10 m</th><td class="s n">${c.wind_mean_ms.toFixed(1)} m/s</td><td>Long-term mean; strongest ${c.wind_max_ms.toFixed(0)} m/s</td></tr>
       <tr><th scope="row">Rain and snow</th><td class="s n">${c.rain_mm_year} mm a year</td><td>Long-term mean</td></tr>
-    </tbody></table></div>
-    <p class="fineprint">${esc(C.dataset)}. ${esc(C.note)}</p>` : '';
+    </tbody></table></div>` : '';
   if (!t) { slot.innerHTML = `<h2>Measured temperature</h2><p>The satellite record returned no clear reading for this site's pixel in ${T ? T.year : 'the year read'}.</p>${clim}`; return; }
   const gap = o && o.k != null && t.min_night_k != null ? t.min_night_k - o.k : null;
   slot.innerHTML = `<h2>Measured temperature</h2>
     <p class="verdict">${gap == null ? '' : gap > 0 ? `Even the coldest night here was ${gap.toFixed(0)} K warmer than the figure for the counterpart.` : `The coldest night here was ${(-gap).toFixed(0)} K colder than the figure for the counterpart.`}</p>
     <div class="xwrap dtw"><table class="dt"><tbody>
-      <tr><th scope="row">${esc(s.short)}, by day</th><td class="s n">${kc(t.mean_day_k)}</td><td>Average over ${T.year}; warmest 8-day average ${kc(t.max_day_k)}<em class="own">measured by us</em></td></tr>
-      <tr><th scope="row">${esc(s.short)}, by night</th><td class="s n">${kc(t.mean_night_k)}</td><td>Average over ${T.year}; coldest 8-day average ${kc(t.min_night_k)}<em class="own">measured by us</em></td></tr>
+      <tr><th scope="row">${esc(s.short)}, by day</th><td class="s n">${kc(t.mean_day_k)}</td><td>Average over ${T.year}; warmest 8-day average ${kc(t.max_day_k)}</td></tr>
+      <tr><th scope="row">${esc(s.short)}, by night</th><td class="s n">${kc(t.mean_night_k)}</td><td>Average over ${T.year}; coldest 8-day average ${kc(t.min_night_k)}</td></tr>
       ${o ? `<tr><th scope="row">${esc(s.target)}</th><td class="s n">${esc(o.v)}</td><td>${esc(o.note)}${srcLinks(D, o.src)}</td></tr>` : ''}
-    </tbody></table></div>
-    <p class="fineprint">${esc(T.dataset)}. ${esc(T.note)} Values used: ${t.n_day} by day and ${t.n_night} by night, of ${t.composites} composites. The two sides are not the same kind of number: one is a year of satellite readings at one pixel, the other a published figure.</p>${clim}`;
+    </tbody></table></div>${clim}`;
 }
 
 // The measured block: real numbers for both windows, or a plain statement that there are none
@@ -211,15 +201,9 @@ async function fillPairTerrain(D, s, pair, ctx) {
   const [e, o] = await Promise.all([ctx.getField(pair.earth, 'earth'), ctx.getField(pair.other, pair.body || 'moon')]);
   const slot = $('#pterr'); if (!slot || !slot.isConnected || !$('#view-pair .pair')) return;
   if (e.missing || o.missing || !e.meta.metrics || !o.meta.metrics) { slot.innerHTML = '<h2>Measured terrain</h2><p>Waiting for terrain exports of both windows. No number is shown until then.</p>'; return; }
-  const me = e.meta.metrics, mo = o.meta.metrics, other = pair.otherTitle.split(',')[0];
-  const r = k => (mo[k] / me[k]).toFixed(1), pc = v => (v * 100).toFixed(0) + '%';
   slot.innerHTML = `<h2>Measured terrain</h2>
     ${simHtml(pair)}
-    <p class="verdict">${esc(s.terrainVerdict || '')}</p>
-    <p>On one ${e.meta.analysis_cell_m} m grid, ${esc(other)} has ${Math.round(mo.relief_p5_p95_m).toLocaleString()} m of relief against ${Math.round(me.relief_p5_p95_m).toLocaleString()} m at ${esc(s.short)} (×${r('relief_p5_p95_m')}), and a median slope of ${mo.median_slope_deg.toFixed(1)}° against ${me.median_slope_deg.toFixed(1)}° (×${r('median_slope_deg')}). ${pc(mo.gentle_share)} of its ground is gentler than ${me.gentle_slope_deg}°, against ${pc(me.gentle_share)} on Earth.</p>
-    <div class="mtwrap">${measTableHtml(e, o)}</div>
-    <p class="fineprint">Both windows are ${e.windowKm} km squares. ${esc((e.meta.source || {}).dataset || '')} and ${esc((o.meta.source || {}).dataset || '')}. The last column is a plain ratio, not a verdict, and the measures are not combined into one score.</p>
-    ${s.terrainReading ? `<p class="fineprint">${esc(s.terrainReading)}</p>` : ''}
+    <div class="mtwrap">${measTableHtml(e, o, pair)}</div>
     <button class="btn" id="pgoside">See both terrains side by side</button>`;
   $('#pgoside').addEventListener('click', () => ctx.openSbs(pair.id));
 }
@@ -229,7 +213,7 @@ async function fillPairTerrain(D, s, pair, ctx) {
 function needHtml(D, F, pill) {
   if (!D.needs) return '';
   const k = F.need || D.needs[0][0], dim = D.dims.find(d => d[0] === k);
-  const item = s => `<li><a href="#pair/${s.id}"><b>${esc(s.short)}</b></a> <span class="muted">for ${esc(s.target)}</span>${s.d[k][0] === 'B' ? '' : ` <span class="st-${s.d[k][0]}">${esc(D.status[s.d[k][0]])}</span>`} <span class="plab">${labelChip(D, s)}</span><br>${esc(s.d[k][1])}${srcLinks(D, (s.dsrc || {})[k])}</li>`;
+  const item = s => `<li><a href="#pair/${s.id}"><b>${esc(s.short)}</b></a> <span class="muted">for ${esc(s.target)}</span><br>${esc(s.d[k][1])}${srcLinks(D, (s.dsrc || {})[k])}</li>`;
   const use = D.sites.filter(s => 'MCP'.includes(s.d[k][0])).sort((a, b) => 'MCP'.indexOf(a.d[k][0]) - 'MCP'.indexOf(b.d[k][0]));
   const hyp = D.sites.filter(s => s.d[k][0] === 'H'), no = D.sites.filter(s => s.d[k][0] === 'B'), na = D.sites.filter(s => s.d[k][0] === 'N');
   return `<section class="need">
@@ -238,8 +222,7 @@ function needHtml(D, F, pill) {
     <div class="needcols">
       <div><h3>Sites with evidence on this (${use.length})</h3>${use.length ? `<ul>${use.map(item).join('')}</ul>` : '<p class="muted">No site in the atlas is measured or cited for this.</p>'}
         ${hyp.length ? `<h3>Proposed by us, not tested (${hyp.length})</h3><ul>${hyp.map(item).join('')}</ul>` : ''}</div>
-      <div class="no"><h3>Sites that do not match on this (${no.length})</h3>${no.length ? `<ul>${no.map(item).join('')}</ul>` : '<p class="muted">No pair is marked as not matching here.</p>'}
-        ${na.length ? `<p class="fineprint">Not assessed for this: ${na.map(s => esc(s.short)).join(', ')}.</p>` : ''}</div>
+      <div class="no"><h3>Sites that do not match on this (${no.length})</h3>${no.length ? `<ul>${no.map(item).join('')}</ul>` : '<p class="muted">No pair is marked as not matching here.</p>'}</div>
     </div></section>`;
 }
 
@@ -269,15 +252,13 @@ export function renderExplore(D, F, rerender, ctx) {
       <div class="pills" role="group" aria-label="Label">${pill('label', 'all', 'Any label')}${Object.entries(D.labels).map(([k, v]) => pill('label', k, v[0])).join('')}</div>
     </div>
     <div class="mhead lgfull">${legendHtml(D, true)}</div>
-    <div class="xwrap"><table class="xt"><thead><tr><th scope="col">Earth site and what it stands in for</th><th scope="col">Label</th><th scope="col" aria-sort="${F.sort === 'desc' ? 'descending' : F.sort === 'asc' ? 'ascending' : 'none'}"><button class="sortbtn" id="xsort" aria-pressed="${!!F.sort}" title="Out of 100. How well the page's statements are supported by sources we opened. Click to order the rows: highest first, lowest first, then back to the written order. Now: ${sortSay}">Confidence <span aria-hidden="true">${F.sort === 'desc' ? '↓' : F.sort === 'asc' ? '↑' : '↕'}</span></button></th>${head}</tr></thead>
+    <div class="xwrap xwide"><table class="xt"><thead><tr><th scope="col">Earth site</th><th scope="col">Label</th><th scope="col" aria-sort="${F.sort === 'desc' ? 'descending' : F.sort === 'asc' ? 'ascending' : 'none'}"><button class="sortbtn" id="xsort" aria-pressed="${!!F.sort}" title="Out of 100. How well the page's statements are supported by sources we opened. Click to order the rows: highest first, lowest first, then back to the written order. Now: ${sortSay}">Confidence <span aria-hidden="true">${F.sort === 'desc' ? '↓' : F.sort === 'asc' ? '↑' : '↕'}</span></button></th>${head}</tr></thead>
       <tbody>${rows || `<tr><td colspan="${D.dims.length + 3}">No pair matches these filters.</td></tr>`}</tbody></table></div>
     <section id="xclim"></section>
-    <section class="breaks">
-      <h2>${esc(D.negative.head)}</h2>
-      <p>${esc(D.negative.text)}${srcLinks(D, D.negative.src)}</p>
-      <div class="limits"><b class="h">${esc(D.limitsHead)}</b>
-        <dl>${D.limits.map(([t, d]) => `<div><dt>${esc(t)}</dt><dd>${esc(d)}</dd></div>`).join('')}</dl>
-        <p class="fineprint">${esc(D.limitsNote || '')}${srcLinks(D, D.limitsSrc)}</p></div>
+    <section class="nolimits">
+      <h2>${esc(D.limitsHead)}</h2>
+      <p class="nlsub">${esc(D.limitsNote || '')}${srcLinks(D, D.limitsSrc)}</p>
+      <dl>${D.limits.map(([t, d], i) => `<div><span class="nlno">${String(i + 1).padStart(2, '0')}</span><dt>${esc(t)}</dt><dd>${esc(d)}</dd></div>`).join('')}</dl>
     </section>
   </div>`;
   $$('.xbar .pill, .need .pill', el).forEach(b => b.addEventListener('click', () => { F[b.dataset.g] = b.dataset.k; rerender(); }));
@@ -293,7 +274,7 @@ async function fillClimateTable(D, sites, ctx) {
   const rows = sites.map(s => { const t = (T && T.sites[s.id]) || {}, c = (C && C.sites[s.id]) || null;
     return `<tr><td><a href="#pair/${s.id}">${esc(s.short)}</a></td><td class="n">${k(t.min_night_k)}</td><td class="n">${k(t.max_day_k)}</td><td class="n">${c ? c.t_mean_c.toFixed(1) + ' °C' : '—'}</td><td class="n">${c ? c.wind_mean_ms.toFixed(1) + ' m/s' : '—'}</td><td class="n">${c ? c.rain_mm_year + ' mm' : '—'}</td></tr>`; }).join('');
   slot.innerHTML = `<h2>Temperature, wind and rain at every site</h2>
-    <p>Two more NASA datasets, read at each Earth site. They put numbers on what terrain cannot show: how cold, how windy, how dry.</p>
+    
     <div class="xwrap"><table class="st2"><thead><tr><th>Site</th><th>Coldest night</th><th>Warmest day</th><th>Mean air temperature</th><th>Mean wind</th><th>Rain and snow a year</th></tr></thead><tbody>${rows}</tbody></table></div>`;
 }
 
